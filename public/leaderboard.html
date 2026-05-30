@@ -10,6 +10,40 @@
       .topbar .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
       .topbar .btn{font-size:.92rem;padding:9px 16px}
 
+      /* Header player pill (mirrors dashboard) */
+      .player{
+        display:flex;align-items:stretch;gap:10px;background:var(--sky);
+        border:1px solid var(--line);padding:6px 12px 6px 6px;border-radius:999px;
+      }
+      .avatar{
+        width:34px;height:34px;border-radius:50%;
+        background:linear-gradient(145deg,var(--blue),var(--navy));color:#fff;
+        display:grid;place-items:center;font-family:'Fredoka';font-weight:700;
+        font-size:1.05rem;box-shadow:inset 0 -2px 4px rgba(0,0,0,.2);align-self:center;
+      }
+      .pwrap{display:flex;flex-direction:column;justify-content:center;line-height:1.05}
+      .player .pn{font-weight:800;color:var(--blue);font-size:.95rem}
+      .player .prank{
+        font-family:'Fredoka';font-weight:700;font-size:.72rem;color:var(--soft);
+        margin-top:1px;display:flex;align-items:center;gap:3px;
+      }
+
+      /* Top nav tabs */
+      .tabs{
+        display:flex;gap:8px;background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:6px;margin-bottom:18px;box-shadow:var(--shadow-sm);
+      }
+      .tabs a{
+        flex:1;text-align:center;text-decoration:none;font-family:'Fredoka';
+        font-weight:600;color:var(--soft);padding:11px 14px;border-radius:11px;
+        transition:background .15s,color .15s;font-size:1rem;
+      }
+      .tabs a.active{
+        background:linear-gradient(145deg,var(--blue),var(--blue-d));color:#fff;
+        box-shadow:0 6px 14px -8px rgba(21,104,160,.9);
+      }
+      .tabs a:not(.active):hover{background:var(--sky);color:var(--navy)}
+
       .hero{text-align:center;margin:6px 0 18px}
       .hero h1{font-size:clamp(1.7rem,5vw,2.6rem);color:var(--navy);font-weight:700;letter-spacing:-.01em}
       .hero h1 .pop{color:var(--blue)}
@@ -38,15 +72,15 @@
         box-shadow:var(--shadow-sm);
       }
       .pod .medal{font-size:2rem;line-height:1;display:block}
-      .pod .nm{font-family:'Fredoka';font-weight:600;color:var(--navy);font-size:.98rem;margin-top:8px;line-height:1.15;word-break:break-word}
+      .pod .nm{font-family:'Fredoka';font-weight:700;font-size:.98rem;margin-top:8px;line-height:1.15;word-break:break-word}
       .pod .pt{margin-top:6px;font-weight:900;color:var(--blue-d);font-size:1.05rem}
       .pod .pt small{font-weight:800;color:var(--soft);font-size:.7rem;display:block}
       /* 1st place taller + golden, on the middle column */
-      .pod.p1{order:2;border-color:var(--gold);background:linear-gradient(180deg,#fffaf0,#fff)}
+      .pod.p1{order:2;border-color:#E0A100;background:linear-gradient(180deg,#fffaf0,#fff);box-shadow:0 12px 26px -14px rgba(224,161,0,.85)}
       .pod.p1 .medal{font-size:2.6rem}
       .pod.p1 .pad{height:18px}
-      .pod.p2{order:1}
-      .pod.p3{order:3}
+      .pod.p2{order:1;border-color:#a9b6c2;background:linear-gradient(180deg,#f7f9fb,#fff)}
+      .pod.p3{order:3;border-color:#cf9a63;background:linear-gradient(180deg,#fdf6ee,#fff)}
       .pod .rk{
         position:absolute;top:8px;left:8px;font-family:'Fredoka';font-weight:700;
         color:var(--soft);font-size:.8rem;background:var(--sky);border:1px solid var(--line);
@@ -63,10 +97,14 @@
       }
       .row .pos{
         font-family:'Fredoka';font-weight:700;color:var(--navy);font-size:1.05rem;
-        min-width:42px;text-align:center;
+        min-width:50px;text-align:center;display:flex;align-items:center;justify-content:center;gap:3px;
       }
       .row .who{flex:1;min-width:0}
       .row .who .nm{font-weight:800;color:var(--ink);font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      /* Top-3 row accents (gold / silver / bronze) */
+      .row.r1{border-color:#E0A100;background:linear-gradient(90deg,#fffaf0,#fff)}
+      .row.r2{border-color:#a9b6c2;background:linear-gradient(90deg,#f7f9fb,#fff)}
+      .row.r3{border-color:#cf9a63;background:linear-gradient(90deg,#fdf6ee,#fff)}
       .row .who .tag{
         display:inline-block;margin-top:2px;font-size:.66rem;font-weight:900;
         color:#fff;background:var(--green);padding:2px 8px;border-radius:999px;letter-spacing:.02em;
@@ -125,10 +163,22 @@
           <div class="s">Aprende jugando</div>
         </div>
         <div class="right">
-          <a class="btn ghost" href="./dashboard.html">Volver al inicio</a>
+          <div class="player">
+            <div class="avatar" id="avatar">?</div>
+            <div class="pwrap">
+              <div class="pn" id="player-name">Estudiante</div>
+              <div class="prank" id="player-rank" hidden></div>
+            </div>
+          </div>
           <button class="btn ghost" id="logout-btn">Cerrar sesión</button>
         </div>
       </header>
+
+      <!-- Top nav: study + leaderboard (here) -->
+      <nav class="tabs">
+        <a href="./dashboard.html">📚 Estudiar</a>
+        <a href="./leaderboard.html" class="active" aria-current="page">🏆 Tabla de Posiciones</a>
+      </nav>
 
       <section class="hero">
         <h1>🏆 Tabla de <span class="pop">Posiciones</span></h1>
@@ -153,6 +203,31 @@
       const myplaceEl = document.getElementById("myplace");
       const podiumEl = document.getElementById("podium");
       const listEl = document.getElementById("list");
+
+      // Shared rank -> medal + name color mapping (gold/silver/bronze/blue).
+      // Mirrors the same mapping on dashboard.html so the header looks
+      // consistent across both pages.
+      function rankMeta(rank) {
+        if (rank === 1) return { medal: "🥇", color: "#E0A100" }; // gold
+        if (rank === 2) return { medal: "🥈", color: "#7D8896" }; // silver
+        if (rank === 3) return { medal: "🥉", color: "#B5742E" }; // bronze
+        return { medal: "", color: "#1f8fd0" }; // theme --blue
+      }
+
+      // Header pill rank treatment. rank == null -> plain blue name, no medal.
+      function applyHeaderRank(rank) {
+        const nameEl = document.getElementById("player-name");
+        const chipEl = document.getElementById("player-rank");
+        if (rank == null) {
+          nameEl.style.color = "#1f8fd0";
+          chipEl.hidden = true;
+          return;
+        }
+        const m = rankMeta(rank);
+        nameEl.style.color = m.color;
+        chipEl.textContent = (m.medal ? m.medal + " " : "") + "#" + rank;
+        chipEl.hidden = false;
+      }
 
       document.getElementById("logout-btn").addEventListener("click", async () => {
         await supabase.auth.signOut();
@@ -185,15 +260,15 @@
           podiumEl.hidden = true;
           return;
         }
-        const medalByRank = { 1: "🥇", 2: "🥈", 3: "🥉" };
         top.slice(0, 3).forEach((r) => {
+          const m = rankMeta(r.rank);
           const el = document.createElement("div");
           el.className = "pod p" + r.rank + (r.user_id === myId ? " me" : "");
           el.innerHTML = `
             <span class="rk">#${r.rank}</span>
             ${r.rank === 1 ? '<span class="pad"></span>' : ""}
-            <span class="medal">${medalByRank[r.rank] || "🏅"}</span>
-            <div class="nm">${escapeHtml(r.display_name)}</div>
+            <span class="medal">${m.medal || "🏅"}</span>
+            <div class="nm" style="color:${m.color}">${escapeHtml(r.display_name)}</div>
             <div class="pt">${fmtPoints(r.total_points)}<small>puntos</small></div>
           `;
           podiumEl.appendChild(el);
@@ -207,12 +282,15 @@
         // ranking reads top-to-bottom without gaps.
         for (const r of rows) {
           const isMe = r.user_id === myId;
+          const m = rankMeta(r.rank);
+          const topClass = r.rank >= 1 && r.rank <= 3 ? " r" + r.rank : "";
+          const nameColor = m.medal ? ` style="color:${m.color}"` : "";
           const el = document.createElement("div");
-          el.className = "row" + (isMe ? " me" : "");
+          el.className = "row" + topClass + (isMe ? " me" : "");
           el.innerHTML = `
-            <div class="pos">#${r.rank}</div>
+            <div class="pos">${m.medal ? m.medal + " " : ""}#${r.rank}</div>
             <div class="who">
-              <div class="nm">${escapeHtml(r.display_name)}</div>
+              <div class="nm"${nameColor}>${escapeHtml(r.display_name)}</div>
               ${isMe ? '<span class="tag">¡Tú!</span>' : ""}
             </div>
             <div class="pts">${fmtPoints(r.total_points)}<small>pts</small></div>
@@ -241,6 +319,12 @@
 
         const myId = user.id;
 
+        // Header pill starts as a plain blue name; upgraded once we know
+        // the user's own row from the view below.
+        const nameEl = document.getElementById("player-name");
+        const avatarEl = document.getElementById("avatar");
+        applyHeaderRank(null);
+
         // Read ONLY the safe leaderboard view.
         const { data: rows, error } = await supabase
           .from("leaderboard")
@@ -248,6 +332,15 @@
           .order("rank", { ascending: true });
 
         const ranking = !error && Array.isArray(rows) ? rows : [];
+        const mine = ranking.find((r) => r.user_id === myId);
+
+        // Fill the header pill from the user's own (privacy-safe) view row.
+        if (mine) {
+          const dn = (mine.display_name || "").trim() || "Estudiante";
+          nameEl.textContent = dn;
+          avatarEl.textContent = dn.charAt(0).toUpperCase() || "?";
+          applyHeaderRank(mine.rank);
+        }
 
         if (!ranking.length) {
           // No scores yet anywhere — still a valid, non-broken page.
@@ -257,7 +350,6 @@
             '<div class="empty">Aún no hay puntajes. ¡Juega una materia para aparecer aquí! 🎮</div>';
         } else {
           const total = ranking.length;
-          const mine = ranking.find((r) => r.user_id === myId);
 
           // Sticky banner: where the current user falls (always show them).
           if (mine) {

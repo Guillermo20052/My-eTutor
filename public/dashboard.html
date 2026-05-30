@@ -17,9 +17,31 @@
         display:grid;place-items:center;font-family:'Fredoka';font-weight:700;
         font-size:1.05rem;box-shadow:inset 0 -2px 4px rgba(0,0,0,.2);
       }
-      .player .pn{font-weight:800;color:var(--navy);font-size:.95rem}
+      .player{align-items:stretch}
+      .pwrap{display:flex;flex-direction:column;justify-content:center;line-height:1.05}
+      .player .pn{font-weight:800;color:var(--blue);font-size:.95rem}
+      .player .prank{
+        font-family:'Fredoka';font-weight:700;font-size:.72rem;color:var(--soft);
+        margin-top:1px;display:flex;align-items:center;gap:3px;
+      }
       .topbar .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
       .topbar .btn{font-size:.92rem;padding:9px 16px}
+
+      /* ---------- Top nav tabs ---------- */
+      .tabs{
+        display:flex;gap:8px;background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:6px;margin-bottom:18px;box-shadow:var(--shadow-sm);
+      }
+      .tabs a{
+        flex:1;text-align:center;text-decoration:none;font-family:'Fredoka';
+        font-weight:600;color:var(--soft);padding:11px 14px;border-radius:11px;
+        transition:background .15s,color .15s;font-size:1rem;
+      }
+      .tabs a.active{
+        background:linear-gradient(145deg,var(--blue),var(--blue-d));color:#fff;
+        box-shadow:0 6px 14px -8px rgba(21,104,160,.9);
+      }
+      .tabs a:not(.active):hover{background:var(--sky);color:var(--navy)}
 
       .hero{text-align:center;margin:8px 0 22px}
       .hero h1{font-size:clamp(1.7rem,5vw,2.6rem);color:var(--navy);font-weight:700;letter-spacing:-.01em}
@@ -67,33 +89,6 @@
         background:var(--sky);border:1px dashed var(--line);border-radius:14px;
         padding:14px 16px;color:var(--ink);font-weight:700;text-align:left;
       }
-
-      /* ---------- Leaderboard widget ---------- */
-      .lb-widget{margin-top:22px}
-      .lb-widget .lb-head{
-        display:flex;align-items:center;justify-content:space-between;
-        gap:10px;flex-wrap:wrap;margin-bottom:12px;
-      }
-      .lb-widget .lb-title{
-        font-family:'Fredoka';font-weight:700;color:var(--navy);font-size:1.2rem;
-        display:flex;align-items:center;gap:8px;
-      }
-      .lb-widget .lb-rank{
-        font-weight:900;color:#fff;background:linear-gradient(145deg,var(--blue),var(--blue-d));
-        border-radius:999px;padding:6px 14px;font-size:.95rem;white-space:nowrap;
-      }
-      .lb-top{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-      .lb-row{
-        display:flex;align-items:center;gap:10px;background:var(--sky);
-        border:1px solid var(--line);border-radius:12px;padding:9px 12px;
-      }
-      .lb-row .m{font-size:1.3rem;line-height:1;width:26px;text-align:center}
-      .lb-row .nm{flex:1;min-width:0;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .lb-row .pt{font-weight:900;color:var(--blue-d);white-space:nowrap}
-      .lb-row .pt small{font-weight:800;color:var(--soft);font-size:.66rem;margin-left:3px}
-      .lb-row.me{border:2px solid var(--green);background:#effaf4}
-      .lb-empty{color:var(--soft);font-weight:800;text-align:center;padding:14px 6px}
-      .lb-widget .btn{width:100%;justify-content:center}
     </style>
   </head>
   <body>
@@ -116,11 +111,20 @@
         <div class="right">
           <div class="player">
             <div class="avatar" id="avatar">?</div>
-            <div class="pn" id="player-name">Estudiante</div>
+            <div class="pwrap">
+              <div class="pn" id="player-name">Estudiante</div>
+              <div class="prank" id="player-rank" hidden></div>
+            </div>
           </div>
           <button class="btn ghost" id="logout-btn">Cerrar sesión</button>
         </div>
       </header>
+
+      <!-- Top nav: study (here) + leaderboard -->
+      <nav class="tabs">
+        <a href="./dashboard.html" class="active" aria-current="page">📚 Estudiar</a>
+        <a href="./leaderboard.html">🏆 Tabla de Posiciones</a>
+      </nav>
 
       <section class="hero">
         <h1 id="greeting">¡Hola!</h1>
@@ -128,16 +132,6 @@
       </section>
 
       <section class="grid" id="subjects"></section>
-
-      <!-- Leaderboard widget (hidden until/unless it has data) -->
-      <section class="card lb-widget" id="lb-widget" hidden style="--ac:var(--gold)">
-        <div class="lb-head">
-          <div class="lb-title">🏆 Tabla de Posiciones</div>
-          <div class="lb-rank" id="lb-rank" hidden></div>
-        </div>
-        <div class="lb-top" id="lb-top"></div>
-        <a class="btn primary" href="./leaderboard.html">Ver tabla completa</a>
-      </section>
     </div>
 
     <!-- Locked modal -->
@@ -216,61 +210,45 @@
         }
       }
 
-      // Leaderboard widget: reads ONLY the safe leaderboard view, and
-      // fails closed (stays hidden / shows a gentle message) on any error
-      // so it can never break the rest of the dashboard.
-      async function loadLeaderboardWidget(userId) {
-        const widgetEl = document.getElementById("lb-widget");
-        const rankEl = document.getElementById("lb-rank");
-        const topEl = document.getElementById("lb-top");
-        const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+      // Shared rank -> medal + name color mapping (gold/silver/bronze/blue).
+      // Used for the header pill here and mirrored on leaderboard.html.
+      function rankMeta(rank) {
+        if (rank === 1) return { medal: "🥇", color: "#E0A100" }; // gold
+        if (rank === 2) return { medal: "🥈", color: "#7D8896" }; // silver
+        if (rank === 3) return { medal: "🥉", color: "#B5742E" }; // bronze
+        return { medal: "", color: "#1f8fd0" }; // theme --blue
+      }
 
+      // Apply the rank treatment to the header pill. rank == null -> plain
+      // blue name, no medal, no chip.
+      function applyHeaderRank(rank) {
+        const nameEl = document.getElementById("player-name");
+        const chipEl = document.getElementById("player-rank");
+        if (rank == null) {
+          nameEl.style.color = "#1f8fd0";
+          chipEl.hidden = true;
+          return;
+        }
+        const m = rankMeta(rank);
+        nameEl.style.color = m.color;
+        chipEl.textContent = (m.medal ? m.medal + " " : "") + "#" + rank;
+        chipEl.hidden = false;
+      }
+
+      // Read ONLY the leaderboard view to find this user's rank. Fails
+      // gracefully (name stays blue) and never blocks the dashboard.
+      async function loadHeaderRank(userId) {
         try {
           const { data: rows, error } = await supabase
             .from("leaderboard")
-            .select("*")
+            .select("user_id, rank")
             .order("rank", { ascending: true });
-
-          if (error || !Array.isArray(rows) || rows.length === 0) {
-            // No data yet -> keep the dashboard intact, hide the widget.
-            widgetEl.hidden = true;
-            return;
-          }
-
-          const total = rows.length;
+          if (error || !Array.isArray(rows)) return;
           const mine = rows.find((r) => r.user_id === userId);
-
-          if (mine) {
-            rankEl.textContent = `Tu lugar: #${mine.rank} de ${total}`;
-            rankEl.hidden = false;
-          } else {
-            rankEl.hidden = true;
-          }
-
-          topEl.innerHTML = "";
-          for (const r of rows.slice(0, 3)) {
-            const row = document.createElement("div");
-            row.className = "lb-row" + (r.user_id === userId ? " me" : "");
-            const pts = Number(r.total_points) || 0;
-            row.innerHTML = `
-              <span class="m">${medals[r.rank] || "🏅"}</span>
-              <span class="nm">${escapeHtml(r.display_name)}</span>
-              <span class="pt">${pts}<small>pts</small></span>
-            `;
-            topEl.appendChild(row);
-          }
-
-          widgetEl.hidden = false;
+          if (mine && mine.rank != null) applyHeaderRank(mine.rank);
         } catch (_e) {
-          // Network/parse failure -> never break the dashboard.
-          widgetEl.hidden = true;
+          // Network/parse failure -> leave the plain blue name in place.
         }
-      }
-
-      function escapeHtml(s) {
-        return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-        }[c]));
       }
 
       // Fix A: stale tabs self-correct when the session changes.
@@ -323,20 +301,21 @@
           ? `¡Hola, <span class="pop">${kidName}</span>!`
           : "¡Hola!";
 
-        // Player pill
+        // Player pill (name starts plain blue; rank treatment applied later).
         document.getElementById("player-name").textContent = kidName || "Estudiante";
         document.getElementById("avatar").textContent = kidName
           ? kidName.charAt(0).toUpperCase()
           : "?";
+        applyHeaderRank(null);
 
         renderSubjects(hasAccess);
 
         loadingEl.hidden = true;
         appEl.hidden = false;
 
-        // Load the leaderboard widget without blocking the dashboard reveal.
+        // Fetch the user's rank for the header without blocking the reveal.
         // (Students only; admins already redirected to admin.html above.)
-        loadLeaderboardWidget(userId);
+        loadHeaderRank(userId);
 
         // Start reacting to session changes only after a successful load.
         setupAuthListener(userId);
