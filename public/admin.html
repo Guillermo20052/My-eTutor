@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin · My eTutor</title>
+    <link rel="stylesheet" href="./css/theme.css" />
+    <style>
+      /* ---------- Admin-only layout (not in theme.css) ---------- */
+      .topbar .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+      .topbar .btn{font-size:.92rem;padding:9px 16px}
+      .adminbadge{
+        font-family:'Fredoka',sans-serif;font-weight:700;font-size:.72rem;
+        letter-spacing:.12em;text-transform:uppercase;color:#fff;
+        background:linear-gradient(145deg,var(--blue),var(--navy));
+        padding:4px 10px;border-radius:999px;
+      }
+
+      .counter{
+        display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;
+      }
+      .stat{
+        flex:1;min-width:140px;background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:14px 16px;box-shadow:var(--shadow-sm);
+      }
+      .stat .n{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.7rem;color:var(--navy);line-height:1}
+      .stat .l{color:var(--soft);font-weight:800;font-size:.78rem;margin-top:4px}
+
+      .searchrow{margin-bottom:16px}
+      .searchrow label{
+        display:block;font-family:'Fredoka',sans-serif;font-weight:600;
+        font-size:.82rem;color:var(--navy);margin-bottom:6px;
+      }
+
+      .tablecard{
+        background:var(--card);border:1px solid var(--line);border-radius:18px;
+        box-shadow:var(--shadow-sm);overflow:hidden;
+      }
+      .tablewrap{overflow-x:auto}
+      table{width:100%;border-collapse:collapse;min-width:560px}
+      th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:.92rem}
+      th{
+        font-family:'Fredoka',sans-serif;font-weight:600;color:var(--soft);
+        font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;background:var(--sky);
+      }
+      td .name{font-weight:800;color:var(--navy)}
+      td .email{color:var(--soft);font-weight:700}
+      tr:last-child td{border-bottom:none}
+      .access-yes{color:var(--green);font-weight:800}
+      .access-no{color:var(--red);font-weight:800}
+      td .btn{font-size:.82rem;padding:8px 14px;white-space:nowrap}
+
+      .empty{padding:22px 16px;text-align:center;color:var(--soft);font-weight:700}
+
+      .loader{
+        min-height:70vh;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:16px;text-align:center;
+      }
+      .loader .brand{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);font-size:1.6rem}
+      .loader .brand span{color:var(--blue)}
+      .loader .msg{color:var(--soft);font-weight:800}
+      .spinner{
+        width:38px;height:38px;border-radius:50%;
+        border:4px solid var(--line);border-top-color:var(--blue);
+        animation:spin .8s linear infinite;
+      }
+      @keyframes spin{to{transform:rotate(360deg)}}
+
+      .modalbox .who{color:var(--navy);font-weight:800;margin:2px 0 0}
+    </style>
+  </head>
+  <body>
+    <!-- Loading state (shown until session + admin check resolve) -->
+    <div class="wrap" id="loading">
+      <div class="loader">
+        <div class="brand">My <span>eTutor</span></div>
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="msg">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- Admin app (revealed only for is_admin accounts) -->
+    <div class="wrap" id="app" hidden>
+      <header class="topbar">
+        <div class="brandtxt">
+          <div class="t">My eTutor</div>
+          <div class="s">Aprende jugando</div>
+        </div>
+        <div class="right">
+          <span class="adminbadge">Admin</span>
+          <button class="btn ghost" id="logout-btn">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="counter">
+        <div class="stat">
+          <div class="n" id="stat-total">—</div>
+          <div class="l">Estudiantes</div>
+        </div>
+        <div class="stat">
+          <div class="n" id="stat-access">—</div>
+          <div class="l">Con acceso</div>
+        </div>
+      </section>
+
+      <section class="searchrow">
+        <label for="search">Buscar por correo o nombre</label>
+        <input
+          class="input"
+          type="search"
+          id="search"
+          placeholder="Ej. correo@ejemplo.com o Sofía"
+          autocomplete="off"
+        />
+      </section>
+
+      <section class="tablecard">
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo del padre/madre</th>
+                <th>Acceso</th>
+                <th>Registrado</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="empty" hidden>No hay resultados.</div>
+      </section>
+    </div>
+
+    <!-- Confirmation modal -->
+    <div class="modal" id="confirm-modal">
+      <div class="modalbox">
+        <div class="mi" id="confirm-icon">🔑</div>
+        <h3 id="confirm-title">Confirmar</h3>
+        <p id="confirm-text">¿Confirmas esta acción?</p>
+        <p class="who" id="confirm-who"></p>
+        <div class="mbtns">
+          <button class="btn ghost" id="confirm-cancel">Cancelar</button>
+          <button class="btn primary" id="confirm-ok">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { supabase } from "./js/supabase.js";
+
+      const loadingEl = document.getElementById("loading");
+      const appEl = document.getElementById("app");
+      const rowsEl = document.getElementById("rows");
+      const emptyEl = document.getElementById("empty");
+      const searchEl = document.getElementById("search");
+      const statTotalEl = document.getElementById("stat-total");
+      const statAccessEl = document.getElementById("stat-access");
+
+      const modalEl = document.getElementById("confirm-modal");
+      const confirmTitle = document.getElementById("confirm-title");
+      const confirmText = document.getElementById("confirm-text");
+      const confirmWho = document.getElementById("confirm-who");
+      const confirmIcon = document.getElementById("confirm-icon");
+      const confirmOk = document.getElementById("confirm-ok");
+      const confirmCancel = document.getElementById("confirm-cancel");
+
+      let pendingAction = null; // { id, nextAccess }
+
+      // ---------- Modal helpers ----------
+      function openConfirm({ id, name, email, currentAccess }) {
+        const nextAccess = !currentAccess;
+        pendingAction = { id, nextAccess };
+        if (nextAccess) {
+          confirmIcon.textContent = "🔑";
+          confirmTitle.textContent = "Otorgar acceso";
+          confirmText.textContent = "Vas a otorgar acceso a:";
+          confirmOk.textContent = "Otorgar";
+          confirmOk.className = "btn primary";
+        } else {
+          confirmIcon.textContent = "🚫";
+          confirmTitle.textContent = "Quitar acceso";
+          confirmText.textContent = "Vas a quitar el acceso a:";
+          confirmOk.textContent = "Quitar";
+          confirmOk.className = "btn danger";
+        }
+        confirmWho.textContent = `${name || "(sin nombre)"} · ${email || "(sin correo)"}`;
+        modalEl.classList.add("on");
+      }
+      function closeConfirm() {
+        modalEl.classList.remove("on");
+        pendingAction = null;
+      }
+      confirmCancel.addEventListener("click", closeConfirm);
+      modalEl.addEventListener("click", (e) => {
+        if (e.target === modalEl) closeConfirm();
+      });
+
+      confirmOk.addEventListener("click", async () => {
+        if (!pendingAction) return;
+        const { id, nextAccess } = pendingAction;
+        confirmOk.disabled = true;
+
+        const { error } = await supabase
+          .from("profiles")
+          .update({ has_access: nextAccess })
+          .eq("id", id);
+
+        confirmOk.disabled = false;
+
+        if (error) {
+          alert("No se pudo actualizar el acceso. Inténtalo de nuevo.");
+          return;
+        }
+
+        // Update local cache, re-render the affected row + counter (no full reload).
+        const s = students.find((x) => x.id === id);
+        if (s) s.has_access = nextAccess;
+        closeConfirm();
+        renderRows(searchEl.value);
+        renderCounter();
+      });
+
+      // ---------- Logout ----------
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        await supabase.auth.signOut();
+        window.location.replace("./login.html");
+      });
+
+      // ---------- Data ----------
+      let students = []; // all non-admin profiles, cached client-side
+
+      function fmtDate(iso) {
+        if (!iso) return "—";
+        try {
+          return new Date(iso).toLocaleDateString("es", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        } catch {
+          return iso;
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str ?? "").replace(/[&<>"']/g, (c) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        }[c]));
+      }
+
+      function renderCounter() {
+        const total = students.length;
+        const withAccess = students.filter((s) => s.has_access === true).length;
+        statTotalEl.textContent = total;
+        statAccessEl.textContent = withAccess;
+      }
+
+      function renderRows(query) {
+        const q = (query || "").trim().toLowerCase();
+        const list = q
+          ? students.filter(
+              (s) =>
+                (s.parent_email || "").toLowerCase().includes(q) ||
+                (s.kid_name || "").toLowerCase().includes(q)
+            )
+          : students;
+
+        rowsEl.innerHTML = "";
+        if (list.length === 0) {
+          emptyEl.hidden = false;
+          return;
+        }
+        emptyEl.hidden = true;
+
+        for (const s of list) {
+          const tr = document.createElement("tr");
+          const access = s.has_access === true;
+          tr.innerHTML = `
+            <td><span class="name">${escapeHtml(s.kid_name || "(sin nombre)")}</span></td>
+            <td><span class="email">${escapeHtml(s.parent_email || "—")}</span></td>
+            <td>${access ? '<span class="access-yes">✅ Sí</span>' : '<span class="access-no">❌ No</span>'}</td>
+            <td>${fmtDate(s.created_at)}</td>
+            <td></td>
+          `;
+          const btn = document.createElement("button");
+          btn.className = access ? "btn ghost" : "btn primary";
+          btn.textContent = access ? "Quitar acceso" : "Otorgar acceso";
+          btn.addEventListener("click", () =>
+            openConfirm({
+              id: s.id,
+              name: s.kid_name,
+              email: s.parent_email,
+              currentAccess: access,
+            })
+          );
+          tr.lastElementChild.appendChild(btn);
+          rowsEl.appendChild(tr);
+        }
+      }
+
+      async function loadStudents() {
+        // Exclude admin rows from the student list/counter.
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, kid_name, parent_email, has_access, created_at, is_admin")
+          .neq("is_admin", true)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          students = [];
+        } else {
+          students = data || [];
+        }
+        renderCounter();
+        renderRows(searchEl.value);
+      }
+
+      // Live search (case-insensitive, client-side over the cached list).
+      searchEl.addEventListener("input", () => renderRows(searchEl.value));
+
+      // ---------- Boot / access control ----------
+      (async () => {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          window.location.replace("./login.html");
+          return;
+        }
+
+        const { data: me } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", session.user.id)
+          .single();
+
+        // Never render admin UI to non-admins.
+        if (me?.is_admin !== true) {
+          window.location.replace("./dashboard.html");
+          return;
+        }
+
+        await loadStudents();
+
+        loadingEl.hidden = true;
+        appEl.hidden = false;
+      })();
+    </script>
+  </body>
+</html>

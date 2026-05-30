@@ -191,12 +191,18 @@
 
         const userId = session.user.id;
 
-        // Fetch this user's profile (kid_name + has_access).
+        // Fetch this user's profile (kid_name + has_access + is_admin).
         const { data: profile } = await supabase
           .from("profiles")
-          .select("kid_name, has_access")
+          .select("kid_name, has_access, is_admin")
           .eq("id", userId)
           .single();
+
+        // Admins never sit on the student dashboard.
+        if (profile?.is_admin === true) {
+          window.location.replace("./admin.html");
+          return;
+        }
 
         const kidName = (profile?.kid_name || "").trim();
         const hasAccess = profile?.has_access === true;
