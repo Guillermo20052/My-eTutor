@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeopardy de los Sacramentos — My eTutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Fredoka:wght@400;500;600;700&family=Mulish:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#070733;
+    --bg-2:#10105e;
+    --board-blue:#161cc4;
+    --board-blue-hi:#2a31e0;
+    --board-blue-lo:#0d1296;
+    --gold:#f4c95d;
+    --gold-hi:#ffe19a;
+    --gold-deep:#caa23c;
+    --green:#37c46d;
+    --green-deep:#1f8f4c;
+    --red:#ef5d5d;
+    --red-deep:#b53333;
+    --panel:#141452;
+    --panel-2:#1c1c6b;
+    --ink:#f6f7ff;
+    --ink-soft:#c7c9ef;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Mulish',sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(244,201,93,.18), transparent 60%),
+      radial-gradient(1000px 700px at 110% 120%, rgba(55,196,109,.12), transparent 55%),
+      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding:18px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:22px 22px;
+    pointer-events:none; z-index:0;
+  }
+  .wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto;}
+
+  /* ---------- LOADING ---------- */
+  .loading{
+    min-height:80vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; text-align:center;
+  }
+  .loading .badge{
+    font-family:'Anton',sans-serif; font-size:28px; letter-spacing:.5px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    color:#3a2e08; padding:8px 16px; border-radius:12px; transform:rotate(-2deg);
+    box-shadow:0 6px 0 var(--gold-deep), 0 10px 22px rgba(0,0,0,.35);
+  }
+  .loading .msg{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600;}
+  .spinner{
+    width:40px; height:40px; border-radius:50%;
+    border:4px solid rgba(255,255,255,.15); border-top-color:var(--gold);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:14px; margin-bottom:18px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand .badge{
+    font-family:'Anton',sans-serif; font-size:26px; letter-spacing:.5px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    color:#3a2e08; padding:8px 14px; border-radius:12px;
+    box-shadow:0 6px 0 var(--gold-deep), 0 10px 22px rgba(0,0,0,.35);
+    transform:rotate(-2deg);
+  }
+  .brand h1{
+    font-family:'Anton',sans-serif; font-weight:400; line-height:.95;
+    font-size:clamp(20px,3.4vw,34px); letter-spacing:.5px;
+    text-shadow:0 3px 0 rgba(0,0,0,.35);
+  }
+  .brand h1 span{color:var(--gold);}
+  .head-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .player-pill{
+    display:flex; align-items:center; gap:10px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:2px solid rgba(244,201,93,.5);
+    padding:8px 16px; border-radius:999px;
+    font-family:'Fredoka',sans-serif; font-weight:600;
+    box-shadow:0 6px 16px rgba(0,0,0,.3);
+  }
+  .player-pill .who{font-size:12px; color:var(--ink-soft); font-weight:500;}
+  .player-pill .nm{font-size:18px; color:var(--gold-hi); letter-spacing:.5px;}
+  .back-link{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:14px;
+    color:var(--gold-hi); text-decoration:none;
+    border:2px solid rgba(244,201,93,.5); border-radius:999px; padding:8px 14px;
+    transition:background .15s ease;
+  }
+  .back-link:hover{background:rgba(244,201,93,.12);}
+
+  .scorebar{
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+    margin-bottom:16px;
+  }
+  .score-box{
+    flex:1 1 200px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:2px solid rgba(255,255,255,.08);
+    border-radius:16px; padding:12px 18px;
+    box-shadow:inset 0 0 0 1px rgba(244,201,93,.15), 0 8px 20px rgba(0,0,0,.28);
+  }
+  .score-box .lbl{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:13px; text-transform:uppercase; letter-spacing:1px;}
+  .score-box .val{font-family:'Anton',sans-serif; font-size:32px; color:var(--gold); text-shadow:0 2px 0 rgba(0,0,0,.3);}
+  .progress-box{flex:1 1 200px;}
+  .progress-box .lbl{font-family:'Fredoka',sans-serif; font-weight:500; color:var(--ink-soft); font-size:13px; margin-bottom:6px; display:flex; justify-content:space-between;}
+  .bar{height:14px; border-radius:999px; background:rgba(255,255,255,.1); overflow:hidden; border:1px solid rgba(255,255,255,.12);}
+  .bar > i{display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,var(--green),var(--gold)); transition:width .5s cubic-bezier(.2,.8,.2,1);}
+
+  /* ---------- CATEGORY CARDS ---------- */
+  .cat-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px;
+  }
+  .cat-card{
+    cursor:pointer; text-align:left; position:relative; overflow:hidden;
+    background:linear-gradient(180deg,var(--board-blue-hi),var(--board-blue-lo));
+    border:2px solid rgba(244,201,93,.25); border-radius:18px; padding:18px 16px;
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.05), 0 8px 20px rgba(0,0,0,.32);
+    transition:transform .14s ease, box-shadow .14s ease, filter .2s ease;
+  }
+  .cat-card:hover{transform:translateY(-4px); filter:brightness(1.08);
+    box-shadow:inset 0 0 0 2px rgba(244,201,93,.45), 0 12px 26px rgba(244,201,93,.18);}
+  .cat-card:active{transform:translateY(-1px);}
+  .cat-card .ic{font-size:34px; line-height:1; display:block; margin-bottom:8px;}
+  .cat-card h3{font-family:'Anton',sans-serif; font-weight:400; font-size:18px;
+    text-transform:uppercase; letter-spacing:.4px; line-height:1.1; color:#fff;
+    text-shadow:0 2px 0 rgba(0,0,0,.4); min-height:40px;}
+  .cat-card .cprog-lbl{font-family:'Fredoka',sans-serif; font-weight:600; font-size:13px;
+    color:var(--ink-soft); margin:12px 0 6px; display:flex; justify-content:space-between; align-items:center;}
+  .cat-card.complete{border-color:var(--green);}
+  .cat-card .check{
+    position:absolute; top:12px; right:12px; font-size:20px; color:var(--green);
+    background:rgba(0,0,0,.25); border-radius:50%; width:30px; height:30px;
+    display:none; align-items:center; justify-content:center;
+  }
+  .cat-card.complete .check{display:flex;}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:'Fredoka',sans-serif; font-weight:600; cursor:pointer;
+    border:none; border-radius:14px; padding:13px 22px; font-size:17px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    color:#3a2e08; box-shadow:0 6px 0 var(--gold-deep), 0 10px 22px rgba(0,0,0,.3);
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.05); transform:translateY(-2px);}
+  .btn:active{transform:translateY(3px); box-shadow:0 3px 0 var(--gold-deep);}
+  .btn.ghost{background:transparent; color:var(--gold-hi); border:2px solid var(--gold); box-shadow:none;}
+  .btn.ghost:hover{background:rgba(244,201,93,.12);}
+  .btn.danger{background:linear-gradient(180deg,#ff8a8a,var(--red)); color:#3a0808;
+    box-shadow:0 6px 0 var(--red-deep), 0 10px 22px rgba(0,0,0,.3);}
+  .btn:disabled{filter:grayscale(.6) brightness(.7); cursor:not-allowed; transform:none;}
+
+  .center{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:22px;}
+
+  /* ---------- OVERLAY / MODALS ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:50; display:none;
+    align-items:center; justify-content:center; padding:18px;
+    background:rgba(3,3,28,.78); backdrop-filter:blur(5px);
+  }
+  .overlay.show{display:flex; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;} to{opacity:1;}}
+  .modal{
+    width:min(640px,100%); max-height:92vh; overflow-y:auto;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:2px solid rgba(244,201,93,.55); border-radius:22px;
+    padding:24px; box-shadow:0 24px 60px rgba(0,0,0,.55);
+    animation:pop .3s cubic-bezier(.2,1.2,.3,1);
+  }
+  @keyframes pop{from{transform:scale(.88) translateY(14px); opacity:0;} to{transform:none; opacity:1;}}
+  .q-meta{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .q-meta .cat{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:14px; text-transform:uppercase; letter-spacing:1px;}
+  .q-meta .pts{font-family:'Anton',sans-serif; color:var(--gold); font-size:22px;}
+  .q-text{font-size:19px; line-height:1.45; font-weight:600; margin-bottom:20px;}
+  .opts{display:flex; flex-direction:column; gap:12px;}
+  .opt{
+    font-family:'Mulish',sans-serif; font-weight:600; font-size:16px; text-align:left;
+    cursor:pointer; color:var(--ink); line-height:1.35;
+    background:linear-gradient(180deg,#23237e,#1a1a63);
+    border:2px solid rgba(255,255,255,.1); border-radius:14px;
+    padding:14px 16px 14px 50px; position:relative;
+    transition:transform .1s ease, border-color .15s ease, filter .15s ease;
+  }
+  .opt:hover:not(.locked){border-color:var(--gold); filter:brightness(1.08); transform:translateX(3px);}
+  .opt .key{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:26px; height:26px; border-radius:50%;
+    background:var(--gold); color:#3a2e08; font-family:'Fredoka',sans-serif; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .opt.correct{border-color:var(--green); background:linear-gradient(180deg,#1d6b3d,#155230);}
+  .opt.correct .key{background:var(--green);}
+  .opt.wrong{border-color:var(--red); background:linear-gradient(180deg,#6e2727,#511d1d);}
+  .opt.wrong .key{background:var(--red);}
+  .opt.locked{cursor:default;}
+
+  .feedback{margin-top:18px; border-radius:16px; padding:16px 18px; display:none; animation:fade .25s ease;}
+  .feedback.show{display:block;}
+  .feedback.ok{background:linear-gradient(180deg, rgba(55,196,109,.2), rgba(55,196,109,.08)); border:2px solid rgba(55,196,109,.5);}
+  .feedback.bad{background:linear-gradient(180deg, rgba(239,93,93,.18), rgba(239,93,93,.07)); border:2px solid rgba(239,93,93,.5);}
+  .feedback h3{font-family:'Fredoka',sans-serif; font-size:20px; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .feedback.ok h3{color:var(--green);}
+  .feedback.bad h3{color:#ff9a9a;}
+  .feedback .line{font-size:15px; line-height:1.5; margin-bottom:8px;}
+  .feedback .line b{color:var(--gold-hi);}
+  .feedback .correct-ans{font-weight:700; color:var(--green);}
+
+  /* ---------- SCREENS ---------- */
+  .screen{
+    text-align:center; padding:34px 22px;
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:2px solid rgba(244,201,93,.4); border-radius:24px;
+    box-shadow:0 18px 50px rgba(0,0,0,.45);
+    animation:pop .35s cubic-bezier(.2,1.1,.3,1);
+  }
+  .screen .big{
+    font-family:'Anton',sans-serif; font-size:clamp(30px,7vw,58px); line-height:.95;
+    text-shadow:0 4px 0 rgba(0,0,0,.35); letter-spacing:1px;
+  }
+  .screen .big .gold{color:var(--gold);}
+  .screen .sub{font-family:'Fredoka',sans-serif; font-size:clamp(15px,2.4vw,21px); color:var(--ink-soft); margin-top:10px;}
+  .screen .hi{color:var(--gold-hi); font-weight:700;}
+  .rules{
+    max-width:560px; margin:24px auto 0; text-align:left;
+    background:rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.1);
+    border-radius:16px; padding:18px 20px;
+  }
+  .rules li{margin:8px 0 8px 4px; line-height:1.5; list-style:none; position:relative; padding-left:30px;}
+  .rules li::before{content:"⭐"; position:absolute; left:0;}
+  .medal{font-size:74px; line-height:1; margin:6px 0;}
+  .wager-box{max-width:460px; margin:20px auto 0;}
+  .wager-box .amt{font-family:'Anton',sans-serif; font-size:42px; color:var(--gold);}
+  input[type=range]{width:100%; accent-color:var(--gold); height:30px; cursor:pointer;}
+  .tiny{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-size:13px; margin-top:6px;}
+
+  /* ---------- REPORT ---------- */
+  .report-row{margin:0 0 16px;}
+  .report-row .top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px;}
+  .report-row .nm{font-family:'Fredoka',sans-serif; font-weight:600; font-size:15px;}
+  .report-row .nm .ic{margin-right:6px;}
+  .report-row .meta{font-family:'Fredoka',sans-serif; font-size:13px; color:var(--ink-soft);}
+  .repbar{height:13px; border-radius:999px; background:rgba(255,255,255,.1); overflow:hidden; border:1px solid rgba(255,255,255,.12);}
+  .repbar > i{display:block; height:100%; width:0%; border-radius:999px; transition:width .5s ease;}
+  .repbar > i.good{background:linear-gradient(90deg,var(--green),var(--gold-hi));}
+  .repbar > i.mid{background:linear-gradient(90deg,var(--gold),var(--gold-hi));}
+  .repbar > i.low{background:linear-gradient(90deg,var(--red),#ffb38a);}
+  .report-row.untried{opacity:.7;}
+  .report-row.untried .meta{color:var(--gold-hi);}
+  .report-msg{
+    margin-top:8px; background:rgba(0,0,0,.2); border:1px solid rgba(244,201,93,.3);
+    border-radius:16px; padding:16px 18px; line-height:1.55; font-size:15px;
+  }
+  .report-msg b{color:var(--gold-hi);}
+  .report-msg .strong{color:var(--green); font-weight:700;}
+  .report-msg .weak{color:#ff9a9a; font-weight:700;}
+
+  .hidden{display:none !important;}
+
+  .confetti{position:fixed; width:10px; height:14px; top:-20px; z-index:60; border-radius:2px; pointer-events:none;}
+  @keyframes fall{to{transform:translateY(108vh) rotate(620deg); opacity:.9;}}
+
+  @media (max-width:560px){
+    .score-box .val{font-size:26px;}
+    .modal{padding:18px;}
+    .q-text{font-size:17px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div class="wrap" id="loadingScreen">
+  <div class="loading">
+    <div class="badge">JEOPARDY</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="msg">Cargando tu juego...</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="wrap hidden" id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="badge">JEOPARDY</div>
+      <h1>Los <span>Sacramentos</span><br>de la Iglesia</h1>
+    </div>
+    <div class="head-right">
+      <div class="player-pill">
+        <span class="who">Jugador</span>
+        <span class="nm" id="playerName">ESTUDIANTE</span>
+      </div>
+      <a class="back-link" href="../dashboard.html">← Volver al inicio</a>
+    </div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="screen">
+    <div class="big">¡Hola, <span class="gold" id="greetName">estudiante</span>!</div>
+    <div class="sub">Bienvenido a tu juego de repaso para el examen del <span class="hi">3er periodo</span>.<br>Vamos a estudiar la Santa Misa, la Confesión y el Orden Sacerdotal… ¡jugando!</div>
+    <ul class="rules">
+      <li>Hay <b>6 categorías</b>. Toca una categoría para responder sus preguntas, una por una.</li>
+      <li>Cada pregunta tiene <b>4 opciones</b> (A, B, C y D). Toca la que creas correcta.</li>
+      <li>Si <b>aciertas</b>, ganas puntos y subes tu racha. Si te <b>equivocas</b>, aparece un <b>Repaso</b> que explica la respuesta correcta… ¡pero nunca pierdes tu progreso!</li>
+      <li>Tu progreso se <b>guarda solo</b>: puedes cerrar y continuar después, ¡incluso en otro dispositivo!</li>
+      <li>Cuando respondas <b>todas</b> las preguntas, se desbloquea el <b>¡Jeopardy Final!</b> (un bonus opcional).</li>
+      <li>Revisa tu <b>Reporte de estudio</b> para ver en qué eres fuerte y qué repasar.</li>
+    </ul>
+    <div class="center">
+      <button class="btn" id="startBtn">¡Comenzar a jugar! 🎮</button>
+    </div>
+  </div>
+
+  <!-- GAME AREA -->
+  <div id="gameArea" class="hidden">
+    <div class="scorebar">
+      <div class="score-box">
+        <span class="lbl" id="scoreLbl">Puntaje</span>
+        <span class="val" id="scoreVal">0</span>
+      </div>
+      <div class="score-box" style="flex:0 1 170px;">
+        <span class="lbl">Racha</span>
+        <span class="val" id="streakVal" style="font-size:26px;">0 🔥</span>
+      </div>
+      <div class="progress-box">
+        <div class="lbl"><span>Progreso total</span><span id="progTxt">0 / 0</span></div>
+        <div class="bar"><i id="progBar"></i></div>
+      </div>
+    </div>
+
+    <div class="cat-grid" id="catGrid"></div>
+
+    <div class="center">
+      <button class="btn" id="finalBtn" disabled>🌟 Jeopardy Final (responde todo primero)</button>
+      <button class="btn ghost" id="reportBtn">📊 Reporte de estudio</button>
+      <button class="btn danger" id="eraseBtn">🗑️ Borrar mi progreso</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== QUESTION OVERLAY ===== -->
+<div class="overlay" id="qOverlay">
+  <div class="modal">
+    <div class="q-meta">
+      <span class="cat" id="qCat"></span>
+      <span class="pts" id="qPts"></span>
+    </div>
+    <div class="q-text" id="qText"></div>
+    <div class="opts" id="qOpts"></div>
+    <div class="feedback" id="qFeedback"></div>
+    <div class="center" style="margin-top:18px;">
+      <button class="btn hidden" id="qContinue">Continuar ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FINAL JEOPARDY OVERLAY ===== -->
+<div class="overlay" id="finalOverlay">
+  <div class="modal">
+    <div class="q-meta">
+      <span class="cat">🌟 JEOPARDY FINAL — El corazón de todo</span>
+    </div>
+
+    <div id="wagerStep">
+      <div class="q-text">¡Llegaste al final! Tienes <span style="color:var(--gold);font-weight:700;" id="finalScoreShow">0</span> puntos.<br>¿Cuántos puntos quieres apostar? Si aciertas los ganas; si fallas los pierdes.</div>
+      <div class="wager-box">
+        <div class="amt" id="wagerAmt">0</div>
+        <input type="range" id="wagerRange" min="0" max="0" step="50" value="0">
+        <div class="tiny">Arrastra para elegir tu apuesta (de 0 hasta todos tus puntos).</div>
+      </div>
+      <div class="center" style="margin-top:18px;">
+        <button class="btn" id="lockWagerBtn">Apostar y ver la pregunta 🎯</button>
+      </div>
+    </div>
+
+    <div id="finalQStep" class="hidden">
+      <div class="q-text" id="finalQText"></div>
+      <div class="opts" id="finalOpts"></div>
+      <div class="feedback" id="finalFeedback"></div>
+      <div class="center" style="margin-top:18px;">
+        <button class="btn hidden" id="finalContinue">Ver mi resultado 🏆</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COMPLETION OVERLAY ===== -->
+<div class="overlay" id="completionOverlay">
+  <div class="modal" style="text-align:center;">
+    <div class="medal">🎉</div>
+    <div class="big" style="font-family:'Anton';font-size:38px;color:var(--gold);">¡COMPLETASTE TODO!</div>
+    <div class="sub" id="completionMsg" style="margin-top:12px;"></div>
+    <div class="center" style="margin-top:22px;">
+      <button class="btn" id="compFinalBtn">🌟 Jugar el Jeopardy Final</button>
+      <button class="btn ghost" id="compReportBtn">📊 Ver mi reporte</button>
+      <button class="btn ghost" id="compCloseBtn">Seguir en el tablero</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== END (FINAL RESULT) OVERLAY ===== -->
+<div class="overlay" id="endOverlay">
+  <div class="modal" style="text-align:center;">
+    <div class="medal" id="endMedal">🏆</div>
+    <div class="big" style="font-family:'Anton';font-size:40px;" id="endTitle"></div>
+    <div class="sub" id="endMsg" style="margin-top:12px;"></div>
+    <div class="score-box" style="max-width:320px;margin:22px auto 0;">
+      <span class="lbl">Puntaje final</span>
+      <span class="val" id="endScore">0</span>
+    </div>
+    <div class="center" style="margin-top:24px;">
+      <button class="btn" id="endReportBtn">📊 Ver mi reporte</button>
+      <button class="btn ghost" id="endCloseBtn">Volver al tablero</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REPORT OVERLAY ===== -->
+<div class="overlay" id="reportOverlay">
+  <div class="modal">
+    <div class="q-meta">
+      <span class="cat">📊 Reporte de estudio</span>
+    </div>
+    <div id="reportBody"></div>
+    <div class="center" style="margin-top:18px;">
+      <button class="btn" id="reportCloseBtn">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ERASE CONFIRM OVERLAY ===== -->
+<div class="overlay" id="eraseOverlay">
+  <div class="modal" style="text-align:center;">
+    <div class="medal">🗑️</div>
+    <div class="big" style="font-family:'Anton';font-size:30px;color:var(--gold);">Borrar progreso</div>
+    <div class="sub" style="margin-top:12px;">¿Seguro que quieres borrar todo tu progreso de Religión? Esto no se puede deshacer.</div>
+    <div class="center" style="margin-top:24px;">
+      <button class="btn danger" id="eraseConfirmBtn">Sí, borrar todo</button>
+      <button class="btn ghost" id="eraseCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "../js/supabase.js";
+
+/* =========================================================
+   BANCO DE PREGUNTAS — RELIGIÓN (Sacramentos, 3er periodo)
+   ========================================================= */
+const CATS = [
+
+  { name:"LAS PARTES DE LA MISA", icon:"🕊️", q:[
+    { q:"La Santa Misa se divide en 4 grandes partes. La PRIMERA sirve para reunir a los fieles y prepararlos para encontrarse con Dios. ¿Cómo se llama?",
+      opts:["Los Ritos Iniciales","La Liturgia de la Palabra","El Rito de Conclusión","La Liturgia Eucarística"], correct:0,
+      ex:"La 1ª parte son «Los Ritos Iniciales»: el comienzo de la Misa que congrega a los fieles y los prepara. Orden de las 4 partes: 1) Ritos Iniciales, 2) Liturgia de la Palabra, 3) Liturgia Eucarística, 4) Rito de Conclusión." },
+    { q:"¿Cuál es el orden CORRECTO de las 4 partes de la Misa?",
+      opts:["Ritos Iniciales → Liturgia de la Palabra → Liturgia Eucarística → Rito de Conclusión","Liturgia de la Palabra → Ritos Iniciales → Comunión → Bendición","Ofertorio → Evangelio → Ritos Iniciales → Salida","Liturgia Eucarística → Liturgia de la Palabra → Ritos Iniciales → Conclusión"], correct:0,
+      ex:"El orden es: 1) Ritos Iniciales (preparación), 2) Liturgia de la Palabra (Dios nos habla), 3) Liturgia Eucarística (Cristo se hace presente), 4) Rito de Conclusión (envío al mundo)." },
+    { q:"En la 2ª parte, la Liturgia de la Palabra, se leen pasajes de la Biblia. ¿Qué está haciendo Dios con nosotros en esta parte?",
+      opts:["Nos envía al mundo","Dios nos habla a través de las Escrituras","Cristo se hace presente en el pan","Nos da la bendición final"], correct:1,
+      ex:"En la Liturgia de la Palabra «Dios nos habla a través de las Escrituras»: al leer la Biblia es como si Dios mismo nos hablara." },
+    { q:"En la 1ª parte, el sacerdote besa el altar. ¿De qué es imagen el altar, y qué representa ese beso?",
+      opts:["Es imagen del cuerpo de Cristo; el beso es un saludo y reconocimiento de la presencia de Dios","Es imagen de la mesa de la casa; el beso es por costumbre","Es imagen del cielo; el beso pide perdón","Es imagen del pan; el beso lo bendice"], correct:0,
+      ex:"El altar es imagen del cuerpo de Cristo. El beso del sacerdote representa un saludo afectuoso y un reconocimiento de la presencia de Dios." },
+    { q:"En los Ritos Iniciales rezamos el «Yo confieso», donde reconocemos que hemos pecado. ¿De qué cuatro maneras decimos que hemos pecado?",
+      opts:["De pensamiento, palabra, obra y omisión","De día, de noche, en casa y en la calle","Con las manos, los pies, los ojos y la boca","Por error, por miedo, por flojera y por enojo"], correct:0,
+      ex:"En el «Yo confieso» reconocemos haber pecado «de pensamiento, palabra, obra y omisión». Por eso decimos «por mi culpa, por mi culpa, por mi gran culpa»." },
+    { q:"La Liturgia de la Palabra tiene varias lecturas. La PRIMERA Lectura casi siempre viene del Antiguo Testamento. ¿De quiénes son principalmente esos escritos?",
+      opts:["De los apóstoles","De los profetas","De los obispos","De los Papas"], correct:1,
+      ex:"La Primera Lectura viene del Antiguo Testamento: los escritos de los profetas. Las cartas de los apóstoles se leen en la Segunda Lectura (Nuevo Testamento)." },
+    { q:"Después de la Primera Lectura rezamos algo que es «nuestra respuesta orante a la Palabra escuchada». ¿Qué es?",
+      opts:["El Salmo Responsorial","El Evangelio","La homilía","El Credo"], correct:0,
+      ex:"El Salmo Responsorial es nuestra respuesta orante a la Palabra que acabamos de escuchar, entre la Primera y la Segunda Lectura." },
+    { q:"La Segunda Lectura viene del Nuevo Testamento (cartas de los apóstoles). Según la guía, ¿cuándo se lee?",
+      opts:["Todos los días","Solo los domingos o días de fiesta","Solo en Navidad","Nunca, ya no se usa"], correct:1,
+      ex:"La Segunda Lectura (cartas de los apóstoles, del Nuevo Testamento) solo se lee los domingos o días de fiesta." },
+    { q:"La lectura más importante de la Liturgia de la Palabra es el Evangelio, llamado «el corazón de las Escrituras». Después, el sacerdote lo explica. ¿Cómo se llama esa explicación y cuánto debe durar como MÁXIMO?",
+      opts:["La homilía, máximo 8 minutos","El salmo, máximo 5 minutos","La bendición, máximo 15 minutos","El ofertorio, máximo 10 minutos"], correct:0,
+      ex:"La explicación del Evangelio es «la homilía», y debe durar máximo 8 minutos. El Evangelio es «el corazón de las Escrituras»: la vida y doctrina del Salvador." },
+    { q:"La 4ª y última parte nos manda de regreso a la vida diaria para llevar a Dios al mundo. ¿Qué recibimos justo antes de que nos envíen, en el Rito de Conclusión?",
+      opts:["La bendición","La Primera Lectura","El examen de conciencia","La consagración del pan"], correct:0,
+      ex:"En el Rito de Conclusión recibimos «la bendición»: esta parte es el envío al mundo CON la bendición." },
+  ]},
+
+  { name:"LA LITURGIA EUCARÍSTICA", icon:"🍞", q:[
+    { q:"La 3ª parte de la Misa es «el momento cumbre de la celebración». ¿Cómo se llama y cuáles son sus tres momentos?",
+      opts:["La Liturgia Eucarística: Ofertorio, Consagración y Comunión","Los Ritos Iniciales: beso, saludo y perdón","La Liturgia de la Palabra: lecturas, salmo y homilía","El Rito de Conclusión: bendición, envío y salida"], correct:0,
+      ex:"La Liturgia Eucarística es el momento cumbre, y tiene tres momentos: Ofertorio, Consagración y Comunión." },
+    { q:"En el Ofertorio, el sacerdote presenta a Dios dos cosas sencillas que después se convertirán en el Cuerpo y la Sangre de Cristo. ¿Cuáles son?",
+      opts:["El agua y el aceite","El pan y el vino","Las velas y las flores","El incienso y la sal"], correct:1,
+      ex:"En el Ofertorio se ofrecen «el pan y el vino», que se convertirán en el Cuerpo y la Sangre de Cristo." },
+    { q:"La «materia de la Misa» nos dice de qué deben estar hechos el pan y el vino. ¿De qué harina debe estar hecho el pan?",
+      opts:["De harina de maíz","De harina de trigo","De cualquier harina","De harina de arroz"], correct:1,
+      ex:"El pan debe ser de harina de trigo (no de maíz ni otra) y el vino debe ser vino natural de vid. A esto se le llama «la materia de la Misa»." },
+    { q:"El vino de la Misa debe ser vino natural de «vid». La vid es una planta. ¿Qué fruta produce la vid?",
+      opts:["Las manzanas","Las uvas","Las aceitunas","Las naranjas"], correct:1,
+      ex:"La vid es la planta que da uvas, y con las uvas se hace el vino. Por eso el vino de la Misa debe ser vino natural de vid." },
+    { q:"En la Consagración, el sacerdote repite las palabras de Jesús sobre el pan: «Esto es mi ______, que será entregado por ustedes.» ¿Qué palabra falta?",
+      opts:["Cuerpo","Pan","Espíritu","Sangre"], correct:0,
+      ex:"Sobre el pan se dice: «Esto es mi Cuerpo, que será entregado por ustedes». Sobre el vino se dice: «Este es el cáliz de mi Sangre…»." },
+    { q:"Sobre el vino, el sacerdote dice: «Este es el cáliz de mi Sangre, Sangre de la alianza nueva y eterna…». ¿Para qué será derramada esa Sangre, según las palabras?",
+      opts:["Para el perdón de los pecados","Para curar enfermedades","Para alegrar la fiesta","Para bendecir la comida"], correct:0,
+      ex:"Las palabras dicen que la Sangre «será derramada por ustedes y por muchos para el perdón de los pecados. Hagan esto en conmemoración mía»." },
+    { q:"Cuando el sacerdote dice las palabras de la Consagración, no habla por sí mismo: habla en el nombre y en la persona de Jesús. ¿Cómo se dice «en la persona de Cristo» en latín?",
+      opts:["In persona Christi","Dominus vobiscum","Per saecula saeculorum","Corpus Christi"], correct:0,
+      ex:"«In persona Christi» significa «en la persona de Cristo»: es Jesús mismo quien actúa a través del sacerdote, y por eso esas palabras realizan el milagro de la transubstanciación." },
+    { q:"¿Cómo se llama el tercer momento de la Liturgia Eucarística, cuando los fieles reciben a Jesús?",
+      opts:["La Comunión","El Ofertorio","La Consagración","La homilía"], correct:0,
+      ex:"El tercer momento es la Comunión, cuando los fieles reciben el Cuerpo de Cristo. Los tres momentos son: Ofertorio, Consagración y Comunión." },
+  ]},
+
+  { name:"EL GRAN MILAGRO", icon:"✨", q:[
+    { q:"El momento más asombroso de la Misa es un milagro llamado «transubstanciación». ¿En qué se transforman el pan y el vino?",
+      opts:["En símbolos que representan a Jesús","En el Cuerpo y la Sangre de Cristo","En pan y vino bendecidos pero iguales","En el alma de los fieles"], correct:1,
+      ex:"La transubstanciación es la transformación del pan en el Cuerpo de Cristo y de TODO el vino en su Sangre. No es solo un símbolo: ¡es Jesús de verdad!" },
+    { q:"Después del milagro, la hostia sigue sabiendo a pan y el vino se sigue viendo como vino. A lo que captan los sentidos (sabor, color, forma) se le llama «los accidentes». ¿Qué les pasa a los accidentes?",
+      opts:["Cambian por completo","Se quedan igual (no cambian)","Desaparecen totalmente","Se vuelven invisibles"], correct:1,
+      ex:"Los «accidentes» (sabor, color, forma) se quedan igual. Eso es solo la apariencia. Lo que SÍ cambia es la realidad profunda." },
+    { q:"Por fuera nada cambia, pero algo muy importante SÍ cambió por dentro. ¿Qué es lo que realmente cambió en la transubstanciación?",
+      opts:["Solo el sabor y el olor","La realidad profunda: ya no es pan ni vino, es Jesús","El tamaño y el peso de la hostia","El olor a incienso"], correct:1,
+      ex:"Cambió «la realidad profunda: ya no es pan ni vino, es Jesús». Truco: los ACCIDENTES (lo que ves y pruebas) se quedan igual, pero la REALIDAD (lo que de verdad es) cambia por completo." },
+    { q:"¿Quién pronuncia las palabras que realizan el milagro de la transubstanciación, y en nombre de quién actúa?",
+      opts:["El sacerdote, actuando «in persona Christi» (en la persona de Cristo)","Los fieles, todos juntos","El monaguillo, ayudando en el altar","El coro, mientras canta"], correct:0,
+      ex:"El sacerdote pronuncia las palabras «in persona Christi»; es Jesús mismo quien actúa por medio de él, y así se realiza la transubstanciación." },
+    { q:"La Misa tiene «frutos» o efectos en quien comulga. Uno de ellos es que la comunión nos une íntimamente con Cristo y renueva la vida de Dios en el alma. ¿Cómo se llama ese fruto?",
+      opts:["Aumento de la Gracia","Pérdida de la fe","Castigo por los pecados","Olvido de lo aprendido"], correct:0,
+      ex:"El «Aumento de la Gracia»: la comunión une íntimamente con Cristo, conservando y renovando la vida de Dios en el alma." },
+    { q:"Otro fruto de la Misa es que, como alimento espiritual, fortalece la caridad y borra las faltas cotidianas. ¿Qué pecados perdona la comunión?",
+      opts:["Los pecados veniales","Los pecados mortales","Todos los pecados sin confesarse","Ningún pecado"], correct:0,
+      ex:"La comunión logra el «Perdón de los pecados veniales»: fortalece la caridad y borra las faltas cotidianas. Los pecados mortales se perdonan en la Confesión." },
+    { q:"El tercer fruto de la Misa la llama «prenda de la gloria futura», porque al comulgar ya saboreamos la vida eterna. ¿Cómo se llama ese fruto?",
+      opts:["Anticipo del Cielo","Aumento del miedo","Fin del mundo","Olvido de Dios"], correct:0,
+      ex:"El «Anticipo del Cielo»: la comunión es «prenda de la gloria futura»; al comulgar saboreamos ya la vida eterna." },
+    { q:"Para COMULGAR (recibir a Jesús en la Eucaristía) hay que cumplir requisitos. Uno tiene que ver con no comer un tiempo antes de la Misa. ¿Cuánto ayuno se necesita antes de comulgar?",
+      opts:["Un día completo","Una hora","Tres horas","Quince minutos"], correct:1,
+      ex:"Para comulgar hay DOS requisitos: 1) estar en estado de gracia (sin pecado mortal) y 2) haber ayunado al menos una hora antes." },
+    { q:"Además del ayuno, ¿en qué estado debe estar el alma de la persona para poder comulgar?",
+      opts:["En estado de gracia, sin pecado mortal","En ayunas de tres días","Tener 25 años cumplidos","Haber recibido la confirmación"], correct:0,
+      ex:"Para comulgar hay que estar «en estado de gracia, sin pecado mortal» y haber ayunado una hora. Todo bautizado puede comulgar si cumple esto." },
+    { q:"¿Quién es el «sujeto» de la Eucaristía, es decir, quién puede comulgar?",
+      opts:["Todo bautizado (en estado de gracia y con ayuno de una hora)","Solo los sacerdotes","Solo los mayores de 25 años","Solo los obispos"], correct:0,
+      ex:"El «sujeto» es todo bautizado, con los requisitos de estar en estado de gracia y ayuno de una hora. (El «ministro» que celebra es el sacerdote.)" },
+  ]},
+
+  { name:"LOS COLORES LITÚRGICOS", icon:"🎨", q:[
+    { q:"Hay un color litúrgico que significa pureza y alegría. ¿Cuál es?",
+      opts:["El blanco","El negro","El café","El gris"], correct:0,
+      ex:"El blanco simboliza la pureza y la alegría." },
+    { q:"En los tiempos de penitencia (Cuaresma, Adviento) y en las misas por los difuntos, ¿qué color usa el sacerdote?",
+      opts:["El verde","El morado","El rojo","El celeste"], correct:1,
+      ex:"El morado simboliza penitencia y se usa en Cuaresma, Adviento y en las misas por los muertos." },
+    { q:"Durante la mayor parte del año, en las misas del «tiempo ordinario», ¿qué color se usa, y qué simboliza?",
+      opts:["El verde, que simboliza la esperanza","El rojo, que simboliza la sangre","El dorado, que simboliza las fiestas","El morado, que simboliza la penitencia"], correct:0,
+      ex:"El verde simboliza la esperanza y se usa en las misas del tiempo ordinario (la temporada más larga del año)." },
+    { q:"Hay un color que recuerda al fuego y a la sangre, usado en las memorias de los mártires. ¿Cuál es?",
+      opts:["El rosa","El rojo","El blanco","El dorado"], correct:1,
+      ex:"El rojo simboliza el fuego y la sangre, y se usa en las memorias de los mártires." },
+    { q:"Un color especial se usa SOLO el 3er domingo de Adviento y simboliza la alegría. ¿Cuál es?",
+      opts:["El rosa","El celeste","El verde","El morado"], correct:0,
+      ex:"El rosa simboliza la alegría y se usa el 3er domingo de Adviento." },
+    { q:"¿Qué color se usa en las fiestas de la Virgen María?",
+      opts:["El celeste","El rojo","El verde","El morado"], correct:0,
+      ex:"El celeste se usa en las fiestas de la Virgen María." },
+    { q:"¿Qué color se usa en las fiestas mayores, como la Pascua y la Navidad?",
+      opts:["El dorado","El verde","El morado","El negro"], correct:0,
+      ex:"El dorado se usa en las fiestas mayores: Pascua y Navidad." },
+    { q:"La guía menciona 7 colores litúrgicos. ¿Cuál de estas listas tiene los 7 correctos?",
+      opts:["Blanco, morado, verde, rojo, rosa, celeste y dorado","Blanco, negro, gris, café, azul, rosa y plateado","Rojo, verde, azul, amarillo, naranja, morado y blanco","Morado, verde, rojo, rosa, celeste, dorado y plateado"], correct:0,
+      ex:"Los 7 colores litúrgicos son: blanco, morado, verde, rojo, rosa, celeste y dorado." },
+    { q:"¿Cuál opción empareja CORRECTAMENTE el color con su significado o uso?",
+      opts:["Morado = penitencia · Verde = esperanza · Rojo = fuego y sangre","Blanco = penitencia · Verde = mártires · Rojo = esperanza","Dorado = tiempo ordinario · Celeste = mártires · Rosa = funerales","Verde = pureza · Morado = alegría · Rojo = la Virgen"], correct:0,
+      ex:"Morado = penitencia; Verde = esperanza (tiempo ordinario); Rojo = fuego y sangre (mártires). El blanco es pureza y alegría." },
+  ]},
+
+  { name:"LA CONFESIÓN", icon:"🙏", q:[
+    { q:"El sacramento de la Reconciliación tiene otro nombre más común. ¿Cuál es?",
+      opts:["La Confesión","El Bautismo","La Comunión","La Unción"], correct:0,
+      ex:"El Sacramento de la Reconciliación también se llama la Confesión." },
+    { q:"¿Qué es la Confesión, según la definición de la guía?",
+      opts:["El sacramento mediante el cual Jesús perdona los pecados cometidos desde la última confesión","Una charla normal con un amigo","Una lista de buenas acciones","Un examen de la escuela"], correct:0,
+      ex:"La Confesión es «el sacramento mediante el cual Jesús perdona los pecados cometidos desde la última confesión»." },
+    { q:"En la Confesión le contamos los pecados al sacerdote, pero ¿QUIÉN nos perdona realmente a través de él?",
+      opts:["El sacerdote por su propio poder","Dios (Jesús mismo)","Nosotros mismos","El Papa desde Roma"], correct:1,
+      ex:"Es Dios (Jesús mismo) quien perdona; el sacerdote es solo su instrumento. Como en todos los sacramentos, es Jesús quien actúa." },
+    { q:"Las palabras que dice el sacerdote para perdonar (la absolución) son: «Yo te absuelvo de tus pecados en el nombre del Padre, y del Hijo, y del ______». ¿Qué falta?",
+      opts:["Espíritu Santo","Ángel de la Guarda","Padre nuestro","Cuerpo de Cristo"], correct:0,
+      ex:"La fórmula de absolución es: «Yo te absuelvo de tus pecados en el nombre del Padre, y del Hijo, y del Espíritu Santo»." },
+    { q:"En otros sacramentos la «materia» son cosas como el agua o el pan. En la Confesión, ¿qué es la materia?",
+      opts:["Los actos del penitente (de la persona que se confiesa)","El agua bendita","El pan y el vino","El aceite"], correct:0,
+      ex:"La materia de la Confesión no son elementos materiales, sino «los actos del penitente»." },
+    { q:"Uno de los actos del penitente consiste en el dolor del alma y el rechazo del pecado, con el propósito de no volver a pecar. ¿Cómo se llama ese acto?",
+      opts:["El Dolor","La Confesión","La Penitencia","El Examen"], correct:0,
+      ex:"El «Dolor» consiste en el dolor del alma y el rechazo del pecado cometido, con el propósito de no volver a pecar." },
+    { q:"Otro acto del penitente es la declaración de todos los pecados al sacerdote. ¿Cómo se llama?",
+      opts:["La Confesión","El Dolor","La Penitencia","El Salmo"], correct:0,
+      ex:"La «Confesión» es la declaración de todos los pecados al sacerdote." },
+    { q:"El tercer acto del penitente es la reparación que el sacerdote impone para sanar el daño causado por el pecado. ¿Cómo se llama?",
+      opts:["La Penitencia","El Dolor","El Ofertorio","La Comunión"], correct:0,
+      ex:"La «Penitencia» es la reparación impuesta por el sacerdote para sanar el daño causado por el pecado." },
+    { q:"Para hacer una buena confesión seguimos 5 pasos. ¿Cuál es el PRIMERO, donde revisamos nuestra conducta para descubrir nuestros pecados?",
+      opts:["El examen de conciencia","La penitencia","La comunión","El dolor de corazón"], correct:0,
+      ex:"El primer paso es «el examen de conciencia». Los 5 pasos en orden: 1) Examen de conciencia, 2) Dolor de corazón, 3) Propósito de enmienda, 4) Confesión, 5) Penitencia." },
+    { q:"Uno de los 5 pasos consiste en prometer de verdad que NO volveremos a cometer los pecados confesados. ¿Cómo se llama ese paso?",
+      opts:["El propósito de enmienda","El examen de conciencia","El dolor de corazón","La penitencia"], correct:0,
+      ex:"El «propósito de enmienda» mira hacia adelante: decidir no repetir esos pecados. (El «dolor de corazón» es arrepentirse de lo ya hecho.)" },
+    { q:"En el paso de la Confesión, ¿cuántos pecados debemos decir al sacerdote, aunque nos dé vergüenza?",
+      opts:["Solo los pequeños","TODOS los pecados, aunque nos dé vergüenza","Solo los de hoy","Solo los que ya no recordamos"], correct:1,
+      ex:"Debemos decir TODOS los pecados al sacerdote, aunque nos dé vergüenza. El último paso, la penitencia, es cumplir lo que el sacerdote nos imponga." },
+    { q:"Después de confesarnos pasan cosas buenas en el alma. ¿Cuál opción describe los TRES efectos de la confesión?",
+      opts:["Paz y alegría · volver a ser amigos de Dios (recuperar la gracia) · fuerza extra contra las tentaciones","Hambre, sueño y cansancio","Recibir dinero, premios y regalos","Más tarea, más reglas y más castigos"], correct:0,
+      ex:"Los tres efectos: 1) Paz y alegría (salimos limpios y felices); 2) Volvemos a ser amigos de Dios (recuperamos la gracia); 3) Fuerza extra contra las tentaciones." },
+  ]},
+
+  { name:"ORDEN SACERDOTAL Y VOCACIÓN", icon:"⛪", q:[
+    { q:"¿Qué es el sacramento del Orden Sacerdotal?",
+      opts:["El sacramento por el que algunos hombres son consagrados para continuar la misión de Jesús en la Iglesia y celebrar los sacramentos","El sacramento que perdona los pecados","El sacramento de la primera comunión","El sacramento del matrimonio"], correct:0,
+      ex:"El Orden Sacerdotal es el sacramento por el que algunos hombres son consagrados para continuar la misión de Jesucristo en la Iglesia, es decir, para celebrar los sacramentos." },
+    { q:"¿Cuántos grados tiene el Orden Sacerdotal?",
+      opts:["Tres grados","Cinco grados","Siete grados","Dos grados"], correct:0,
+      ex:"Tiene tres grados: el Diaconado (diáconos), el Presbiterado (sacerdotes) y el Episcopado (obispos)." },
+    { q:"El grado más alto lo tienen los obispos, sucesores de los apóstoles y cabeza visible de su diócesis. ¿Cómo se llama ese grado?",
+      opts:["El Episcopado","El Diaconado","El Presbiterado","El Pontificado"], correct:0,
+      ex:"El «Episcopado» es el grado de los obispos, que poseen la plenitud del sacramento y son la cabeza visible de la Iglesia particular (la diócesis)." },
+    { q:"Los sacerdotes son cooperadores del obispo, consagrados para predicar el Evangelio, pastorear a los fieles y celebrar el culto divino. ¿Cómo se llama su grado?",
+      opts:["El Presbiterado","El Episcopado","El Diaconado","El Cardenalato"], correct:0,
+      ex:"El «Presbiterado» es el grado de los sacerdotes (presbíteros), cooperadores del obispo." },
+    { q:"Hay un grado cuyos miembros sirven a la Iglesia en la palabra, la liturgia y la caridad, pero NO son sacerdotes. ¿Cuál es?",
+      opts:["El Diaconado (los diáconos)","El Episcopado (los obispos)","El Presbiterado (los sacerdotes)","El Laicado (los laicos)"], correct:0,
+      ex:"El «Diaconado»: los diáconos están al servicio de la Iglesia (palabra, liturgia y caridad), no para el sacerdocio. Orden de los grados: Diaconado → Presbiterado → Episcopado." },
+    { q:"Para que un hombre pueda ser sacerdote, ¿cuál opción tiene los TRES requisitos correctos?",
+      opts:["Ser varón · estar bautizado y confirmado · tener 25 años cumplidos","Ser varón · estar en ayunas · tener 18 años","Estar bautizado · ser mayor de edad · estar casado","Saber latín · medir más de 1.70 m · ser de Roma"], correct:0,
+      ex:"Requisitos para ser sacerdote: 1) ser varón, 2) estar bautizado y confirmado, 3) tener 25 años cumplidos. (¡El ayuno de una hora y el estado de gracia son para COMULGAR, no para ser sacerdote!)" },
+    { q:"¿Qué es la vocación?",
+      opts:["El llamado personal que Dios hace a cada persona para amar, servir y alcanzar la santidad según una misión concreta","Un trabajo cualquiera que se elige por dinero","Una materia de la escuela","Una fiesta de la Iglesia"], correct:0,
+      ex:"La vocación es el llamado personal que Dios hace a cada persona para amar, servir y alcanzar la santidad según una misión concreta en la vida." },
+    { q:"La vocación a formar una familia cristiana y santificarse a través del amor de los esposos y la educación de los hijos, ¿cómo se llama?",
+      opts:["Vocación al matrimonio","Vocación sacerdotal","Vocación a la vida consagrada","Vocación laical"], correct:0,
+      ex:"La «vocación al matrimonio» es la llamada a formar una familia cristiana y santificarse a través del amor conyugal y la educación de los hijos." },
+    { q:"La vocación de entregar la vida a Dios mediante promesas de pobreza, castidad y obediencia (como franciscanos o jesuitas), ¿cómo se llama?",
+      opts:["Vocación a la vida consagrada","Vocación al matrimonio","Vocación laical","Vocación sacerdotal"], correct:0,
+      ex:"La «vocación a la vida consagrada» entrega la vida a Dios mediante promesas de pobreza, castidad y obediencia, en congregaciones religiosas o vida contemplativa." },
+    { q:"La llamada de los fieles laicos a santificar el mundo desde dentro (a través del trabajo, la amistad, la educación, la política, los negocios), ¿qué vocación es?",
+      opts:["Vocación laical","Vocación sacerdotal","Vocación a la vida consagrada","Vocación al matrimonio"], correct:0,
+      ex:"La «vocación laical» es la llamada de los laicos a santificar el mundo desde dentro: trabajo, amistad, educación, política, negocios (por ejemplo, el Opus Dei)." },
+    { q:"Según la guía, ¿cuál de estas es una verdadera señal de vocación?",
+      opts:["Alegría y deseo al pensar en vivir esa vocación, y gusto por darse a los demás y servirlos","Hacerlo solo para ganar mucho dinero","Que te obliguen tus papás","Aburrirte cuando piensas en ella"], correct:0,
+      ex:"Algunas señales de vocación: alegría al pensar en vivir esa vocación, deseo de servir a los demás, admiración por quienes ya la viven y deseo de acercarse más a Dios. «Dios no habla a los oídos; habla al corazón»." },
+  ]},
+];
+
+const FINAL = {
+  q:"La GRAN idea que une todo el estudio: en todos los sacramentos hay Alguien que actúa de verdad por medio del sacerdote, aunque no lo veamos. En la Eucaristía el sacerdote habla «in persona Christi», y en la Confesión el sacerdote es solo un instrumento. ¿QUIÉN es el que de verdad actúa y obra el milagro en los sacramentos?",
+  opts:["Jesús (Dios) mismo","Solamente el sacerdote por su esfuerzo","Los fieles que están en la Misa","Los santos del cielo"], correct:0,
+  ex:"En TODOS los sacramentos es JESÚS mismo quien actúa. En la Eucaristía el sacerdote habla «in persona Christi» y el pan y el vino se vuelven el Cuerpo y la Sangre de Cristo; en la Confesión, quien realmente perdona es Dios, y el sacerdote es su instrumento."
+};
+
+/* =========================================================
+   CONSTANTES / ESTADO
+   ========================================================= */
+const SUBJECT = "religion";
+const POINTS = 100;           // puntos base por respuesta correcta
+const TOTAL_Q = CATS.reduce((s,c)=>s+c.q.length,0);
+const LETTERS = ["A","B","C","D"];
+
+let USER_ID = null;
+let KID_NAME = "estudiante";
+
+let score = 0;
+let streak = 0;
+let answered = {};            // { "<ci>_<qi>": { correct: bool } }
+let finalDone = false;
+
+let currentCat = null;        // ci abierto
+let current = null;           // { ci, qi, shuffled }
+let wager = 0;
+let finalShuffled = [];
+let completionShown = false;
+
+/* =========================================================
+   HELPERS DOM
+   ========================================================= */
+const $ = (id)=>document.getElementById(id);
+function show(id){ $(id).classList.add('show'); }
+function hide(id){ $(id).classList.remove('show'); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function answeredCount(){ return Object.keys(answered).length; }
+function totalCorrect(){ return Object.values(answered).filter(a=>a && a.correct).length; }
+
+function catAnswered(ci){
+  let n=0;
+  CATS[ci].q.forEach((_,qi)=>{ if(answered[`${ci}_${qi}`]) n++; });
+  return n;
+}
+function catComplete(ci){ return catAnswered(ci) >= CATS[ci].q.length; }
+
+/* =========================================================
+   GUARDADO EN SUPABASE (UPSERT con coalescing)
+   ========================================================= */
+function buildByCategory(){
+  const by = {};
+  CATS.forEach((cat,ci)=>{
+    let correct=0, wrong=0;
+    cat.q.forEach((_,qi)=>{
+      const a = answered[`${ci}_${qi}`];
+      if(a){ a.correct ? correct++ : wrong++; }
+    });
+    if(correct+wrong>0) by[cat.name] = { correct, wrong, total: correct+wrong };
+  });
+  return by;
+}
+function buildData(){
+  return {
+    answered,
+    score,
+    byCategory: buildByCategory(),
+    finalDone,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+let saving=false, dirty=false;
+async function saveProgress(){
+  dirty = true;
+  if(saving) return;
+  saving = true;
+  try{
+    while(dirty){
+      dirty = false;
+      const data = buildData();
+      const { error } = await supabase
+        .from('progress')
+        .upsert(
+          { user_id: USER_ID, subject: SUBJECT, data, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,subject' }
+        );
+      if(error) console.error('Error al guardar progreso:', error.message);
+    }
+  } finally {
+    saving = false;
+  }
+}
+
+async function loadProgress(){
+  const { data: row } = await supabase
+    .from('progress')
+    .select('data')
+    .eq('user_id', USER_ID)
+    .eq('subject', SUBJECT)
+    .maybeSingle();
+  if(row && row.data){
+    const d = row.data;
+    answered  = (d.answered && typeof d.answered === 'object') ? d.answered : {};
+    score     = Number.isFinite(d.score) ? d.score : 0;
+    finalDone = d.finalDone === true;
+  } else {
+    answered = {}; score = 0; finalDone = false;
+  }
+}
+
+/* =========================================================
+   RENDER DEL MARCADOR / TABLERO
+   ========================================================= */
+function updateScoreboard(){
+  $('scoreVal').textContent = score;
+  $('streakVal').textContent = `${streak} 🔥`;
+  const ac = answeredCount();
+  $('progTxt').textContent = `${ac} / ${TOTAL_Q}`;
+  $('progBar').style.width = (TOTAL_Q ? (ac/TOTAL_Q*100) : 0) + '%';
+  // botón final solo al 100%
+  const done = ac >= TOTAL_Q;
+  $('finalBtn').disabled = !done;
+  $('finalBtn').textContent = done
+    ? (finalDone ? '🌟 Jeopardy Final (jugar de nuevo)' : '🌟 ¡Jeopardy Final! (ya puedes jugarlo)')
+    : '🌟 Jeopardy Final (responde todo primero)';
+}
+
+function buildBoard(){
+  const grid = $('catGrid');
+  grid.innerHTML = '';
+  CATS.forEach((cat,ci)=>{
+    const n = catAnswered(ci);
+    const total = cat.q.length;
+    const complete = n>=total;
+    const card = document.createElement('div');
+    card.className = 'cat-card' + (complete ? ' complete' : '');
+    card.innerHTML = `
+      <span class="check">✓</span>
+      <span class="ic">${cat.icon}</span>
+      <h3>${esc(cat.name)}</h3>
+      <div class="cprog-lbl"><span>${n} / ${total}</span><span>${complete ? '¡Completa!' : 'Continuar'}</span></div>
+      <div class="bar"><i style="width:${total?(n/total*100):0}%"></i></div>
+    `;
+    card.addEventListener('click', ()=>openCategory(ci));
+    grid.appendChild(card);
+  });
+  updateScoreboard();
+}
+
+/* =========================================================
+   FLUJO POR CATEGORÍA
+   ========================================================= */
+function nextUnanswered(ci, from=0){
+  for(let qi=from; qi<CATS[ci].q.length; qi++){
+    if(!answered[`${ci}_${qi}`]) return qi;
+  }
+  return -1;
+}
+
+function openCategory(ci){
+  currentCat = ci;
+  const qi = nextUnanswered(ci);
+  if(qi === -1){
+    // Categoría completa: mostrar repaso rápido (no re-preguntar).
+    openQuestion(ci, 0, true);
+    return;
+  }
+  openQuestion(ci, qi, false);
+}
+
+function openQuestion(ci, qi, reviewMode){
+  const cat = CATS[ci];
+  const qd = cat.q[qi];
+  current = { ci, qi };
+
+  $('qCat').textContent = `${cat.icon} ${cat.name}`;
+  $('qPts').textContent = `${catAnswered(ci)} / ${cat.q.length}`;
+  $('qText').textContent = qd.q;
+
+  // mezclar opciones (la correcta no siempre en el mismo lugar)
+  current.shuffled = qd.opts.map((t,i)=>({text:t, correct:i===qd.correct}));
+  for(let k=current.shuffled.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[current.shuffled[k],current.shuffled[j]]=[current.shuffled[j],current.shuffled[k]];}
+
+  const optsBox = $('qOpts');
+  optsBox.innerHTML = '';
+  current.shuffled.forEach((opt,idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${LETTERS[idx]}</span>${esc(opt.text)}`;
+    if(!reviewMode) b.addEventListener('click', ()=>answer(idx));
+    optsBox.appendChild(b);
+  });
+
+  const fb = $('qFeedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  $('qContinue').classList.add('hidden');
+
+  if(reviewMode){
+    // En modo repaso, mostrar de una vez la respuesta correcta.
+    const correctIdx = current.shuffled.findIndex(o=>o.correct);
+    document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
+      b.classList.add('locked');
+      if(i===correctIdx) b.classList.add('correct');
+    });
+    fb.className = 'feedback ok show';
+    fb.innerHTML = `<h3>📖 Repaso</h3>
+      <div class="line">Ya completaste esta categoría. Aquí tienes un repaso:</div>
+      <div class="line">${esc(qd.ex)}</div>`;
+    $('qContinue').classList.remove('hidden');
+    $('qContinue').textContent = 'Continuar ▶';
+  }
+
+  show('qOverlay');
+}
+
+function answer(idx){
+  const { ci, qi } = current;
+  const qd = CATS[ci].q[qi];
+  const correctIdx = current.shuffled.findIndex(o=>o.correct);
+  const isRight = current.shuffled[idx].correct;
+
+  document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
+    b.classList.add('locked');
+    b.replaceWith(b.cloneNode(true)); // quitar handlers
+  });
+  // re-aplicar marcado (clones perdieron clases de estado aún no puestas)
+  document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
+    if(i===correctIdx) b.classList.add('correct');
+    if(i===idx && !isRight) b.classList.add('wrong');
+  });
+
+  // registrar respuesta (solo la primera vez)
+  if(!answered[`${ci}_${qi}`]){
+    answered[`${ci}_${qi}`] = { correct: isRight };
+  }
+
+  const fb = $('qFeedback');
+  if(isRight){
+    streak++;
+    const gained = POINTS + (streak-1)*20;
+    score += gained;
+    fb.className = 'feedback ok show';
+    fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
+      <div class="line">Sumaste <b>${gained} puntos</b>${streak>1?` (racha de <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">${esc(qd.ex)}</div>`;
+    confettiBurst();
+  } else {
+    streak = 0;
+    fb.className = 'feedback bad show';
+    fb.innerHTML = `<h3>📚 Repaso</h3>
+      <div class="line">Elegiste: <b>${LETTERS[idx]}) ${esc(current.shuffled[idx].text)}</b>, pero no era la correcta.</div>
+      <div class="line">${esc(qd.ex)}</div>
+      <div class="line correct-ans">✔ Respuesta correcta: ${esc(current.shuffled[correctIdx].text)}</div>
+      <div class="line">¡No pierdes tu progreso! Sigue adelante. 💪</div>`;
+  }
+
+  $('qContinue').classList.remove('hidden');
+  $('qContinue').textContent = 'Continuar ▶';
+  updateScoreboard();
+  saveProgress();
+}
+
+function continueQuestion(){
+  hide('qOverlay');
+  const ci = currentCat;
+  // siguiente sin responder en la MISMA categoría
+  const nextQi = (ci!==null) ? nextUnanswered(ci) : -1;
+  if(ci!==null && nextQi!==-1){
+    openQuestion(ci, nextQi, false);
+    return;
+  }
+  // categoría terminada -> volver al tablero
+  current = null; currentCat = null;
+  buildBoard();
+  if(answeredCount() >= TOTAL_Q && !completionShown){
+    completionShown = true;
+    setTimeout(showCompletion, 350);
+  }
+}
+
+/* =========================================================
+   COMPLETADO (100%)
+   ========================================================= */
+function showCompletion(){
+  const tc = totalCorrect();
+  $('completionMsg').innerHTML =
+    `¡Felicidades, <span class="hi">${esc(KID_NAME)}</span>! Respondiste las <b>${TOTAL_Q}</b> preguntas y acertaste <b>${tc}</b>.<br>Ahora puedes jugar el Jeopardy Final (opcional) o revisar tu reporte de estudio.`;
+  confettiBurst(); confettiBurst();
+  show('completionOverlay');
+}
+
+/* =========================================================
+   JEOPARDY FINAL
+   ========================================================= */
+function openFinal(){
+  if(answeredCount() < TOTAL_Q) return;
+  $('finalScoreShow').textContent = score;
+  const range = $('wagerRange');
+  range.max = Math.max(0, score);
+  range.value = 0;
+  wager = 0;
+  $('wagerAmt').textContent = 0;
+  $('wagerStep').classList.remove('hidden');
+  $('finalQStep').classList.add('hidden');
+  show('finalOverlay');
+}
+function updateWager(){
+  wager = parseInt($('wagerRange').value) || 0;
+  $('wagerAmt').textContent = wager;
+}
+function lockWager(){
+  $('wagerStep').classList.add('hidden');
+  $('finalQStep').classList.remove('hidden');
+  $('finalQText').textContent = FINAL.q;
+
+  finalShuffled = FINAL.opts.map((t,i)=>({text:t, correct:i===FINAL.correct}));
+  for(let k=finalShuffled.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[finalShuffled[k],finalShuffled[j]]=[finalShuffled[j],finalShuffled[k]];}
+
+  const box = $('finalOpts');
+  box.innerHTML = '';
+  finalShuffled.forEach((opt,idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${LETTERS[idx]}</span>${esc(opt.text)}`;
+    b.addEventListener('click', ()=>answerFinal(idx));
+    box.appendChild(b);
+  });
+  $('finalFeedback').className = 'feedback';
+  $('finalFeedback').innerHTML = '';
+  $('finalContinue').classList.add('hidden');
+}
+function answerFinal(idx){
+  const correctIdx = finalShuffled.findIndex(o=>o.correct);
+  const isRight = finalShuffled[idx].correct;
+  document.querySelectorAll('#finalOpts .opt').forEach((b,i)=>{
+    const clone = b.cloneNode(true);
+    if(i===correctIdx) clone.classList.add('correct');
+    if(i===idx && !isRight) clone.classList.add('wrong');
+    clone.classList.add('locked');
+    b.replaceWith(clone);
+  });
+  const fb = $('finalFeedback');
+  if(isRight){
+    score += wager;
+    fb.className = 'feedback ok show';
+    fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
+      <div class="line">Ganaste tu apuesta de <b>${wager} puntos</b>.</div>
+      <div class="line">${esc(FINAL.ex)}</div>`;
+    confettiBurst();
+  } else {
+    score = Math.max(0, score - wager);
+    fb.className = 'feedback bad show';
+    fb.innerHTML = `<h3>📚 Repaso</h3>
+      <div class="line">Apostaste <b>${wager} puntos</b> y esta vez no acertaste.</div>
+      <div class="line">${esc(FINAL.ex)}</div>
+      <div class="line correct-ans">✔ Respuesta correcta: ${esc(finalShuffled[correctIdx].text)}</div>`;
+  }
+  finalDone = true;
+  updateScoreboard();
+  saveProgress();
+  $('finalContinue').classList.remove('hidden');
+}
+function showEnd(){
+  hide('finalOverlay');
+  const tc = totalCorrect();
+  const pct = TOTAL_Q ? tc/TOTAL_Q : 0;
+  let medal='🎖️', title='', msg='';
+  if(pct >= 0.85){ medal='🏆'; title='¡CAMPEÓN!'; msg=`${KID_NAME}, dominas el tema casi a la perfección. ¡Estás listísimo para el examen!`; }
+  else if(pct >= 0.6){ medal='🥇'; title='¡MUY BIEN!'; msg=`${KID_NAME}, sabes mucho. Repasa los temas donde dudaste y serás imparable.`; }
+  else if(pct >= 0.35){ medal='🥈'; title='¡BUEN ESFUERZO!'; msg=`Vas por buen camino, ${KID_NAME}. Revisa los Repasos y tu reporte para subir tu puntaje.`; }
+  else { medal='📚'; title='¡A SEGUIR ESTUDIANDO!'; msg=`No te preocupes, ${KID_NAME}: cada Repaso te enseñó algo nuevo. ¡Revisa tu reporte y verás cómo mejoras!`; }
+  $('endMedal').textContent = medal;
+  $('endTitle').textContent = title;
+  $('endMsg').textContent = msg;
+  $('endScore').textContent = score;
+  show('endOverlay');
+  confettiBurst(); confettiBurst();
+}
+
+/* =========================================================
+   REPORTE DE ESTUDIO
+   ========================================================= */
+function openReport(){
+  const by = buildByCategory();
+  const attempted = [];
+  let html = '';
+
+  CATS.forEach((cat,ci)=>{
+    const rec = by[cat.name];
+    if(rec && rec.total>0){
+      const pct = Math.round(rec.correct/rec.total*100);
+      const cls = pct>=80 ? 'good' : (pct>=50 ? 'mid' : 'low');
+      attempted.push({ name:cat.name, icon:cat.icon, pct, ...rec, size:cat.q.length });
+      html += `
+        <div class="report-row">
+          <div class="top">
+            <span class="nm"><span class="ic">${cat.icon}</span>${esc(cat.name)}</span>
+            <span class="meta">${rec.total} / ${cat.q.length} resp. · <b style="color:var(--gold-hi)">${pct}%</b></span>
+          </div>
+          <div class="repbar"><i class="${cls}" style="width:${pct}%"></i></div>
+        </div>`;
+    } else {
+      html += `
+        <div class="report-row untried">
+          <div class="top">
+            <span class="nm"><span class="ic">${cat.icon}</span>${esc(cat.name)}</span>
+            <span class="meta">Sin intentar aún — ¡pruébala!</span>
+          </div>
+          <div class="repbar"><i class="mid" style="width:0%"></i></div>
+        </div>`;
+    }
+  });
+
+  // Mensaje de fortalezas / debilidades (solo entre las intentadas)
+  let msg = '';
+  if(attempted.length === 0){
+    msg = `¡Aún no respondes preguntas, ${esc(KID_NAME)}! Toca una categoría para empezar y aquí verás en qué eres fuerte. 💪`;
+  } else {
+    const maxPct = Math.max(...attempted.map(a=>a.pct));
+    const minPct = Math.min(...attempted.map(a=>a.pct));
+    const strong = attempted.filter(a=>a.pct===maxPct).map(a=>a.name);
+    const weak = attempted.filter(a=>a.pct===minPct).map(a=>a.name);
+    const fmt = (arr)=>arr.map(n=>esc(n)).join(', ');
+
+    if(maxPct === minPct){
+      msg = `¡Vas parejo, ${esc(KID_NAME)}! Llevas <b>${maxPct}%</b> de aciertos en lo que has intentado. Sigue respondiendo más categorías para descubrir tus súper poderes. 🌟`;
+    } else {
+      msg = `Tu punto más fuerte: <span class="strong">${fmt(strong)}</span> (${maxPct}% de aciertos). ¡Excelente, ${esc(KID_NAME)}! 🎉<br><br>
+        Lo que conviene repasar: <span class="weak">${fmt(weak)}</span> (${minPct}%). No te preocupes: vuelve a leer los Repasos de esa categoría y verás cómo mejoras. ¡Tú puedes! 💪`;
+    }
+  }
+  html += `<div class="report-msg">${msg}</div>`;
+
+  $('reportBody').innerHTML = html;
+  show('reportOverlay');
+}
+
+/* =========================================================
+   BORRAR PROGRESO (UPDATE a objeto vacío, NUNCA delete)
+   ========================================================= */
+async function eraseProgress(){
+  const emptyData = { answered:{}, score:0, byCategory:{}, finalDone:false, updatedAt:new Date().toISOString() };
+  const { error } = await supabase
+    .from('progress')
+    .upsert(
+      { user_id: USER_ID, subject: SUBJECT, data: emptyData, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,subject' }
+    );
+  if(error){ console.error('Error al borrar progreso:', error.message); }
+
+  // resetear estado en memoria
+  answered = {}; score = 0; streak = 0; finalDone = false;
+  currentCat = null; current = null; completionShown = false;
+  hide('eraseOverlay');
+  buildBoard();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
+function confettiBurst(){
+  const colors = ['#f4c95d','#37c46d','#2a31e0','#ffe19a','#ef5d5d','#ffffff'];
+  for(let i=0;i<26;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animation = `fall ${1.6+Math.random()*1.4}s linear forwards`;
+    c.style.animationDelay = (Math.random()*.3)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3400);
+  }
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+$('startBtn').addEventListener('click', ()=>{
+  $('startScreen').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildBoard();
+});
+$('qContinue').addEventListener('click', continueQuestion);
+$('finalBtn').addEventListener('click', openFinal);
+$('compFinalBtn').addEventListener('click', ()=>{ hide('completionOverlay'); openFinal(); });
+$('compReportBtn').addEventListener('click', ()=>{ hide('completionOverlay'); openReport(); });
+$('compCloseBtn').addEventListener('click', ()=>hide('completionOverlay'));
+$('wagerRange').addEventListener('input', updateWager);
+$('lockWagerBtn').addEventListener('click', lockWager);
+$('finalContinue').addEventListener('click', showEnd);
+$('endReportBtn').addEventListener('click', ()=>{ hide('endOverlay'); openReport(); });
+$('endCloseBtn').addEventListener('click', ()=>hide('endOverlay'));
+$('reportBtn').addEventListener('click', openReport);
+$('reportCloseBtn').addEventListener('click', ()=>hide('reportOverlay'));
+$('eraseBtn').addEventListener('click', ()=>show('eraseOverlay'));
+$('eraseCancelBtn').addEventListener('click', ()=>hide('eraseOverlay'));
+$('eraseConfirmBtn').addEventListener('click', eraseProgress);
+
+/* =========================================================
+   ARRANQUE / CONTROL DE ACCESO
+   ========================================================= */
+function setupAuthListener(loadedUserId){
+  supabase.auth.onAuthStateChange((event, session)=>{
+    if(event === 'SIGNED_OUT' || !session){
+      window.location.replace('../login.html');
+      return;
+    }
+    if(session.user.id !== loadedUserId){
+      window.location.replace('../login.html');
+    }
+  });
+}
+
+(async ()=>{
+  // Sesión requerida (Religión es gratis, pero NO se juega sin iniciar sesión).
+  const { data:{ user }, error } = await supabase.auth.getUser();
+  if(error || !user){
+    window.location.replace('../login.html');
+    return;
+  }
+  USER_ID = user.id;
+
+  // Nombre del estudiante (sin has_access: Religión es gratis).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('kid_name')
+    .eq('id', USER_ID)
+    .single();
+  const nm = (profile?.kid_name || '').trim();
+  KID_NAME = nm || 'estudiante';
+  $('playerName').textContent = (KID_NAME).toUpperCase();
+  $('greetName').textContent = KID_NAME;
+  $('scoreLbl').textContent = `Puntaje de ${KID_NAME}`;
+
+  // Restaurar progreso guardado.
+  await loadProgress();
+  if(answeredCount() >= TOTAL_Q) completionShown = true; // ya completó antes
+
+  // Revelar app.
+  $('loadingScreen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  // Si ya hay progreso, ir directo al tablero (saltar intro).
+  if(answeredCount() > 0){
+    $('startScreen').classList.add('hidden');
+    $('gameArea').classList.remove('hidden');
+    buildBoard();
+  } else {
+    $('startBtn').textContent = '¡Comenzar a jugar! 🎮';
+  }
+
+  setupAuthListener(USER_ID);
+})();
+</script>
+</body>
+</html>

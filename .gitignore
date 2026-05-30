@@ -12,3 +12,8 @@ node_modules/
 # One-time admin bootstrap (contains a real email; do not commit)
 promote.sql
 bootstrap.sql
+
+# Unprotected source copy of the religion game (replaced by public/games/religion.html)
+religion BASTIAN .html
+religion_BASTIAN_.html
+*BASTIAN*.html
