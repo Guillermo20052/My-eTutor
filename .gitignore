@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+
+# Environment / secrets
+.env
+.env.*
+*.local
+
+# One-time admin bootstrap (contains a real email; do not commit)
+promote.sql
+bootstrap.sql
