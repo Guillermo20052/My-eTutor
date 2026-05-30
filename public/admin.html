@@ -320,21 +320,40 @@
       // Live search (case-insensitive, client-side over the cached list).
       searchEl.addEventListener("input", () => renderRows(searchEl.value));
 
+      // Fix A: stale tabs self-correct when the session changes.
+      function setupAuthListener(loadedUserId) {
+        supabase.auth.onAuthStateChange((event, session) => {
+          // Signed out or no session anywhere -> back to login.
+          if (event === "SIGNED_OUT" || !session) {
+            window.location.replace("./login.html");
+            return;
+          }
+          // Active account changed (switched in another tab) -> clean reload via login.
+          if (session.user.id !== loadedUserId) {
+            window.location.replace("./login.html");
+          }
+        });
+      }
+
       // ---------- Boot / access control ----------
       (async () => {
+        // Fix B: validate against the server; don't trust the cached session.
         const {
-          data: { session },
-        } = await supabase.auth.getSession();
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
 
-        if (!session) {
+        if (userError || !user) {
           window.location.replace("./login.html");
           return;
         }
 
+        const userId = user.id;
+
         const { data: me } = await supabase
           .from("profiles")
           .select("is_admin")
-          .eq("id", session.user.id)
+          .eq("id", userId)
           .single();
 
         // Never render admin UI to non-admins.
@@ -347,6 +366,9 @@
 
         loadingEl.hidden = true;
         appEl.hidden = false;
+
+        // Start reacting to session changes only after a successful load.
+        setupAuthListener(userId);
       })();
     </script>
   </body>

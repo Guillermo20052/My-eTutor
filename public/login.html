@@ -83,12 +83,25 @@
       const messageText = document.getElementById("message-text");
       const submitBtn = document.getElementById("submit-btn");
 
-      // Si ya hay sesión activa, ir directo al panel.
+      // Enviar al panel según el rol (admin -> admin.html, estudiante -> dashboard.html).
+      async function routeByRole(userId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", userId)
+          .single();
+        window.location.replace(
+          profile?.is_admin === true ? "./admin.html" : "./dashboard.html"
+        );
+      }
+
+      // Si ya hay sesión activa (validada con el servidor), ir directo al panel por rol.
       (async () => {
         const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session) window.location.replace("./dashboard.html");
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
+        if (!error && user) await routeByRole(user.id);
       })();
 
       function showMessage(text, type) {
@@ -127,7 +140,7 @@
         submitBtn.disabled = true;
         submitBtn.textContent = "Entrando...";
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -142,7 +155,8 @@
           return;
         }
 
-        window.location.replace("./dashboard.html");
+        // Enrutar directamente según el rol (sin pasar por el dashboard).
+        await routeByRole(data.user.id);
       });
     </script>
   </body>

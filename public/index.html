@@ -35,10 +35,14 @@
 
       (async () => {
         try {
+          // Validar contra el servidor (no confiar solo en la sesión en caché).
           const {
-            data: { session },
-          } = await supabase.auth.getSession();
-          window.location.replace(session ? "./dashboard.html" : "./login.html");
+            data: { user },
+            error,
+          } = await supabase.auth.getUser();
+          window.location.replace(
+            !error && user ? "./dashboard.html" : "./login.html"
+          );
         } catch (e) {
           // Si algo falla al verificar la sesión, ir a iniciar sesión.
           window.location.replace("./login.html");

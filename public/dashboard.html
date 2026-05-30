@@ -179,17 +179,34 @@
         }
       }
 
-      (async () => {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+      // Fix A: stale tabs self-correct when the session changes.
+      function setupAuthListener(loadedUserId) {
+        supabase.auth.onAuthStateChange((event, session) => {
+          // Signed out or no session anywhere -> back to login.
+          if (event === "SIGNED_OUT" || !session) {
+            window.location.replace("./login.html");
+            return;
+          }
+          // Active account changed (switched in another tab) -> clean reload via login.
+          if (session.user.id !== loadedUserId) {
+            window.location.replace("./login.html");
+          }
+        });
+      }
 
-        if (!session) {
+      (async () => {
+        // Fix B: validate against the server; don't trust the cached session.
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError || !user) {
           window.location.replace("./login.html");
           return;
         }
 
-        const userId = session.user.id;
+        const userId = user.id;
 
         // Fetch this user's profile (kid_name + has_access + is_admin).
         const { data: profile } = await supabase
@@ -222,6 +239,9 @@
 
         loadingEl.hidden = true;
         appEl.hidden = false;
+
+        // Start reacting to session changes only after a successful load.
+        setupAuthListener(userId);
       })();
     </script>
   </body>
