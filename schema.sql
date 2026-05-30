@@ -196,3 +196,92 @@ create trigger on_auth_user_created
 -- NOT part of the schema. It lives in promote.sql (gitignored) since it
 -- is a manual bootstrap step. Run promote.sql once in the SQL Editor.
 -- ---------------------------------------------------------------------
+
+
+-- ---------------------------------------------------------------------
+-- 8. CROSS-SUBJECT LEADERBOARD
+--    A privacy-safe, read-only ranking of every NON-admin student by
+--    their total score summed across ALL of their progress rows.
+--    This section only ADDS objects; it does not alter the tables,
+--    RLS policies, or triggers defined above.
+-- ---------------------------------------------------------------------
+
+-- 8a. Privacy-safe display-name derivation.
+--     "Guillermo Guadarrama Patuel" -> "Guillermo G."
+--     "Maria"                       -> "Maria"
+--     null / empty / whitespace     -> "Estudiante"
+--     This is a PURE function of its text input: it never touches any
+--     table, so it cannot leak anything. SECURITY INVOKER (the default).
+create or replace function public.derive_display_name(p_name text)
+returns text
+language sql
+immutable
+as $$
+  select case
+    when p_name is null or btrim(p_name) = '' then 'Estudiante'
+    else
+      (regexp_split_to_array(btrim(p_name), '\s+'))[1]
+      || case
+           when array_length(regexp_split_to_array(btrim(p_name), '\s+'), 1) >= 2
+             then ' '
+               || upper(left((regexp_split_to_array(btrim(p_name), '\s+'))[2], 1))
+               || '.'
+           else ''
+         end
+  end;
+$$;
+
+-- 8b. The leaderboard VIEW.
+--     - One row per NON-admin student (admins excluded via is_admin).
+--     - LEFT JOIN to progress so a student with NO progress rows still
+--       appears with total_points = 0 (chosen behavior: everyone shows).
+--     - total_points = SUM over the student's progress rows of the
+--       numeric "score" in data->>'score', treating a missing key or a
+--       non-numeric value as 0 (the regex guard avoids cast errors).
+--     - rank() computed in SQL, ordered by total_points desc.
+--
+--     SECURITY MODEL: this is an ordinary view (security_invoker = false,
+--     i.e. it runs with the OWNER's rights). That is intentional and
+--     required: it lets the view read ALL students' rows (the profiles
+--     RLS would otherwise restrict a caller to only their own row, which
+--     would defeat a leaderboard). It CANNOT leak private data because a
+--     view is a fixed projection: the object only has the four columns
+--     below, so parent_email / full kid_name / has_access / is_admin are
+--     simply not selectable through it.
+drop view if exists public.leaderboard;
+create view public.leaderboard
+with (security_invoker = false)
+as
+with totals as (
+  select
+    p.id                                as user_id,
+    public.derive_display_name(p.kid_name) as display_name,
+    coalesce(
+      sum(
+        case
+          when pr.data ->> 'score' ~ '^[+-]?[0-9]+(\.[0-9]+)?$'
+            then (pr.data ->> 'score')::numeric
+          else 0
+        end
+      ),
+      0
+    )                                   as total_points
+  from public.profiles p
+  left join public.progress pr on pr.user_id = p.id
+  where p.is_admin is not true            -- exclude admin accounts
+  group by p.id, p.kid_name
+)
+select
+  user_id,
+  display_name,
+  total_points,
+  rank() over (order by total_points desc) as rank
+from totals;
+
+-- 8c. Grants: authenticated users may read it; anonymous users may not.
+--     Revoke any default-granted access first, then grant only SELECT
+--     to the authenticated role. (anon is never granted, so logged-out
+--     visitors cannot read the leaderboard.)
+revoke all on public.leaderboard from public;
+revoke all on public.leaderboard from anon;
+grant select on public.leaderboard to authenticated;

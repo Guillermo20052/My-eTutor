@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tabla de Posiciones · My eTutor</title>
+    <link rel="stylesheet" href="./css/theme.css" />
+    <style>
+      /* ---------- Leaderboard-only layout (not in theme.css) ---------- */
+      .topbar .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+      .topbar .btn{font-size:.92rem;padding:9px 16px}
+
+      .hero{text-align:center;margin:6px 0 18px}
+      .hero h1{font-size:clamp(1.7rem,5vw,2.6rem);color:var(--navy);font-weight:700;letter-spacing:-.01em}
+      .hero h1 .pop{color:var(--blue)}
+      .hero p{color:var(--soft);font-weight:700;margin-top:6px;font-size:1.02rem}
+
+      /* Sticky "your place" banner */
+      .myplace{
+        position:sticky;top:8px;z-index:20;margin:0 0 16px;
+        background:linear-gradient(145deg,var(--blue),var(--blue-d));color:#fff;
+        border-radius:18px;padding:14px 18px;box-shadow:var(--shadow);
+        display:flex;align-items:center;justify-content:center;gap:10px;
+        text-align:center;flex-wrap:wrap;
+      }
+      .myplace .lbl{font-weight:800;font-size:1rem;opacity:.95}
+      .myplace .big{font-family:'Fredoka';font-weight:700;font-size:1.5rem}
+      .myplace .pts{font-weight:800;font-size:.95rem;opacity:.95}
+
+      /* Podium (top 3) */
+      .podium{
+        display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+        align-items:end;margin-bottom:18px;
+      }
+      .pod{
+        position:relative;background:var(--card);border:1px solid var(--line);
+        border-radius:18px;padding:16px 8px 14px;text-align:center;
+        box-shadow:var(--shadow-sm);
+      }
+      .pod .medal{font-size:2rem;line-height:1;display:block}
+      .pod .nm{font-family:'Fredoka';font-weight:600;color:var(--navy);font-size:.98rem;margin-top:8px;line-height:1.15;word-break:break-word}
+      .pod .pt{margin-top:6px;font-weight:900;color:var(--blue-d);font-size:1.05rem}
+      .pod .pt small{font-weight:800;color:var(--soft);font-size:.7rem;display:block}
+      /* 1st place taller + golden, on the middle column */
+      .pod.p1{order:2;border-color:var(--gold);background:linear-gradient(180deg,#fffaf0,#fff)}
+      .pod.p1 .medal{font-size:2.6rem}
+      .pod.p1 .pad{height:18px}
+      .pod.p2{order:1}
+      .pod.p3{order:3}
+      .pod .rk{
+        position:absolute;top:8px;left:8px;font-family:'Fredoka';font-weight:700;
+        color:var(--soft);font-size:.8rem;background:var(--sky);border:1px solid var(--line);
+        border-radius:999px;min-width:24px;height:24px;display:grid;place-items:center;padding:0 6px;
+      }
+      .pod.me{outline:3px solid var(--green);outline-offset:2px}
+
+      /* Full ranked list */
+      .list{display:flex;flex-direction:column;gap:8px}
+      .row{
+        display:flex;align-items:center;gap:12px;background:var(--card);
+        border:1px solid var(--line);border-radius:14px;padding:11px 14px;
+        box-shadow:var(--shadow-sm);
+      }
+      .row .pos{
+        font-family:'Fredoka';font-weight:700;color:var(--navy);font-size:1.05rem;
+        min-width:42px;text-align:center;
+      }
+      .row .who{flex:1;min-width:0}
+      .row .who .nm{font-weight:800;color:var(--ink);font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .row .who .tag{
+        display:inline-block;margin-top:2px;font-size:.66rem;font-weight:900;
+        color:#fff;background:var(--green);padding:2px 8px;border-radius:999px;letter-spacing:.02em;
+      }
+      .row .pts{font-weight:900;color:var(--blue-d);font-size:1.05rem;white-space:nowrap}
+      .row .pts small{font-weight:800;color:var(--soft);font-size:.66rem;margin-left:3px}
+      /* Highlight the current user wherever they fall */
+      .row.me{
+        border:2.5px solid var(--green);background:#effaf4;
+        box-shadow:0 8px 18px -10px rgba(28,158,106,.7);
+      }
+      .row.me .pos{color:var(--green)}
+
+      .empty{
+        text-align:center;color:var(--soft);font-weight:800;
+        padding:40px 16px;background:var(--card);border:1px dashed var(--line);
+        border-radius:18px;box-shadow:var(--shadow-sm);
+      }
+
+      .loader{
+        min-height:70vh;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:16px;text-align:center;
+      }
+      .loader .brand{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);font-size:1.6rem}
+      .loader .brand span{color:var(--blue)}
+      .loader .msg{color:var(--soft);font-weight:800}
+      .spinner{
+        width:38px;height:38px;border-radius:50%;
+        border:4px solid var(--line);border-top-color:var(--blue);
+        animation:spin .8s linear infinite;
+      }
+      @keyframes spin{to{transform:rotate(360deg)}}
+
+      @media (max-width:420px){
+        .pod .nm{font-size:.86rem}
+        .pod .medal{font-size:1.7rem}
+        .pod.p1 .medal{font-size:2.1rem}
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading state (shown until session + data are resolved) -->
+    <div class="wrap" id="loading">
+      <div class="loader">
+        <div class="brand">My <span>eTutor</span></div>
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="msg">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- App (revealed after data loads) -->
+    <div class="wrap" id="app" hidden>
+      <header class="topbar">
+        <div class="brandtxt">
+          <div class="t">My eTutor</div>
+          <div class="s">Aprende jugando</div>
+        </div>
+        <div class="right">
+          <a class="btn ghost" href="./dashboard.html">Volver al inicio</a>
+          <button class="btn ghost" id="logout-btn">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h1>🏆 Tabla de <span class="pop">Posiciones</span></h1>
+        <p>Tus puntos de todas las materias, sumados.</p>
+      </section>
+
+      <!-- Sticky "your place" banner (filled in JS) -->
+      <div class="myplace" id="myplace" hidden></div>
+
+      <!-- Podium for the top 3 (filled in JS) -->
+      <section class="podium" id="podium" hidden></section>
+
+      <!-- Full ranked list (filled in JS) -->
+      <section class="list" id="list"></section>
+    </div>
+
+    <script type="module">
+      import { supabase } from "./js/supabase.js";
+
+      const loadingEl = document.getElementById("loading");
+      const appEl = document.getElementById("app");
+      const myplaceEl = document.getElementById("myplace");
+      const podiumEl = document.getElementById("podium");
+      const listEl = document.getElementById("list");
+
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        await supabase.auth.signOut();
+        window.location.replace("./login.html");
+      });
+
+      // Stale tabs self-correct when the session changes (same pattern as dashboard).
+      function setupAuthListener(loadedUserId) {
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === "SIGNED_OUT" || !session) {
+            window.location.replace("./login.html");
+            return;
+          }
+          if (session.user.id !== loadedUserId) {
+            window.location.replace("./login.html");
+          }
+        });
+      }
+
+      function fmtPoints(n) {
+        const v = Number(n) || 0;
+        // Show as integer when whole, else trim trailing zeros.
+        return Number.isInteger(v) ? String(v) : String(v);
+      }
+
+      function renderPodium(top, myId) {
+        // top: up to 3 rows already sorted by rank asc.
+        podiumEl.innerHTML = "";
+        if (!top.length) {
+          podiumEl.hidden = true;
+          return;
+        }
+        const medalByRank = { 1: "🥇", 2: "🥈", 3: "🥉" };
+        top.slice(0, 3).forEach((r) => {
+          const el = document.createElement("div");
+          el.className = "pod p" + r.rank + (r.user_id === myId ? " me" : "");
+          el.innerHTML = `
+            <span class="rk">#${r.rank}</span>
+            ${r.rank === 1 ? '<span class="pad"></span>' : ""}
+            <span class="medal">${medalByRank[r.rank] || "🏅"}</span>
+            <div class="nm">${escapeHtml(r.display_name)}</div>
+            <div class="pt">${fmtPoints(r.total_points)}<small>puntos</small></div>
+          `;
+          podiumEl.appendChild(el);
+        });
+        podiumEl.hidden = false;
+      }
+
+      function renderList(rows, myId) {
+        listEl.innerHTML = "";
+        // The full list shows EVERYONE (including the top 3 again) so the
+        // ranking reads top-to-bottom without gaps.
+        for (const r of rows) {
+          const isMe = r.user_id === myId;
+          const el = document.createElement("div");
+          el.className = "row" + (isMe ? " me" : "");
+          el.innerHTML = `
+            <div class="pos">#${r.rank}</div>
+            <div class="who">
+              <div class="nm">${escapeHtml(r.display_name)}</div>
+              ${isMe ? '<span class="tag">¡Tú!</span>' : ""}
+            </div>
+            <div class="pts">${fmtPoints(r.total_points)}<small>pts</small></div>
+          `;
+          listEl.appendChild(el);
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        }[c]));
+      }
+
+      (async () => {
+        // Validate against the server; don't trust the cached session.
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError || !user) {
+          window.location.replace("./login.html");
+          return;
+        }
+
+        const myId = user.id;
+
+        // Read ONLY the safe leaderboard view.
+        const { data: rows, error } = await supabase
+          .from("leaderboard")
+          .select("*")
+          .order("rank", { ascending: true });
+
+        const ranking = !error && Array.isArray(rows) ? rows : [];
+
+        if (!ranking.length) {
+          // No scores yet anywhere — still a valid, non-broken page.
+          myplaceEl.hidden = true;
+          podiumEl.hidden = true;
+          listEl.innerHTML =
+            '<div class="empty">Aún no hay puntajes. ¡Juega una materia para aparecer aquí! 🎮</div>';
+        } else {
+          const total = ranking.length;
+          const mine = ranking.find((r) => r.user_id === myId);
+
+          // Sticky banner: where the current user falls (always show them).
+          if (mine) {
+            myplaceEl.innerHTML = `
+              <span class="lbl">Tu lugar:</span>
+              <span class="big">#${mine.rank} de ${total}</span>
+              <span class="pts">· ${fmtPoints(mine.total_points)} puntos</span>
+            `;
+          } else {
+            // Edge case: the view didn't include this student yet.
+            myplaceEl.innerHTML = `
+              <span class="lbl">Tu lugar:</span>
+              <span class="big">Sin clasificar</span>
+              <span class="pts">· 0 puntos — ¡juega para entrar!</span>
+            `;
+          }
+          myplaceEl.hidden = false;
+
+          renderPodium(ranking.slice(0, 3), myId);
+          renderList(ranking, myId);
+        }
+
+        loadingEl.hidden = true;
+        appEl.hidden = false;
+
+        setupAuthListener(myId);
+      })();
+    </script>
+  </body>
+</html>

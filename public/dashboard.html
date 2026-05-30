@@ -67,6 +67,33 @@
         background:var(--sky);border:1px dashed var(--line);border-radius:14px;
         padding:14px 16px;color:var(--ink);font-weight:700;text-align:left;
       }
+
+      /* ---------- Leaderboard widget ---------- */
+      .lb-widget{margin-top:22px}
+      .lb-widget .lb-head{
+        display:flex;align-items:center;justify-content:space-between;
+        gap:10px;flex-wrap:wrap;margin-bottom:12px;
+      }
+      .lb-widget .lb-title{
+        font-family:'Fredoka';font-weight:700;color:var(--navy);font-size:1.2rem;
+        display:flex;align-items:center;gap:8px;
+      }
+      .lb-widget .lb-rank{
+        font-weight:900;color:#fff;background:linear-gradient(145deg,var(--blue),var(--blue-d));
+        border-radius:999px;padding:6px 14px;font-size:.95rem;white-space:nowrap;
+      }
+      .lb-top{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+      .lb-row{
+        display:flex;align-items:center;gap:10px;background:var(--sky);
+        border:1px solid var(--line);border-radius:12px;padding:9px 12px;
+      }
+      .lb-row .m{font-size:1.3rem;line-height:1;width:26px;text-align:center}
+      .lb-row .nm{flex:1;min-width:0;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .lb-row .pt{font-weight:900;color:var(--blue-d);white-space:nowrap}
+      .lb-row .pt small{font-weight:800;color:var(--soft);font-size:.66rem;margin-left:3px}
+      .lb-row.me{border:2px solid var(--green);background:#effaf4}
+      .lb-empty{color:var(--soft);font-weight:800;text-align:center;padding:14px 6px}
+      .lb-widget .btn{width:100%;justify-content:center}
     </style>
   </head>
   <body>
@@ -101,6 +128,16 @@
       </section>
 
       <section class="grid" id="subjects"></section>
+
+      <!-- Leaderboard widget (hidden until/unless it has data) -->
+      <section class="card lb-widget" id="lb-widget" hidden style="--ac:var(--gold)">
+        <div class="lb-head">
+          <div class="lb-title">🏆 Tabla de Posiciones</div>
+          <div class="lb-rank" id="lb-rank" hidden></div>
+        </div>
+        <div class="lb-top" id="lb-top"></div>
+        <a class="btn primary" href="./leaderboard.html">Ver tabla completa</a>
+      </section>
     </div>
 
     <!-- Locked modal -->
@@ -179,6 +216,63 @@
         }
       }
 
+      // Leaderboard widget: reads ONLY the safe leaderboard view, and
+      // fails closed (stays hidden / shows a gentle message) on any error
+      // so it can never break the rest of the dashboard.
+      async function loadLeaderboardWidget(userId) {
+        const widgetEl = document.getElementById("lb-widget");
+        const rankEl = document.getElementById("lb-rank");
+        const topEl = document.getElementById("lb-top");
+        const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+        try {
+          const { data: rows, error } = await supabase
+            .from("leaderboard")
+            .select("*")
+            .order("rank", { ascending: true });
+
+          if (error || !Array.isArray(rows) || rows.length === 0) {
+            // No data yet -> keep the dashboard intact, hide the widget.
+            widgetEl.hidden = true;
+            return;
+          }
+
+          const total = rows.length;
+          const mine = rows.find((r) => r.user_id === userId);
+
+          if (mine) {
+            rankEl.textContent = `Tu lugar: #${mine.rank} de ${total}`;
+            rankEl.hidden = false;
+          } else {
+            rankEl.hidden = true;
+          }
+
+          topEl.innerHTML = "";
+          for (const r of rows.slice(0, 3)) {
+            const row = document.createElement("div");
+            row.className = "lb-row" + (r.user_id === userId ? " me" : "");
+            const pts = Number(r.total_points) || 0;
+            row.innerHTML = `
+              <span class="m">${medals[r.rank] || "🏅"}</span>
+              <span class="nm">${escapeHtml(r.display_name)}</span>
+              <span class="pt">${pts}<small>pts</small></span>
+            `;
+            topEl.appendChild(row);
+          }
+
+          widgetEl.hidden = false;
+        } catch (_e) {
+          // Network/parse failure -> never break the dashboard.
+          widgetEl.hidden = true;
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        }[c]));
+      }
+
       // Fix A: stale tabs self-correct when the session changes.
       function setupAuthListener(loadedUserId) {
         supabase.auth.onAuthStateChange((event, session) => {
@@ -239,6 +333,10 @@
 
         loadingEl.hidden = true;
         appEl.hidden = false;
+
+        // Load the leaderboard widget without blocking the dashboard reveal.
+        // (Students only; admins already redirected to admin.html above.)
+        loadLeaderboardWidget(userId);
 
         // Start reacting to session changes only after a successful load.
         setupAuthListener(userId);
