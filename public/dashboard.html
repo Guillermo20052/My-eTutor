@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel · My eTutor</title>
+    <link rel="stylesheet" href="./css/theme.css" />
+    <style>
+      /* ---------- Dashboard-only layout (not in theme.css) ---------- */
+      .player{
+        display:flex;align-items:center;gap:10px;background:var(--sky);
+        border:1px solid var(--line);padding:6px 12px 6px 6px;border-radius:999px;
+      }
+      .avatar{
+        width:34px;height:34px;border-radius:50%;
+        background:linear-gradient(145deg,var(--blue),var(--navy));color:#fff;
+        display:grid;place-items:center;font-family:'Fredoka';font-weight:700;
+        font-size:1.05rem;box-shadow:inset 0 -2px 4px rgba(0,0,0,.2);
+      }
+      .player .pn{font-weight:800;color:var(--navy);font-size:.95rem}
+      .topbar .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+      .topbar .btn{font-size:.92rem;padding:9px 16px}
+
+      .hero{text-align:center;margin:8px 0 22px}
+      .hero h1{font-size:clamp(1.7rem,5vw,2.6rem);color:var(--navy);font-weight:700;letter-spacing:-.01em}
+      .hero h1 .pop{color:var(--blue)}
+      .hero p{color:var(--soft);font-weight:700;margin-top:6px;font-size:1.02rem}
+
+      .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+      .subject{text-align:left}
+      .subject .ic{font-size:2rem;line-height:1;display:block;margin:4px 0 10px}
+      .subject h3{font-size:1.05rem;color:var(--navy);font-weight:600;line-height:1.12}
+      .subject .tag{
+        display:inline-block;margin-top:10px;font-size:.68rem;font-weight:800;
+        color:var(--blue-d);background:var(--sky);padding:3px 8px;border-radius:999px;
+      }
+
+      /* Locked state: dimmed preview + lock overlay */
+      .subject.locked{cursor:pointer}
+      .subject.locked .ic,
+      .subject.locked h3,
+      .subject.locked .tag{opacity:.45;filter:grayscale(.3)}
+      .subject.locked::after{
+        content:"🔒";position:absolute;top:10px;right:10px;font-size:1.15rem;
+        background:#fff;border:1px solid var(--line);border-radius:10px;
+        width:30px;height:30px;display:grid;place-items:center;
+        box-shadow:var(--shadow-sm);opacity:1;filter:none;
+      }
+      .subject.locked:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow-sm)}
+
+      .loader{
+        min-height:70vh;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:16px;text-align:center;
+      }
+      .loader .brand{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);font-size:1.6rem}
+      .loader .brand span{color:var(--blue)}
+      .loader .msg{color:var(--soft);font-weight:800}
+      .spinner{
+        width:38px;height:38px;border-radius:50%;
+        border:4px solid var(--line);border-top-color:var(--blue);
+        animation:spin .8s linear infinite;
+      }
+      @keyframes spin{to{transform:rotate(360deg)}}
+
+      .modalbox .hint{font-size:.85rem;color:var(--soft);font-weight:700;margin-top:14px}
+      .payinfo{
+        background:var(--sky);border:1px dashed var(--line);border-radius:14px;
+        padding:14px 16px;color:var(--ink);font-weight:700;text-align:left;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading state (shown until session + profile are resolved) -->
+    <div class="wrap" id="loading">
+      <div class="loader">
+        <div class="brand">My <span>eTutor</span></div>
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="msg">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- App (revealed after data loads) -->
+    <div class="wrap" id="app" hidden>
+      <header class="topbar">
+        <div class="brandtxt">
+          <div class="t">My eTutor</div>
+          <div class="s">Aprende jugando</div>
+        </div>
+        <div class="right">
+          <div class="player">
+            <div class="avatar" id="avatar">?</div>
+            <div class="pn" id="player-name">Estudiante</div>
+          </div>
+          <button class="btn ghost" id="logout-btn">Cerrar sesión</button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h1 id="greeting">¡Hola!</h1>
+        <p>Elige una materia para estudiar jugando.</p>
+      </section>
+
+      <section class="grid" id="subjects"></section>
+    </div>
+
+    <!-- Locked modal -->
+    <div class="modal" id="locked-modal">
+      <div class="modalbox">
+        <div class="mi">🔒</div>
+        <h3>¿Cómo obtengo acceso?</h3>
+        <div class="payinfo">
+          <!-- ===== PAYMENT INSTRUCTIONS — EDIT THIS LATER ===== -->
+          (TODO: payment text goes here)
+          <!-- ===== END PAYMENT INSTRUCTIONS ===== -->
+        </div>
+        <p class="hint">Actualiza la página después de obtener acceso.</p>
+        <div class="mbtns">
+          <button class="btn ghost" id="close-modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { supabase } from "./js/supabase.js";
+
+      // Adding a subject later = one line in this array.
+      const SUBJECTS = [
+        { id: "religion",    name: "Religión",    icon: "✝️", accent: "#7C3AED", free: true  },
+        { id: "matematicas", name: "Matemáticas", icon: "🔢", accent: "#1f8fd0", free: false },
+        { id: "ingles",      name: "Inglés",      icon: "🔤", accent: "#0E9F6E", free: false },
+      ];
+
+      const loadingEl = document.getElementById("loading");
+      const appEl = document.getElementById("app");
+      const subjectsEl = document.getElementById("subjects");
+      const modalEl = document.getElementById("locked-modal");
+
+      function openModal() {
+        modalEl.classList.add("on");
+      }
+      function closeModal() {
+        modalEl.classList.remove("on");
+      }
+      document.getElementById("close-modal").addEventListener("click", closeModal);
+      modalEl.addEventListener("click", (e) => {
+        if (e.target === modalEl) closeModal();
+      });
+
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        await supabase.auth.signOut();
+        window.location.replace("./login.html");
+      });
+
+      function renderSubjects(hasAccess) {
+        subjectsEl.innerHTML = "";
+        for (const subj of SUBJECTS) {
+          // A card is UNLOCKED if the subject is free OR the user has access.
+          const unlocked = subj.free === true || hasAccess === true;
+
+          const card = document.createElement("div");
+          card.className = "card subject" + (unlocked ? "" : " locked");
+          card.style.setProperty("--ac", subj.accent);
+          card.innerHTML = `
+            <span class="ic">${subj.icon}</span>
+            <h3>${subj.name}</h3>
+            <span class="tag">${subj.free ? "Gratis" : unlocked ? "Disponible" : "Bloqueado"}</span>
+          `;
+
+          if (unlocked) {
+            card.addEventListener("click", () => {
+              window.location.href = `./games/${subj.id}.html`;
+            });
+          } else {
+            // Locked: clicking does NOT navigate, it opens the modal.
+            card.addEventListener("click", openModal);
+          }
+
+          subjectsEl.appendChild(card);
+        }
+      }
+
+      (async () => {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          window.location.replace("./login.html");
+          return;
+        }
+
+        const userId = session.user.id;
+
+        // Fetch this user's profile (kid_name + has_access).
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("kid_name, has_access")
+          .eq("id", userId)
+          .single();
+
+        const kidName = (profile?.kid_name || "").trim();
+        const hasAccess = profile?.has_access === true;
+
+        // Greeting: never render "¡Hola, !"
+        document.getElementById("greeting").innerHTML = kidName
+          ? `¡Hola, <span class="pop">${kidName}</span>!`
+          : "¡Hola!";
+
+        // Player pill
+        document.getElementById("player-name").textContent = kidName || "Estudiante";
+        document.getElementById("avatar").textContent = kidName
+          ? kidName.charAt(0).toUpperCase()
+          : "?";
+
+        renderSubjects(hasAccess);
+
+        loadingEl.hidden = true;
+        appEl.hidden = false;
+      })();
+    </script>
+  </body>
+</html>
