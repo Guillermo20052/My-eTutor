@@ -48,27 +48,50 @@
       .hero h1 .pop{color:var(--blue)}
       .hero p{color:var(--soft);font-weight:700;margin-top:6px;font-size:1.02rem}
 
-      .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-      .subject{text-align:left}
-      .subject .ic{font-size:2rem;line-height:1;display:block;margin:4px 0 10px}
-      .subject h3{font-size:1.05rem;color:var(--navy);font-weight:600;line-height:1.12}
-      .subject .tag{
-        display:inline-block;margin-top:10px;font-size:.68rem;font-weight:800;
-        color:var(--blue-d);background:var(--sky);padding:3px 8px;border-radius:999px;
+      /* Big, game-like subject tiles, centered to fill the page. */
+      .grid{
+        display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+        max-width:880px;margin:6px auto 0;min-height:52vh;align-content:center;
       }
+      .subject{
+        text-align:center;cursor:pointer;border-radius:24px;
+        min-height:250px;padding:30px 22px 26px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+      }
+      .subject .ic{
+        font-size:4rem;line-height:1;display:block;margin:0 0 8px;
+        filter:drop-shadow(0 6px 12px rgba(13,52,92,.18));
+        transition:transform .16s ease;
+      }
+      .subject h3{font-size:1.5rem;color:var(--navy);font-weight:700;line-height:1.12}
+      .subject .desc{color:var(--soft);font-weight:700;font-size:.95rem;margin-top:3px}
+      .subject .tag{
+        display:inline-block;margin-top:16px;font-size:.8rem;font-weight:800;
+        color:var(--blue-d);background:var(--sky);padding:6px 14px;border-radius:999px;
+        border:1px solid var(--line);
+      }
+      /* Extra-fun hover lift for kids. */
+      .subject:hover{transform:translateY(-8px) scale(1.03)}
+      .subject:hover .ic{transform:scale(1.08) rotate(-3deg)}
 
-      /* Locked state: dimmed preview + lock overlay */
-      .subject.locked{cursor:pointer}
+      /* Locked state: dimmed preview + lock overlay (scaled up for big tiles) */
       .subject.locked .ic,
       .subject.locked h3,
+      .subject.locked .desc,
       .subject.locked .tag{opacity:.45;filter:grayscale(.3)}
       .subject.locked::after{
-        content:"🔒";position:absolute;top:10px;right:10px;font-size:1.15rem;
-        background:#fff;border:1px solid var(--line);border-radius:10px;
-        width:30px;height:30px;display:grid;place-items:center;
+        content:"🔒";position:absolute;top:12px;right:12px;font-size:1.4rem;
+        background:#fff;border:1px solid var(--line);border-radius:12px;
+        width:40px;height:40px;display:grid;place-items:center;
         box-shadow:var(--shadow-sm);opacity:1;filter:none;
       }
       .subject.locked:hover{transform:none;border-color:var(--line);box-shadow:var(--shadow-sm)}
+      .subject.locked:hover .ic{transform:none}
+
+      @media (max-width:680px){
+        .grid{grid-template-columns:1fr;gap:18px;max-width:440px;min-height:0}
+        .subject{min-height:200px}
+      }
 
       .loader{
         min-height:70vh;display:flex;flex-direction:column;
@@ -156,9 +179,9 @@
 
       // Adding a subject later = one line in this array.
       const SUBJECTS = [
-        { id: "religion",    name: "Religión",    icon: "✝️", accent: "#7C3AED", free: true  },
-        { id: "matematicas", name: "Matemáticas", icon: "🔢", accent: "#1f8fd0", free: false },
-        { id: "ingles",      name: "Inglés",      icon: "🔤", accent: "#0E9F6E", free: false },
+        { id: "religion",    name: "Religión",    icon: "✝️", accent: "#7C3AED", free: true,  desc: "Los sacramentos"  },
+        { id: "matematicas", name: "Matemáticas", icon: "🔢", accent: "#1f8fd0", free: false, desc: "Practica y juega"  },
+        { id: "ingles",      name: "Inglés",      icon: "🔤", accent: "#0E9F6E", free: false, desc: "Practice English" },
       ];
 
       const loadingEl = document.getElementById("loading");
@@ -194,6 +217,7 @@
           card.innerHTML = `
             <span class="ic">${subj.icon}</span>
             <h3>${subj.name}</h3>
+            ${subj.desc ? `<span class="desc">${subj.desc}</span>` : ""}
             <span class="tag">${subj.free ? "Gratis" : unlocked ? "Disponible" : "Bloqueado"}</span>
           `;
 
