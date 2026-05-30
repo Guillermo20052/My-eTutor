@@ -126,33 +126,45 @@
   .bar > i{display:block; height:100%; width:0%; border-radius:999px;
     background:linear-gradient(90deg,var(--green),var(--gold)); transition:width .5s cubic-bezier(.2,.8,.2,1);}
 
-  /* ---------- CATEGORY CARDS ---------- */
-  .cat-grid{
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px;
+  /* ---------- JEOPARDY BOARD ---------- */
+  .board-scroll{overflow-x:auto; padding-bottom:8px; border-radius:18px;}
+  .board{
+    min-width:860px;
+    display:grid; grid-template-columns:repeat(6,1fr); gap:10px;
+    align-items:start;
+    padding:12px; border-radius:18px;
+    background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.05));
+    border:2px solid rgba(0,0,0,.4);
+    box-shadow:0 14px 40px rgba(0,0,0,.4);
   }
-  .cat-card{
-    cursor:pointer; text-align:left; position:relative; overflow:hidden;
+  .col{display:flex; flex-direction:column; gap:10px;}
+  .cat-head{
+    font-family:'Anton',sans-serif; font-weight:400;
+    text-align:center; padding:14px 8px; min-height:84px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
     background:linear-gradient(180deg,var(--board-blue-hi),var(--board-blue-lo));
-    border:2px solid rgba(244,201,93,.25); border-radius:18px; padding:18px 16px;
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,.05), 0 8px 20px rgba(0,0,0,.32);
-    transition:transform .14s ease, box-shadow .14s ease, filter .2s ease;
+    border-radius:12px; color:#fff; line-height:1.05;
+    text-transform:uppercase; letter-spacing:.4px; font-size:14px;
+    border:2px solid rgba(244,201,93,.25);
+    text-shadow:0 2px 0 rgba(0,0,0,.4);
   }
-  .cat-card:hover{transform:translateY(-4px); filter:brightness(1.08);
-    box-shadow:inset 0 0 0 2px rgba(244,201,93,.45), 0 12px 26px rgba(244,201,93,.18);}
-  .cat-card:active{transform:translateY(-1px);}
-  .cat-card .ic{font-size:34px; line-height:1; display:block; margin-bottom:8px;}
-  .cat-card h3{font-family:'Anton',sans-serif; font-weight:400; font-size:18px;
-    text-transform:uppercase; letter-spacing:.4px; line-height:1.1; color:#fff;
-    text-shadow:0 2px 0 rgba(0,0,0,.4); min-height:40px;}
-  .cat-card .cprog-lbl{font-family:'Fredoka',sans-serif; font-weight:600; font-size:13px;
-    color:var(--ink-soft); margin:12px 0 6px; display:flex; justify-content:space-between; align-items:center;}
-  .cat-card.complete{border-color:var(--green);}
-  .cat-card .check{
-    position:absolute; top:12px; right:12px; font-size:20px; color:var(--green);
-    background:rgba(0,0,0,.25); border-radius:50%; width:30px; height:30px;
-    display:none; align-items:center; justify-content:center;
+  .cat-head .ic{font-size:24px;}
+  .tile{
+    font-family:'Anton',sans-serif;
+    border:none; cursor:pointer; color:var(--gold);
+    background:linear-gradient(180deg,var(--board-blue),var(--board-blue-lo));
+    border-radius:12px; min-height:70px; font-size:28px;
+    text-shadow:0 2px 0 rgba(0,0,0,.45);
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.06), 0 6px 0 rgba(0,0,0,.35);
+    transition:transform .12s ease, box-shadow .12s ease, filter .2s ease;
+    position:relative;
   }
-  .cat-card.complete .check{display:flex;}
+  .tile:hover:not(:disabled){transform:translateY(-3px) scale(1.02); filter:brightness(1.15); box-shadow:inset 0 0 0 2px rgba(244,201,93,.5), 0 9px 0 rgba(0,0,0,.35), 0 12px 24px rgba(244,201,93,.25);}
+  .tile:active:not(:disabled){transform:translateY(2px); box-shadow:inset 0 0 0 2px rgba(255,255,255,.06), 0 3px 0 rgba(0,0,0,.35);}
+  .tile:disabled{cursor:default; color:transparent; background:linear-gradient(180deg,#0b0b40,#0a0a33); box-shadow:inset 0 0 0 2px rgba(255,255,255,.03);}
+  .tile.done-ok::after{content:"✓"; color:var(--green); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:32px; text-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .tile.done-bad::after{content:"✕"; color:var(--red); position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:28px; text-shadow:0 2px 0 rgba(0,0,0,.4);}
+  .scroll-hint{font-family:'Fredoka',sans-serif; text-align:center; color:var(--ink-soft); font-size:13px; margin-top:8px;}
 
   /* ---------- BUTTONS ---------- */
   .btn{
@@ -349,7 +361,10 @@
       </div>
     </div>
 
-    <div class="cat-grid" id="catGrid"></div>
+    <div class="board-scroll">
+      <div class="board" id="board"></div>
+    </div>
+    <div class="scroll-hint">👉 Si no ves todo el tablero, desliza hacia los lados.</div>
 
     <div class="center">
       <button class="btn" id="finalBtn" disabled>🌟 Jeopardy Final (responde todo primero)</button>
@@ -679,7 +694,6 @@ const FINAL = {
    CONSTANTES / ESTADO
    ========================================================= */
 const SUBJECT = "religion";
-const POINTS = 100;           // puntos base por respuesta correcta
 const TOTAL_Q = CATS.reduce((s,c)=>s+c.q.length,0);
 const LETTERS = ["A","B","C","D"];
 
@@ -691,8 +705,8 @@ let streak = 0;
 let answered = {};            // { "<ci>_<qi>": { correct: bool } }
 let finalDone = false;
 
-let currentCat = null;        // ci abierto
-let current = null;           // { ci, qi, shuffled }
+let tileOrder = [];           // por categoría: orden barajado de qIndices (pregunta -> tile)
+let current = null;           // { ci, qi, points, shuffled }
 let wager = 0;
 let finalShuffled = [];
 let completionShown = false;
@@ -707,13 +721,6 @@ function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<'
 
 function answeredCount(){ return Object.keys(answered).length; }
 function totalCorrect(){ return Object.values(answered).filter(a=>a && a.correct).length; }
-
-function catAnswered(ci){
-  let n=0;
-  CATS[ci].q.forEach((_,qi)=>{ if(answered[`${ci}_${qi}`]) n++; });
-  return n;
-}
-function catComplete(ci){ return catAnswered(ci) >= CATS[ci].q.length; }
 
 /* =========================================================
    GUARDADO EN SUPABASE (UPSERT con coalescing)
@@ -796,56 +803,62 @@ function updateScoreboard(){
     : '🌟 Jeopardy Final (responde todo primero)';
 }
 
+// Valor del tile según su posición de fila: 200,400,600,800,1000 y luego se repite.
+function tileValue(row){ return 200 * ((row % 5) + 1); }
+
+// Baraja qué pregunta queda detrás de cada tile, por categoría (una vez por partida).
+function shuffleTiles(){
+  tileOrder = CATS.map(cat=>{
+    const idx = cat.q.map((_,i)=>i);
+    for(let k=idx.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[idx[k],idx[j]]=[idx[j],idx[k]];}
+    return idx;
+  });
+}
+
 function buildBoard(){
-  const grid = $('catGrid');
-  grid.innerHTML = '';
+  const board = $('board');
+  board.innerHTML = '';
   CATS.forEach((cat,ci)=>{
-    const n = catAnswered(ci);
-    const total = cat.q.length;
-    const complete = n>=total;
-    const card = document.createElement('div');
-    card.className = 'cat-card' + (complete ? ' complete' : '');
-    card.innerHTML = `
-      <span class="check">✓</span>
-      <span class="ic">${cat.icon}</span>
-      <h3>${esc(cat.name)}</h3>
-      <div class="cprog-lbl"><span>${n} / ${total}</span><span>${complete ? '¡Completa!' : 'Continuar'}</span></div>
-      <div class="bar"><i style="width:${total?(n/total*100):0}%"></i></div>
-    `;
-    card.addEventListener('click', ()=>openCategory(ci));
-    grid.appendChild(card);
+    const col = document.createElement('div');
+    col.className = 'col';
+
+    const head = document.createElement('div');
+    head.className = 'cat-head';
+    head.innerHTML = `<span class="ic">${cat.icon}</span>${esc(cat.name)}`;
+    col.appendChild(head);
+
+    // Un tile por pregunta de la categoría, en el orden barajado de esta partida.
+    tileOrder[ci].forEach((qi,row)=>{
+      const val = tileValue(row);
+      const t = document.createElement('button');
+      t.className = 'tile';
+      t.textContent = val;
+      // El estado "hecho" se decide por IDENTIDAD de pregunta (ci_qi), no por el tile.
+      const a = answered[`${ci}_${qi}`];
+      if(a){
+        t.disabled = true;
+        t.classList.add(a.correct ? 'done-ok' : 'done-bad');
+      } else {
+        t.addEventListener('click', ()=>openQuestion(ci, qi, val));
+      }
+      col.appendChild(t);
+    });
+
+    board.appendChild(col);
   });
   updateScoreboard();
 }
 
 /* =========================================================
-   FLUJO POR CATEGORÍA
+   PREGUNTAS
    ========================================================= */
-function nextUnanswered(ci, from=0){
-  for(let qi=from; qi<CATS[ci].q.length; qi++){
-    if(!answered[`${ci}_${qi}`]) return qi;
-  }
-  return -1;
-}
-
-function openCategory(ci){
-  currentCat = ci;
-  const qi = nextUnanswered(ci);
-  if(qi === -1){
-    // Categoría completa: mostrar repaso rápido (no re-preguntar).
-    openQuestion(ci, 0, true);
-    return;
-  }
-  openQuestion(ci, qi, false);
-}
-
-function openQuestion(ci, qi, reviewMode){
+function openQuestion(ci, qi, points){
   const cat = CATS[ci];
   const qd = cat.q[qi];
-  current = { ci, qi };
+  current = { ci, qi, points };
 
   $('qCat').textContent = `${cat.icon} ${cat.name}`;
-  $('qPts').textContent = `${catAnswered(ci)} / ${cat.q.length}`;
+  $('qPts').textContent = `${points} pts`;
   $('qText').textContent = qd.q;
 
   // mezclar opciones (la correcta no siempre en el mismo lugar)
@@ -858,7 +871,7 @@ function openQuestion(ci, qi, reviewMode){
     const b = document.createElement('button');
     b.className = 'opt';
     b.innerHTML = `<span class="key">${LETTERS[idx]}</span>${esc(opt.text)}`;
-    if(!reviewMode) b.addEventListener('click', ()=>answer(idx));
+    b.addEventListener('click', ()=>answer(idx));
     optsBox.appendChild(b);
   });
 
@@ -866,21 +879,6 @@ function openQuestion(ci, qi, reviewMode){
   fb.className = 'feedback';
   fb.innerHTML = '';
   $('qContinue').classList.add('hidden');
-
-  if(reviewMode){
-    // En modo repaso, mostrar de una vez la respuesta correcta.
-    const correctIdx = current.shuffled.findIndex(o=>o.correct);
-    document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
-      b.classList.add('locked');
-      if(i===correctIdx) b.classList.add('correct');
-    });
-    fb.className = 'feedback ok show';
-    fb.innerHTML = `<h3>📖 Repaso</h3>
-      <div class="line">Ya completaste esta categoría. Aquí tienes un repaso:</div>
-      <div class="line">${esc(qd.ex)}</div>`;
-    $('qContinue').classList.remove('hidden');
-    $('qContinue').textContent = 'Continuar ▶';
-  }
 
   show('qOverlay');
 }
@@ -909,11 +907,10 @@ function answer(idx){
   const fb = $('qFeedback');
   if(isRight){
     streak++;
-    const gained = POINTS + (streak-1)*20;
-    score += gained;
+    score += current.points;
     fb.className = 'feedback ok show';
     fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
-      <div class="line">Sumaste <b>${gained} puntos</b>${streak>1?` (racha de <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">Sumaste <b>${current.points} puntos</b>${streak>1?` (racha de <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
       <div class="line">${esc(qd.ex)}</div>`;
     confettiBurst();
   } else {
@@ -934,15 +931,8 @@ function answer(idx){
 
 function continueQuestion(){
   hide('qOverlay');
-  const ci = currentCat;
-  // siguiente sin responder en la MISMA categoría
-  const nextQi = (ci!==null) ? nextUnanswered(ci) : -1;
-  if(ci!==null && nextQi!==-1){
-    openQuestion(ci, nextQi, false);
-    return;
-  }
-  // categoría terminada -> volver al tablero
-  current = null; currentCat = null;
+  current = null;
+  // Volver al tablero; se re-marca el tile recién respondido por identidad de pregunta.
   buildBoard();
   if(answeredCount() >= TOTAL_Q && !completionShown){
     completionShown = true;
@@ -1122,7 +1112,8 @@ async function eraseProgress(){
 
   // resetear estado en memoria
   answered = {}; score = 0; streak = 0; finalDone = false;
-  currentCat = null; current = null; completionShown = false;
+  current = null; completionShown = false;
+  shuffleTiles(); // nueva partida -> nuevo orden de tiles
   hide('eraseOverlay');
   buildBoard();
   window.scrollTo({ top:0, behavior:'smooth' });
@@ -1207,6 +1198,7 @@ function setupAuthListener(loadedUserId){
 
   // Restaurar progreso guardado.
   await loadProgress();
+  shuffleTiles(); // orden de tiles para esta partida (las respondidas se re-marcan por identidad)
   if(answeredCount() >= TOTAL_Q) completionShown = true; // ya completó antes
 
   // Revelar app.
