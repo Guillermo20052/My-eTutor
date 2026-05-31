@@ -497,6 +497,19 @@
   </div>
 </div>
 
+<!-- ===== PRACTICE NOTICE OVERLAY (solo cuentas GRATIS) ===== -->
+<div class="overlay" id="practiceOverlay">
+  <div class="modal" style="text-align:center;">
+    <div class="medal">🎉</div>
+    <div class="big" style="font-family:'Anton';font-size:28px;color:var(--gold);">¡Genial que quieras practicar más!</div>
+    <div class="sub" style="margin-top:12px;">Puedes repasar Religión todas las veces que quieras para practicar. Pero los puntos que ya ganaste no aumentarán al repetir las preguntas — esto es para que la tabla de posiciones sea justa para todos. ¡Sigue practicando para aprender más!</div>
+    <div class="center" style="margin-top:24px;">
+      <button class="btn danger" id="practiceEraseConfirmBtn">Sí, borrar</button>
+      <button class="btn ghost" id="practiceCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== SCROLL AFFORDANCE (más preguntas abajo) ===== -->
 <div class="board-fade" id="boardFade" aria-hidden="true"></div>
 <div class="scroll-cue" id="scrollCue" aria-hidden="true">⬇ Desliza para ver más preguntas</div>
@@ -723,6 +736,7 @@ const LETTERS = ["A","B","C","D"];
 
 let USER_ID = null;
 let KID_NAME = "estudiante";
+let isPaid = false;           // cuenta pagada (has_access===true) -> repasos valen 20%; gratis -> repasos valen 0
 
 let score = 0;
 let streak = 0;
@@ -953,11 +967,13 @@ function answer(idx){
     answered[`${ci}_${qi}`] = { correct: isRight };
   }
 
-  // Rendimiento decreciente: la PRIMERA vez que se domina una pregunta vale los
-  // puntos completos; cualquier acierto posterior (incluso tras borrar) vale 20%.
+  // Anti-farm: la PRIMERA vez que se domina una pregunta vale los puntos completos
+  // (para todos). En cualquier acierto posterior (incluso tras borrar):
+  //   - cuenta PAGADA  -> 20% de los puntos (comportamiento original)
+  //   - cuenta GRATIS  -> 0 puntos (no se puede farmear la única materia gratis)
   const qid = `${ci}_${qi}`;
   const isRepeat = isRight && mastered[qid] === true;
-  const gained = isRight ? (isRepeat ? Math.round(current.points * 0.2) : current.points) : 0;
+  const gained = isRight ? (isRepeat ? (isPaid ? Math.round(current.points * 0.2) : 0) : current.points) : 0;
   if(isRight && !isRepeat) mastered[qid] = true;
 
   const fb = $('qFeedback');
@@ -965,8 +981,9 @@ function answer(idx){
     streak++;
     score += gained;
     fb.className = 'feedback ok show';
+    const repeatNote = isRepeat ? (isPaid ? ` (repaso: 20% de ${current.points})` : ` (repaso de práctica: no suma puntos)`) : '';
     fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
-      <div class="line">Sumaste <b>${gained} puntos</b>${isRepeat?` (repaso: 20% de ${current.points})`:''}${streak>1?` · racha de <b>${streak}</b> 🔥`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">Sumaste <b>${gained} puntos</b>${repeatNote}${streak>1?` · racha de <b>${streak}</b> 🔥`:''}, ${esc(KID_NAME)}.</div>
       <div class="line">${esc(qd.ex)}</div>`;
     confettiBurst();
   } else {
@@ -1172,6 +1189,7 @@ async function eraseProgress(){
   current = null; completionShown = false;
   shuffleTiles(); // nueva partida -> nuevo orden de tiles
   hide('eraseOverlay');
+  hide('practiceOverlay');
   buildBoard();
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -1213,9 +1231,12 @@ $('endReportBtn').addEventListener('click', ()=>{ hide('endOverlay'); openReport
 $('endCloseBtn').addEventListener('click', ()=>hide('endOverlay'));
 $('reportBtn').addEventListener('click', openReport);
 $('reportCloseBtn').addEventListener('click', ()=>hide('reportOverlay'));
-$('eraseBtn').addEventListener('click', ()=>show('eraseOverlay'));
+// PAGADA: flujo de borrado original. GRATIS: primero el aviso de práctica (mismos botones de confirmación).
+$('eraseBtn').addEventListener('click', ()=> show(isPaid ? 'eraseOverlay' : 'practiceOverlay'));
 $('eraseCancelBtn').addEventListener('click', ()=>hide('eraseOverlay'));
 $('eraseConfirmBtn').addEventListener('click', eraseProgress);
+$('practiceCancelBtn').addEventListener('click', ()=>hide('practiceOverlay'));
+$('practiceEraseConfirmBtn').addEventListener('click', eraseProgress);
 
 /* =========================================================
    ARRANQUE / CONTROL DE ACCESO
@@ -1241,12 +1262,14 @@ function setupAuthListener(loadedUserId){
   }
   USER_ID = user.id;
 
-  // Nombre del estudiante (sin has_access: Religión es gratis).
+  // Nombre del estudiante. Religión es GRATIS (no gatea por has_access),
+  // pero leemos has_access para diferenciar el puntaje de repaso (justicia en la tabla).
   const { data: profile } = await supabase
     .from('profiles')
-    .select('kid_name')
+    .select('kid_name, has_access')
     .eq('id', USER_ID)
     .single();
+  isPaid = (profile?.has_access === true);
   const nm = (profile?.kid_name || '').trim();
   KID_NAME = nm || 'estudiante';
   $('playerName').textContent = (KID_NAME).toUpperCase();
