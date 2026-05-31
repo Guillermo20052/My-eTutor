@@ -112,6 +112,22 @@
         background:var(--sky);border:1px dashed var(--line);border-radius:14px;
         padding:14px 16px;color:var(--ink);font-weight:700;text-align:left;
       }
+
+      /* ---------- Disclaimer popup (students, on load) ---------- */
+      #disclaimer-modal .modalbox{max-width:440px}
+      .disc-body{
+        text-align:left;color:var(--ink);font-weight:600;font-size:.96rem;
+        line-height:1.5;margin:6px 0 4px;
+      }
+      .disc-body p{margin:0 0 12px}
+      .disc-body p:last-child{margin-bottom:0}
+      .disc-body .lead{color:var(--soft)}
+      .disc-check{
+        display:flex;align-items:center;gap:9px;justify-content:center;
+        margin:18px 0 4px;font-weight:700;color:var(--navy);
+        font-size:.95rem;cursor:pointer;
+      }
+      .disc-check input{width:18px;height:18px;cursor:pointer;accent-color:var(--blue)}
     </style>
   </head>
   <body>
@@ -161,15 +177,49 @@
     <div class="modal" id="locked-modal">
       <div class="modalbox">
         <div class="mi">🔒</div>
-        <h3>¿Cómo obtengo acceso?</h3>
+        <h3>Materia bloqueada</h3>
         <div class="payinfo">
-          <!-- ===== PAYMENT INSTRUCTIONS — EDIT THIS LATER ===== -->
-          (TODO: payment text goes here)
-          <!-- ===== END PAYMENT INSTRUCTIONS ===== -->
+          🔒 Esta materia está bloqueada. Para desbloquearla, revisa el chat del
+          grupo: ahí está el enlace del fondo común (money pool) y las
+          instrucciones de pago.
         </div>
         <p class="hint">Actualiza la página después de obtener acceso.</p>
         <div class="mbtns">
           <button class="btn ghost" id="close-modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disclaimer popup (shown to students on load until they opt out) -->
+    <div class="modal" id="disclaimer-modal">
+      <div class="modalbox">
+        <div class="mi">📚</div>
+        <h3>Antes de empezar 📚</h3>
+        <div class="disc-body">
+          <p class="lead">
+            Esta plataforma es una herramienta de estudio para repasar jugando.
+            No garantiza cubrir absolutamente todo lo que vendrá en los exámenes:
+            se basa en las guías de estudio y en algunas de las notas de clase.
+            Te recomendamos también revisar tus propias notas y otras guías de
+            estudio.
+          </p>
+          <p>
+            <strong>Para Ciencias (Science):</strong> como la guía solo daba los
+            temas y no el contenido exacto, las preguntas se prepararon
+            investigando lo que normalmente aprende un alumno de 5º grado. Revisa
+            también tus apuntes de clase.
+          </p>
+          <p>
+            Aun así, ¡esta plataforma te puede ayudar muchísimo a repasar y
+            practicar!
+          </p>
+        </div>
+        <label class="disc-check" for="disc-hide">
+          <input type="checkbox" id="disc-hide" />
+          No volver a mostrar
+        </label>
+        <div class="mbtns">
+          <button class="btn" id="disc-ok">Entendido</button>
         </div>
       </div>
     </div>
@@ -203,6 +253,62 @@
       modalEl.addEventListener("click", (e) => {
         if (e.target === modalEl) closeModal();
       });
+
+      // ---------- Disclaimer popup ----------
+      // Preference is stored in Supabase (NOT localStorage) so it follows the
+      // student across devices: a row in `progress` with subject='_prefs' and
+      // data={ hideDisclaimer:true }. RLS already lets a user read/write their
+      // own progress rows, and there's no subject whitelist.
+      const PREFS_SUBJECT = "_prefs";
+      const disclaimerEl = document.getElementById("disclaimer-modal");
+      const discHideEl = document.getElementById("disc-hide");
+
+      // Reads the hide flag. Safe default: on ANY failure, returns false so the
+      // popup still shows and the dashboard is never blocked.
+      async function shouldHideDisclaimer(userId) {
+        try {
+          const { data, error } = await supabase
+            .from("progress")
+            .select("data")
+            .eq("user_id", userId)
+            .eq("subject", PREFS_SUBJECT)
+            .maybeSingle();
+          if (error) return false;
+          return data?.data?.hideDisclaimer === true;
+        } catch (_e) {
+          return false;
+        }
+      }
+
+      function closeDisclaimer(userId) {
+        disclaimerEl.classList.remove("on");
+        // Persist the opt-out only when the box is ticked. Fire-and-forget:
+        // a write failure must never break the dashboard.
+        if (discHideEl.checked) {
+          supabase
+            .from("progress")
+            .upsert(
+              {
+                user_id: userId,
+                subject: PREFS_SUBJECT,
+                data: { hideDisclaimer: true },
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id,subject" }
+            )
+            .then(() => {})
+            .catch(() => {});
+        }
+      }
+
+      async function maybeShowDisclaimer(userId) {
+        const hide = await shouldHideDisclaimer(userId);
+        if (hide) return;
+        disclaimerEl.classList.add("on");
+        document
+          .getElementById("disc-ok")
+          .addEventListener("click", () => closeDisclaimer(userId), { once: true });
+      }
 
       document.getElementById("logout-btn").addEventListener("click", async () => {
         await supabase.auth.signOut();
@@ -344,6 +450,10 @@
         // Fetch the user's rank for the header without blocking the reveal.
         // (Students only; admins already redirected to admin.html above.)
         loadHeaderRank(userId);
+
+        // Show the study disclaimer to students until they opt out (persisted
+        // in Supabase). Runs after the reveal so it never blocks rendering.
+        maybeShowDisclaimer(userId);
 
         // Start reacting to session changes only after a successful load.
         setupAuthListener(userId);
