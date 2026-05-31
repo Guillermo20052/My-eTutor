@@ -404,9 +404,15 @@ import { supabase } from "../js/supabase.js";
      la A4  -> step  3  (espacio 2, entre línea 2 y 3)
      si B4  -> step  4  (SOBRE la línea 3, central)
      do C5  -> step  5  (espacio 3, entre línea 3 y 4)
+   Notas altas (mitad superior del pentagrama):
+     re D5  -> step  6  (SOBRE la línea 4)
+     mi E5  -> step  7  (espacio 4, entre línea 4 y 5)
+     fa F5  -> step  8  (SOBRE la línea 5, la de ARRIBA)
+     sol G5 -> step  9  (espacio ARRIBA de la línea 5; sin línea adicional)
    ========================================================= */
 const NOTE_BY_STEP = {
-  '-2':'do', '-1':'re', '0':'mi', '1':'fa', '2':'sol', '3':'la', '4':'si', '5':'do'
+  '-2':'do', '-1':'re', '0':'mi', '1':'fa', '2':'sol', '3':'la', '4':'si', '5':'do',
+  '6':'re', '7':'mi', '8':'fa', '9':'sol'
 };
 const NAMES = ['do','re','mi','fa','sol','la','si'];
 const LABEL = { do:'Do', re:'Re', mi:'Mi', fa:'Fa', sol:'Sol', la:'La', si:'Si' };
@@ -447,11 +453,11 @@ function staffSVG(step){
    NIVELES (misiones)
    ========================================================= */
 const LEVELS = [
-  { id:'l1', n:'Notas en las líneas', ic:'🎼', steps:[0,2,4],                 desc:'mi · sol · si' },
-  { id:'l2', n:'Notas en los espacios', ic:'🎶', steps:[-1,1,3,5],            desc:'re · fa · la · do' },
-  { id:'l3', n:'Octava completa', ic:'🎹', steps:[-2,-1,0,1,2,3,4,5],         desc:'de do a do' },
+  { id:'baja',  n:'Octava baja',    ic:'🎼', steps:[-2,-1,0,1,2,3,4,5],              desc:'do · re · mi · fa · sol · la · si · do' },
+  { id:'altas', n:'Notas altas',    ic:'🎶', steps:[6,7,8,9],                        desc:'re · mi · fa · sol (agudas)' },
+  { id:'full',  n:'Rango completo', ic:'🎹', steps:[-2,-1,0,1,2,3,4,5,6,7,8,9],      desc:'de do (C4) a sol (G5)' },
 ];
-const ENDLESS_STEPS = [-2,-1,0,1,2,3,4,5];
+const ENDLESS_STEPS = [-2,-1,0,1,2,3,4,5,6,7,8,9];
 
 /* =========================================================
    PUNTOS (sin tope: las notas se generan al azar; practicar = más puntos)
