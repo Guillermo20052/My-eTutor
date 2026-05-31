@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lee las Notas — My eTutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Mulish:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#1e1247;
+    --bg-2:#33205f;
+    --bg-3:#4a2d86;
+    --indigo:#2a1a5e;
+    --purple:#5b3fb0;
+    --purple-hi:#7d5fd6;
+    --violet:#9b7ce6;
+    --gold:#f4c64a;
+    --gold-hi:#ffe089;
+    --gold-deep:#c79a26;
+    --cream:#f6f1ff;
+    --ink:#2a1a4a;
+    --ink-soft:#c9b9f0;
+    --panel:#fffdf7;
+    --green:#34c281;
+    --green-deep:#1f8f5c;
+    --red:#ef5d7a;
+    --red-deep:#b53350;
+    --card:#3a2570;
+    --card-2:#43287d;
+    --line:rgba(155,124,230,.32);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Mulish',sans-serif;
+    color:var(--cream);
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(244,198,74,.18), transparent 60%),
+      radial-gradient(900px 700px at 110% 116%, rgba(125,95,214,.4), transparent 55%),
+      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding:18px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Subtle music-note motif */
+  body::before{
+    content:"♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬ ♪ ♫ ♩ ♬";
+    position:fixed; inset:0; z-index:0;
+    color:rgba(255,255,255,.045);
+    font-size:38px; line-height:2.4; letter-spacing:24px;
+    word-spacing:18px; overflow:hidden; pointer-events:none;
+    transform:rotate(-12deg) scale(1.4); transform-origin:top left;
+  }
+  .wrap{position:relative; z-index:1; max-width:920px; margin:0 auto;}
+
+  /* ---------- LOADING ---------- */
+  .loading{
+    min-height:80vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; text-align:center;
+  }
+  .loading .badge{
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; letter-spacing:.5px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    color:#3a2c05; padding:10px 18px; border-radius:14px; transform:rotate(-2deg);
+    box-shadow:0 6px 0 var(--gold-deep), 0 10px 22px rgba(0,0,0,.35);
+  }
+  .loading .msg{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600;}
+  .spinner{
+    width:40px; height:40px; border-radius:50%;
+    border:4px solid rgba(255,255,255,.16); border-top-color:var(--gold);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:14px; margin-bottom:18px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand .badge{
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; letter-spacing:.3px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    color:#3a2c05; padding:9px 14px; border-radius:14px;
+    box-shadow:0 6px 0 var(--gold-deep), 0 10px 22px rgba(0,0,0,.3);
+    transform:rotate(-2deg); white-space:nowrap;
+  }
+  .brand h1{
+    font-family:'Baloo 2',cursive; font-weight:800; line-height:1;
+    font-size:clamp(18px,3.2vw,30px); letter-spacing:.2px; color:#fff;
+    text-shadow:0 3px 0 rgba(0,0,0,.3);
+  }
+  .brand h1 span{color:var(--gold);}
+  .head-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .player-pill{
+    display:flex; flex-direction:column; gap:2px;
+    background:linear-gradient(180deg,var(--card-2),var(--card));
+    border:2px solid var(--gold);
+    padding:7px 16px; border-radius:16px;
+    font-family:'Fredoka',sans-serif; font-weight:600; line-height:1.1;
+    box-shadow:0 6px 16px rgba(0,0,0,.3);
+  }
+  .player-pill .nm{font-size:16px; color:#fff; letter-spacing:.3px;}
+  .player-pill .stats{font-size:12px; color:var(--ink-soft); font-weight:600;}
+  .player-pill .stats .st{color:var(--gold);}
+  .player-pill .stats .sc{color:var(--violet); font-weight:800;}
+  .back-link{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:14px;
+    color:var(--gold-hi); text-decoration:none;
+    border:2px solid var(--gold); border-radius:999px; padding:8px 14px;
+    background:rgba(0,0,0,.15);
+    transition:background .15s ease;
+  }
+  .back-link:hover{background:rgba(244,198,74,.16);}
+
+  /* ---------- VIEWS ---------- */
+  .hidden{display:none !important;}
+  .view{display:none;}
+  .view.on{display:block; animation:fade .3s both;}
+  @keyframes fade{from{opacity:0;} to{opacity:1;}}
+
+  .hero{text-align:center; margin:6px 0 22px;}
+  .hero h2{font-family:'Baloo 2',cursive; font-weight:800; color:#fff; font-size:clamp(22px,5vw,38px); line-height:1.05; text-shadow:0 3px 0 rgba(0,0,0,.3);}
+  .hero h2 .gold{color:var(--gold);}
+  .hero p{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600; margin-top:8px; font-size:1.02rem;}
+
+  /* ---------- MODE / LEVEL CARDS ---------- */
+  .mode-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px; max-width:620px; margin:0 auto;}
+  .mode-card{
+    cursor:pointer; text-align:center; padding:28px 20px;
+    background:linear-gradient(180deg,var(--card-2),var(--card));
+    border:2px solid var(--line); border-radius:24px;
+    box-shadow:0 12px 30px rgba(0,0,0,.3);
+    transition:transform .14s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .mode-card:hover{transform:translateY(-5px); border-color:var(--gold); box-shadow:0 18px 38px rgba(0,0,0,.4);}
+  .mode-card .mic{font-size:3rem; line-height:1; display:block; margin-bottom:10px;}
+  .mode-card h3{font-family:'Baloo 2',cursive; font-weight:800; color:#fff; font-size:1.3rem; line-height:1.1;}
+  .mode-card p{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600; font-size:.92rem; margin-top:6px;}
+
+  .level-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px;}
+  .level-card{
+    position:relative; cursor:pointer; padding:18px 16px;
+    background:linear-gradient(180deg,var(--card-2),var(--card));
+    border:2px solid var(--line); border-radius:20px;
+    box-shadow:0 10px 24px rgba(0,0,0,.28);
+    transition:transform .14s ease, border-color .15s ease;
+  }
+  .level-card:hover{transform:translateY(-4px); border-color:var(--gold);}
+  .level-card .num{position:absolute; top:12px; right:12px; font-family:'Fredoka'; font-weight:700; font-size:.78rem; color:#3a2c05; background:var(--gold); width:24px; height:24px; border-radius:8px; display:grid; place-items:center;}
+  .level-card .lic{font-size:2rem; display:block; margin-bottom:8px;}
+  .level-card h3{font-family:'Baloo 2',cursive; font-weight:700; color:#fff; font-size:1.05rem; line-height:1.15;}
+  .level-card .ldesc{font-family:'Fredoka'; color:var(--ink-soft); font-weight:600; font-size:.82rem; margin-top:4px;}
+  .level-card .stars{margin-top:10px; font-size:1.05rem; color:var(--gold); letter-spacing:2px;}
+  .level-card .stars .e{color:rgba(255,255,255,.2);}
+  .level-card .appr{display:inline-block; margin-left:6px; font-size:.62rem; font-weight:800; color:var(--green); background:rgba(52,194,129,.16); padding:2px 8px; border-radius:999px; vertical-align:middle;}
+
+  .hubactions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:26px;}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:'Fredoka',sans-serif; font-weight:600; cursor:pointer;
+    border:none; border-radius:14px; padding:13px 22px; font-size:16px;
+    background:linear-gradient(180deg,var(--purple-hi),var(--purple));
+    color:#fff; box-shadow:0 6px 0 #3a2580, 0 10px 22px rgba(0,0,0,.3);
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.08); transform:translateY(-2px);}
+  .btn:active{transform:translateY(3px); box-shadow:0 3px 0 #3a2580;}
+  .btn.gold{background:linear-gradient(180deg,var(--gold-hi),var(--gold)); color:#3a2c05; box-shadow:0 6px 0 var(--gold-deep), 0 10px 22px rgba(0,0,0,.3);}
+  .btn.ghost{background:rgba(0,0,0,.15); color:var(--gold-hi); border:2px solid var(--gold); box-shadow:none;}
+  .btn.ghost:hover{background:rgba(244,198,74,.14);}
+  .btn.danger{background:linear-gradient(180deg,#f37e96,var(--red)); color:#fff; box-shadow:0 6px 0 var(--red-deep), 0 10px 22px rgba(0,0,0,.3);}
+  .center{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:22px;}
+
+  /* ---------- GAME BAR ---------- */
+  .gbar{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
+  .back{font-family:'Fredoka'; font-weight:700; background:rgba(0,0,0,.18); border:2px solid var(--line); color:#fff; padding:9px 14px; border-radius:12px; cursor:pointer; transition:.15s;}
+  .back:hover{border-color:var(--gold);}
+  .gtitle{flex:1; min-width:140px; font-family:'Baloo 2',cursive; font-weight:700; color:#fff; font-size:1.2rem;}
+  .dots{display:flex; gap:6px;}
+  .dot{width:13px; height:13px; border-radius:50%; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.18); transition:.2s;}
+  .dot.ok{background:var(--green); border-color:var(--green);}
+  .dot.no{background:var(--red); border-color:var(--red);}
+  .dot.cur{border-color:var(--gold); background:transparent;}
+  .endless-meter{font-family:'Fredoka'; font-weight:700; color:var(--gold-hi); font-size:.95rem;}
+
+  /* ---------- PANEL (light, so notes are visible) ---------- */
+  .panel{
+    background:var(--panel); border:2px solid var(--gold);
+    border-radius:24px; box-shadow:0 16px 40px rgba(0,0,0,.4);
+    padding:22px; color:var(--ink); text-align:center;
+    animation:pop .3s cubic-bezier(.2,1.1,.3,1);
+  }
+  @keyframes pop{from{transform:scale(.95) translateY(10px); opacity:0;} to{transform:none; opacity:1;}}
+  .qhint{font-family:'Fredoka'; font-weight:800; color:var(--purple); font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px;}
+  .qtitle{font-family:'Baloo 2',cursive; font-weight:700; color:var(--ink); font-size:1.25rem; margin-bottom:8px;}
+
+  /* ---------- STAFF SVG ---------- */
+  .staff-wrap{display:flex; justify-content:center; margin:6px 0 14px;}
+  .staff{width:100%; max-width:340px; height:auto;}
+  .staff-line, .ledger{stroke:#2f2150; stroke-width:2; stroke-linecap:round;}
+  .notehead{fill:#241640;}
+  .stem{stroke:#241640; stroke-width:2.6; stroke-linecap:round;}
+  .clef{fill:var(--purple); font-family:'Times New Roman',serif; font-size:118px; dominant-baseline:alphabetic;}
+
+  /* ---------- ANSWER BUTTONS (Spanish solfège) ---------- */
+  .notebtns{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:6px;}
+  .nbtn{
+    font-family:'Baloo 2',cursive; font-weight:700; font-size:1.15rem; cursor:pointer;
+    min-width:74px; padding:14px 10px; border-radius:16px;
+    background:linear-gradient(180deg,#efe6ff,#ddd0f7);
+    color:var(--purple); border:2px solid #cdbcef;
+    transition:transform .1s ease, filter .12s ease, border-color .12s ease;
+  }
+  .nbtn:hover:not(:disabled){transform:translateY(-3px); border-color:var(--purple-hi); filter:brightness(1.03);}
+  .nbtn:active:not(:disabled){transform:translateY(1px);}
+  .nbtn.correct{background:linear-gradient(180deg,#c8f3df,#a6e8c8); border-color:var(--green); color:var(--green-deep);}
+  .nbtn.wrong{background:linear-gradient(180deg,#fcd4dd,#f6b6c4); border-color:var(--red); color:var(--red-deep);}
+  .nbtn:disabled{cursor:default;}
+
+  .feedback{margin-top:16px; border-radius:16px; padding:0; max-height:0; overflow:hidden; opacity:0; transition:.3s;}
+  .feedback.show{max-height:300px; opacity:1; padding:14px 16px;}
+  .feedback.good{background:#e3f8ee; border:1.5px solid #aee6cb;}
+  .feedback.bad{background:#fdebf0; border:1.5px solid #f6c2cf;}
+  .feedback .fh{font-family:'Baloo 2',cursive; font-weight:700; font-size:1.1rem; margin-bottom:4px;}
+  .feedback.good .fh{color:var(--green-deep);}
+  .feedback.bad .fh{color:var(--red-deep);}
+  .feedback .sol{color:var(--ink); font-weight:600; line-height:1.5; font-size:.98rem;}
+  .feedback .sol b{color:var(--purple);}
+
+  .actions{margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+
+  /* ---------- SUMMARY ---------- */
+  .summary{text-align:center; padding:10px;}
+  .bigstars{font-size:3.2rem; letter-spacing:8px; color:var(--gold); margin:6px 0 4px;}
+  .bigstars .e{color:#d9cdf2;}
+  .bigstars.sad{color:var(--red); letter-spacing:0; font-size:3rem;}
+  .summary h2{font-family:'Baloo 2',cursive; color:var(--ink); font-size:1.6rem;}
+  .summary p{color:var(--ink-soft); font-weight:700; margin:6px 0 6px; font-size:1.02rem; color:#6a5a90;}
+  .summary .score{font-family:'Baloo 2',cursive; color:var(--purple); font-size:1.05rem;}
+  .summary .pts-won{font-family:'Baloo 2',cursive; color:var(--green-deep); font-size:1rem; margin-top:-2px;}
+
+  /* ---------- MODALS ---------- */
+  .modal{position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(20,10,50,.62); backdrop-filter:blur(4px);}
+  .modal.on{display:flex; animation:fade .2s both;}
+  .modalbox{
+    background:linear-gradient(180deg,var(--card-2),var(--card));
+    border:2px solid var(--gold); border-radius:22px;
+    max-width:400px; width:100%; padding:26px 24px; text-align:center;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  .modalbox.wide{max-width:560px; text-align:left; max-height:86vh; overflow:auto;}
+  .modalbox .mi{font-size:2.4rem;}
+  .modalbox h3{font-family:'Baloo 2',cursive; color:#fff; font-size:1.3rem; margin:6px 0;}
+  .modalbox p{color:var(--ink-soft); font-weight:600; font-size:.98rem; line-height:1.5; margin-bottom:18px;}
+  .modalbox .mbtns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+
+  /* ---------- REPORT ---------- */
+  .rep-section-t{font-family:'Baloo 2',cursive; font-weight:700; color:var(--gold-hi); font-size:1rem; margin:6px 0 10px;}
+  .rep-row{display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; background:rgba(0,0,0,.16);}
+  .rep-row .rn{font-family:'Baloo 2',cursive; font-weight:700; color:#fff; font-size:1.05rem; width:48px; flex:0 0 auto;}
+  .rep-row .rbarwrap{flex:1 1 auto;}
+  .rep-row .rbar{height:11px; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; border:1px solid var(--line);}
+  .rep-row .rbar > i{display:block; height:100%; width:0%; border-radius:999px;}
+  .rep-row .rbar > i.good{background:linear-gradient(90deg,var(--green),#7fe3b3);}
+  .rep-row .rbar > i.mid{background:linear-gradient(90deg,var(--gold),var(--gold-hi));}
+  .rep-row .rbar > i.low{background:linear-gradient(90deg,var(--red),#ff9db1);}
+  .rep-row .rmeta{font-family:'Fredoka'; font-weight:700; font-size:.8rem; color:var(--ink-soft); white-space:nowrap; flex:0 0 auto;}
+  .rep-row.untried .rmeta{color:var(--gold-hi);}
+  .rep-lv{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:8px; background:rgba(0,0,0,.16);}
+  .rep-lv .ln{font-family:'Fredoka'; font-weight:700; color:#fff; font-size:.92rem;}
+  .rep-lv .ls{font-size:.95rem; color:var(--gold); letter-spacing:1px; white-space:nowrap;}
+  .rep-lv .ls .e{color:rgba(255,255,255,.2);}
+  .rep-msg{background:rgba(244,198,74,.1); border:1px solid var(--gold); border-radius:14px; padding:14px 16px; color:var(--cream); font-weight:600; line-height:1.55; font-size:.96rem; margin-top:12px;}
+  .rep-msg .strong{color:#7fe3b3; font-weight:800;}
+  .rep-msg .weak{color:var(--gold-hi); font-weight:800;}
+
+  @media (max-width:560px){
+    .mode-grid{grid-template-columns:1fr;}
+    .panel{padding:16px;}
+    .nbtn{min-width:62px; font-size:1.05rem; padding:13px 8px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div class="wrap" id="loadingScreen">
+  <div class="loading">
+    <div class="badge">MÚSICA</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="msg">Afinando tu juego...</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="wrap hidden" id="app" hidden>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="badge">MÚSICA</div>
+      <h1>Lee las <span>Notas</span> 🎼</h1>
+    </div>
+    <div class="head-right">
+      <div class="player-pill">
+        <span class="nm" id="playerName">ESTUDIANTE</span>
+        <span class="stats"><span class="st" id="totStars">★ 0</span> / 9 · <span class="sc" id="totScore">0</span> pts</span>
+      </div>
+      <a class="back-link" href="../dashboard.html">← Volver al inicio</a>
+    </div>
+  </div>
+
+  <!-- ===== HUB (mode selection) ===== -->
+  <section id="hub" class="view on">
+    <div class="hero">
+      <h2>¡Hola, <span class="gold" id="greetName">estudiante</span>! 🎵</h2>
+      <p>Aprende a leer las notas en el pentagrama: <b>do, re, mi, fa, sol, la, si</b>.</p>
+    </div>
+    <div class="mode-grid">
+      <div class="mode-card" id="modeLevels">
+        <span class="mic">⭐</span>
+        <h3>Niveles</h3>
+        <p>Misiones para aprender, paso a paso. ¡Gana estrellas!</p>
+      </div>
+      <div class="mode-card" id="modeEndless">
+        <span class="mic">♾️</span>
+        <h3>Práctica sin fin</h3>
+        <p>Notas sin parar. Suma puntos y arma tu mejor racha.</p>
+      </div>
+    </div>
+    <div class="hubactions">
+      <button class="btn ghost" id="reportBtn">📊 Reporte de estudio</button>
+      <button class="btn danger" id="eraseBtn">🗑️ Borrar mi progreso</button>
+    </div>
+  </section>
+
+  <!-- ===== LEVELS LIST ===== -->
+  <section id="levels" class="view">
+    <div class="gbar">
+      <button class="back" id="levelsBack">← Menú</button>
+      <div class="gtitle">⭐ Niveles</div>
+    </div>
+    <div class="hero" style="margin:0 0 18px;">
+      <p>Aprueba con <b>4 de 5</b>. ¡Junta hasta 3 estrellas por nivel!</p>
+    </div>
+    <div class="level-grid" id="levelCards"></div>
+  </section>
+
+  <!-- ===== GAME (level or endless) ===== -->
+  <section id="game" class="view">
+    <div class="gbar">
+      <button class="back" id="gameBack">← Salir</button>
+      <div class="gtitle" id="gTitle"></div>
+      <div class="dots" id="dots"></div>
+      <div class="endless-meter" id="endlessMeter" hidden></div>
+    </div>
+    <div class="panel" id="panel"></div>
+  </section>
+
+</div>
+
+<!-- ===== ERASE CONFIRM ===== -->
+<div class="modal" id="eraseModal">
+  <div class="modalbox">
+    <div class="mi">🗑️</div>
+    <h3>¿Borrar mi progreso?</h3>
+    <p>Se perderán tus estrellas, niveles, racha y puntos de Música, y volverás a empezar. Esta acción no se puede deshacer.</p>
+    <div class="mbtns">
+      <button class="btn ghost" id="eraseCancel">Cancelar</button>
+      <button class="btn danger" id="eraseConfirm">Sí, borrar todo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REPORT ===== -->
+<div class="modal" id="reportModal">
+  <div class="modalbox wide">
+    <h3 style="text-align:center;">📊 Reporte de estudio</h3>
+    <div id="reportBody"></div>
+    <div class="mbtns" style="margin-top:6px;">
+      <button class="btn ghost" id="reportClose">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "../js/supabase.js";
+
+/* =========================================================
+   MAPA DE NOTAS — UNA OCTAVA (do C4 → do C5) en clave de SOL
+   "step" = pasos diatónicos desde la línea 1 (Mi). Cada paso = media
+   distancia entre líneas. Líneas: 1=abajo … 5=arriba.
+   step = 2*(n-1) cae justo SOBRE la línea n.
+     do C4  -> step -2  (línea adicional DEBAJO del pentagrama)
+     re D4  -> step -1  (espacio debajo de la línea 1)
+     mi E4  -> step  0  (SOBRE la línea 1)
+     fa F4  -> step  1  (espacio 1, entre línea 1 y 2)
+     sol G4 -> step  2  (SOBRE la línea 2)
+     la A4  -> step  3  (espacio 2, entre línea 2 y 3)
+     si B4  -> step  4  (SOBRE la línea 3, central)
+     do C5  -> step  5  (espacio 3, entre línea 3 y 4)
+   ========================================================= */
+const NOTE_BY_STEP = {
+  '-2':'do', '-1':'re', '0':'mi', '1':'fa', '2':'sol', '3':'la', '4':'si', '5':'do'
+};
+const NAMES = ['do','re','mi','fa','sol','la','si'];
+const LABEL = { do:'Do', re:'Re', mi:'Mi', fa:'Fa', sol:'Sol', la:'La', si:'Si' };
+
+/* Geometría del pentagrama (coordenadas SVG) */
+const Y_LINE1 = 110;   // y de la línea 1 (abajo)
+const LS = 18;         // separación entre líneas
+const STEP_PX = LS/2;  // un "paso" = media separación
+const NOTE_X = 158;    // x de la cabeza de nota
+function noteY(step){ return Y_LINE1 - step*STEP_PX; }
+
+function staffSVG(step){
+  const x0=46, x1=224;
+  let lines='';
+  for(let n=1;n<=5;n++){
+    const y=Y_LINE1-(n-1)*LS;
+    lines+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="staff-line"/>`;
+  }
+  const ny=noteY(step);
+  // Línea adicional (ledger) para do C4 (debajo del pentagrama)
+  let ledger='';
+  if(step<=-2){
+    ledger=`<line x1="${NOTE_X-14}" y1="${ny}" x2="${NOTE_X+14}" y2="${ny}" class="ledger"/>`;
+  }
+  const rx=8.4, ry=6.2;
+  const head=`<ellipse cx="${NOTE_X}" cy="${ny}" rx="${rx}" ry="${ry}" class="notehead" transform="rotate(-22 ${NOTE_X} ${ny})"/>`;
+  // Plica: hacia arriba si está debajo de la línea central (step<4); si no, hacia abajo.
+  const stemUp = step < 4;
+  const stem = stemUp
+    ? `<line x1="${NOTE_X+rx-0.6}" y1="${ny-1}" x2="${NOTE_X+rx-0.6}" y2="${ny-36}" class="stem"/>`
+    : `<line x1="${NOTE_X-rx+0.6}" y1="${ny+1}" x2="${NOTE_X-rx+0.6}" y2="${ny+36}" class="stem"/>`;
+  // Clave de Sol (Unicode 𝄞), enroscada alrededor de la línea 2 (Sol).
+  const clef=`<text x="14" y="118" class="clef">\u{1D11E}</text>`;
+  return `<svg viewBox="0 0 240 170" class="staff" role="img" aria-label="Nota en el pentagrama">${lines}${ledger}${stem}${head}${clef}</svg>`;
+}
+
+/* =========================================================
+   NIVELES (misiones)
+   ========================================================= */
+const LEVELS = [
+  { id:'l1', n:'Notas en las líneas', ic:'🎼', steps:[0,2,4],                 desc:'mi · sol · si' },
+  { id:'l2', n:'Notas en los espacios', ic:'🎶', steps:[-1,1,3,5],            desc:'re · fa · la · do' },
+  { id:'l3', n:'Octava completa', ic:'🎹', steps:[-2,-1,0,1,2,3,4,5],         desc:'de do a do' },
+];
+const ENDLESS_STEPS = [-2,-1,0,1,2,3,4,5];
+
+/* =========================================================
+   PUNTOS (sin tope: las notas se generan al azar; practicar = más puntos)
+   ========================================================= */
+const ROUND_LEN = 5;
+const PASS = 4;
+const PTS_CORRECT = 10;  // por respuesta correcta (ambos modos)
+const PTS_PASS    = 25;  // bono por aprobar un nivel
+const PTS_PERFECT = 25;  // bono extra por nivel perfecto (5/5)
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const SUBJECT = 'musica';
+let USER_ID = null;
+let PLAYER = 'estudiante';
+
+const best = {};     // { levelId: stars }
+const passed = {};   // { levelId: bool }
+LEVELS.forEach(l=>{ best[l.id]=0; passed[l.id]=false; });
+let score = 0;
+let endlessBest = 0;
+let noteStats = {};  // { name: {correct,wrong} }
+NAMES.forEach(n=>noteStats[n]={correct:0,wrong:0});
+
+let mode = null;        // 'level' | 'endless'
+let curLevel = null;
+let idx = 0, correct = 0;
+let dotResults = [];
+let answered = false;
+let curStep = null, curName = null;
+let endlessStreak = 0;
+let lastStep = null;
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (id)=>document.getElementById(id);
+const pick = a=>a[Math.floor(Math.random()*a.length)];
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function starStr(s){ let o=''; for(let i=1;i<=3;i++) o+= i<=s?'★':'<span class="e">★</span>'; return o; }
+
+/* =========================================================
+   PERSISTENCIA EN SUPABASE
+   ========================================================= */
+function buildData(){
+  const levels={};
+  LEVELS.forEach(l=>{ levels[l.id]={ bestStars: best[l.id]||0, passed: passed[l.id]===true }; });
+  return { levels, score, endlessBest, noteStats, updatedAt: new Date().toISOString() };
+}
+
+async function loadProgress(){
+  LEVELS.forEach(l=>{ best[l.id]=0; passed[l.id]=false; });
+  score=0; endlessBest=0;
+  NAMES.forEach(n=>noteStats[n]={correct:0,wrong:0});
+  const { data: row } = await supabase
+    .from('progress')
+    .select('data')
+    .eq('user_id', USER_ID)
+    .eq('subject', SUBJECT)
+    .maybeSingle();
+  if(row && row.data){
+    const d=row.data;
+    if(d.levels && typeof d.levels==='object'){
+      LEVELS.forEach(l=>{
+        const r=d.levels[l.id];
+        if(r){
+          if(Number.isFinite(r.bestStars)) best[l.id]=r.bestStars;
+          if(typeof r.passed==='boolean') passed[l.id]=r.passed;
+        }
+      });
+    }
+    score = Number.isFinite(d.score) ? d.score : 0;
+    endlessBest = Number.isFinite(d.endlessBest) ? d.endlessBest : 0;
+    if(d.noteStats && typeof d.noteStats==='object'){
+      NAMES.forEach(n=>{
+        const s=d.noteStats[n];
+        if(s) noteStats[n]={ correct:Number(s.correct)||0, wrong:Number(s.wrong)||0 };
+      });
+    }
+  }
+}
+
+let saving=false, dirty=false;
+async function saveProgress(){
+  dirty=true;
+  if(saving) return;
+  saving=true;
+  try{
+    while(dirty){
+      dirty=false;
+      const data=buildData();
+      const { error } = await supabase
+        .from('progress')
+        .upsert(
+          { user_id: USER_ID, subject: SUBJECT, data, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,subject' }
+        );
+      if(error) console.error('Error al guardar progreso:', error.message);
+    }
+  } finally { saving=false; }
+}
+
+/* =========================================================
+   BORRAR (UPDATE a objeto vacío, NUNCA delete)
+   ========================================================= */
+async function eraseProgress(){
+  const emptyNote={}; NAMES.forEach(n=>emptyNote[n]={correct:0,wrong:0});
+  const emptyData={ levels:{}, score:0, endlessBest:0, noteStats:emptyNote, updatedAt:new Date().toISOString() };
+  const { error } = await supabase
+    .from('progress')
+    .upsert(
+      { user_id: USER_ID, subject: SUBJECT, data: emptyData, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,subject' }
+    );
+  if(error) console.error('Error al borrar progreso:', error.message);
+  LEVELS.forEach(l=>{ best[l.id]=0; passed[l.id]=false; });
+  score=0; endlessBest=0; NAMES.forEach(n=>noteStats[n]={correct:0,wrong:0});
+  $('eraseModal').classList.remove('on');
+  goHub();
+}
+
+/* =========================================================
+   NAVEGACIÓN ENTRE VISTAS
+   ========================================================= */
+function showView(id){
+  ['hub','levels','game'].forEach(v=>$(v).classList.toggle('on', v===id));
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function refreshTotals(){
+  const tot=LEVELS.reduce((a,l)=>a+(best[l.id]||0),0);
+  $('totStars').textContent='★ '+tot;
+  $('totScore').textContent=score;
+}
+function goHub(){ refreshTotals(); showView('hub'); }
+
+function renderLevels(){
+  const c=$('levelCards'); c.innerHTML='';
+  LEVELS.forEach((l,i)=>{
+    const card=el(`<div class="level-card">
+      <span class="num">${i+1}</span>
+      <span class="lic">${l.ic}</span>
+      <h3>${esc(l.n)}</h3>
+      <div class="ldesc">${esc(l.desc)}</div>
+      <div class="stars">${starStr(best[l.id])}${passed[l.id]?'<span class="appr">✓</span>':''}</div>
+    </div>`);
+    card.onclick=()=>startLevel(l.id);
+    c.appendChild(card);
+  });
+  showView('levels');
+}
+
+/* =========================================================
+   FLUJO DE JUEGO
+   ========================================================= */
+function freshStep(pool){
+  let s, tries=0;
+  do { s=pick(pool); tries++; } while(s===lastStep && pool.length>1 && tries<20);
+  lastStep=s;
+  return s;
+}
+
+function startLevel(id){
+  mode='level';
+  curLevel=LEVELS.find(l=>l.id===id);
+  idx=0; correct=0; dotResults=[]; lastStep=null;
+  $('gTitle').textContent=`${curLevel.ic}  ${curLevel.n}`;
+  $('endlessMeter').hidden=true;
+  $('dots').style.display='';
+  showView('game');
+  nextNote();
+}
+
+function startEndless(){
+  mode='endless';
+  endlessStreak=0; lastStep=null;
+  $('gTitle').textContent='♾️ Práctica sin fin';
+  $('dots').style.display='none';
+  $('endlessMeter').hidden=false;
+  updateEndlessMeter();
+  showView('game');
+  nextNote();
+}
+function updateEndlessMeter(){
+  $('endlessMeter').textContent=`🔥 Racha: ${endlessStreak} · Mejor: ${Math.max(endlessBest,endlessStreak)}`;
+}
+
+function dotsHTML(){
+  let h='';
+  for(let i=0;i<ROUND_LEN;i++){
+    let cls='dot';
+    if(i<idx) cls+= dotResults[i]?' ok':' no';
+    else if(i===idx) cls+=' cur';
+    h+=`<span class="${cls}"></span>`;
+  }
+  return h;
+}
+
+function nextNote(){
+  answered=false;
+  if(mode==='level' && idx>=ROUND_LEN){ return showSummary(); }
+
+  const pool = mode==='level' ? curLevel.steps : ENDLESS_STEPS;
+  curStep = freshStep(pool);
+  curName = NOTE_BY_STEP[String(curStep)];
+
+  if(mode==='level') $('dots').innerHTML=dotsHTML();
+
+  const hint = mode==='level'
+    ? `Nota ${idx+1} de ${ROUND_LEN}`
+    : `Toca el nombre de la nota`;
+
+  $('panel').innerHTML=`
+    <div class="qhint">${hint}</div>
+    <div class="qtitle">¿Qué nota es esta?</div>
+    <div class="staff-wrap">${staffSVG(curStep)}</div>
+    <div class="notebtns" id="notebtns"></div>
+    <div class="feedback" id="fb"></div>
+    <div class="actions" id="acts"></div>`;
+
+  const box=$('notebtns');
+  NAMES.forEach(name=>{
+    const b=el(`<button class="nbtn">${LABEL[name]}</button>`);
+    b.onclick=()=>answer(name, b);
+    box.appendChild(b);
+  });
+}
+
+const goodMsgs=()=>[`¡Correcto, ${esc(PLAYER)}! 🎉`,`¡Muy bien, ${esc(PLAYER)}!`,`¡Afinadísimo! 🎵`,`¡Lo lograste!`,`¡Genial! 🌟`];
+const badMsgs=()=>[`¡Casi, ${esc(PLAYER)}!`,`No pasa nada, así se aprende 💪`,`¡Ánimo! Fíjate bien:`,`Mira dónde está la nota:`];
+
+function answer(name, btnEl){
+  if(answered) return;
+  answered=true;
+  const ok = name===curName;
+
+  // marcar botones
+  document.querySelectorAll('#notebtns .nbtn').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===LABEL[curName]) b.classList.add('correct');
+  });
+  if(!ok) btnEl.classList.add('wrong');
+
+  // estadística por nota (siempre por nombre)
+  if(ok) noteStats[curName].correct++; else noteStats[curName].wrong++;
+
+  // puntos + racha
+  if(ok){
+    score += PTS_CORRECT;
+    if(mode==='endless'){ endlessStreak++; if(endlessStreak>endlessBest) endlessBest=endlessStreak; }
+  } else {
+    if(mode==='endless') endlessStreak=0;
+  }
+  if(mode==='endless') updateEndlessMeter();
+  refreshTotals();
+
+  if(mode==='level'){
+    dotResults[idx]=ok;
+    $('dots').innerHTML=dotsHTML().replace(/cur/,'');
+  }
+
+  // feedback
+  const fb=$('fb');
+  fb.className='feedback '+(ok?'good':'bad')+' show';
+  fb.innerHTML=`<div class="fh">${ok?pick(goodMsgs()):pick(badMsgs())}</div>`+
+    (ok ? '' : `<div class="sol">Esta nota es <b>${LABEL[curName]}</b>.</div>`);
+
+  saveProgress();
+
+  // botón continuar
+  const acts=$('acts'); acts.innerHTML='';
+  if(mode==='level'){
+    const last = idx===ROUND_LEN-1;
+    const btn=el(`<button class="btn ${last?'gold':'primary'}">${last?'Ver resultado 🏁':'Siguiente →'}</button>`);
+    btn.onclick=()=>{ idx++; nextNote(); };
+    acts.appendChild(btn);
+    btn.focus();
+  } else {
+    const btn=el(`<button class="btn gold">Siguiente nota →</button>`);
+    btn.onclick=()=>nextNote();
+    acts.appendChild(btn);
+    btn.focus();
+    const stop=el(`<button class="btn ghost">Terminar</button>`);
+    stop.onclick=goHub;
+    acts.appendChild(stop);
+  }
+}
+
+function showSummary(){
+  const ok = correct>=PASS;
+  const stars = correct===ROUND_LEN?3 : correct===PASS?2 : 0;
+  let bonus=0;
+  if(ok){
+    if(stars>best[curLevel.id]) best[curLevel.id]=stars;
+    passed[curLevel.id]=true;
+    bonus = PTS_PASS + (stars===3 ? PTS_PERFECT : 0);
+    score += bonus;
+    refreshTotals();
+    saveProgress();
+  }
+  $('dots').innerHTML=dotsHTML();
+  const panel=$('panel');
+  if(ok){
+    const msg = stars===3?`¡Perfecto, ${esc(PLAYER)}! Lees estas notas como todo un músico. 🏆`
+                         :`¡Aprobaste, ${esc(PLAYER)}! Muy bien hecho. ✅`;
+    let sStr=''; for(let i=1;i<=3;i++) sStr+= i<=stars?'★':'<span class="e">★</span>';
+    panel.innerHTML=`<div class="summary">
+      <div class="bigstars">${sStr}</div>
+      <h2>¡Nivel aprobado!</h2>
+      <p class="score">Acertaste ${correct} de ${ROUND_LEN}</p>
+      <p class="pts-won">+${bonus} puntos de bono 🪙</p>
+      <p>${msg}</p>
+      <div class="actions">
+        <button class="btn primary" id="sumReplay">Jugar otra vez ↺</button>
+        <button class="btn ghost" id="sumBack">Volver a niveles</button>
+      </div></div>`;
+  } else {
+    panel.innerHTML=`<div class="summary">
+      <div class="bigstars sad">✕</div>
+      <h2>Aún no apruebas este nivel</h2>
+      <p class="score">Acertaste ${correct} de ${ROUND_LEN}</p>
+      <p>Necesitas <b>al menos 4 de 5</b>. ¡Tú puedes, ${esc(PLAYER)}! Vamos otra vez. 💪</p>
+      <div class="actions">
+        <button class="btn gold" id="sumReplay">Volver a practicar 🔁</button>
+        <button class="btn ghost" id="sumBack">Volver a niveles</button>
+      </div></div>`;
+  }
+  $('sumReplay').onclick=()=>startLevel(curLevel.id);
+  $('sumBack').onclick=renderLevels;
+}
+
+/* =========================================================
+   REPORTE DE ESTUDIO
+   ========================================================= */
+function openReport(){
+  const body=$('reportBody');
+  // Por nota
+  let noteRows='<div class="rep-section-t">🎵 Cómo vas con cada nota</div>';
+  const attempted=[];
+  NAMES.forEach(name=>{
+    const s=noteStats[name]; const tot=s.correct+s.wrong;
+    if(tot>0){
+      const pct=Math.round(s.correct/tot*100);
+      const cls= pct>=80?'good':(pct>=50?'mid':'low');
+      attempted.push({name, pct});
+      noteRows+=`<div class="rep-row">
+        <span class="rn">${LABEL[name]}</span>
+        <span class="rbarwrap"><div class="rbar"><i class="${cls}" style="width:${pct}%"></i></div></span>
+        <span class="rmeta">${s.correct}/${tot} · ${pct}%</span>
+      </div>`;
+    } else {
+      noteRows+=`<div class="rep-row untried">
+        <span class="rn">${LABEL[name]}</span>
+        <span class="rbarwrap"><div class="rbar"><i class="mid" style="width:0%"></i></div></span>
+        <span class="rmeta">Sin intentar</span>
+      </div>`;
+    }
+  });
+
+  // Por nivel
+  let lvRows='<div class="rep-section-t" style="margin-top:14px;">⭐ Tus niveles</div>';
+  LEVELS.forEach((l,i)=>{
+    const st=best[l.id]||0; const p=passed[l.id]===true;
+    lvRows+=`<div class="rep-lv">
+      <span class="ln">${i+1}. ${esc(l.n)}</span>
+      <span class="ls">${starStr(st)} ${p?'✓':''}</span>
+    </div>`;
+  });
+
+  // Mensaje de fortalezas / debilidades (solo notas intentadas)
+  let msg='';
+  if(attempted.length===0){
+    msg=`¡Aún no juegas, ${esc(PLAYER)}! Empieza con los Niveles o la Práctica sin fin para ver aquí cómo vas con cada nota. 🎼`;
+  } else {
+    const maxPct=Math.max(...attempted.map(a=>a.pct));
+    const minPct=Math.min(...attempted.map(a=>a.pct));
+    const strong=attempted.filter(a=>a.pct===maxPct).map(a=>LABEL[a.name]);
+    const weak=attempted.filter(a=>a.pct===minPct).map(a=>LABEL[a.name]);
+    if(maxPct===minPct){
+      msg=`¡Vas parejo, ${esc(PLAYER)}! Llevas <b>${maxPct}%</b> de aciertos en las notas que has practicado. Sigue jugando para dominar toda la octava. 🌟`;
+    } else {
+      msg=`Tus notas más firmes: <span class="strong">${strong.join(', ')}</span> (${maxPct}%). ¡Excelente, ${esc(PLAYER)}! 🎉<br><br>
+        Para practicar un poco más: <span class="weak">${weak.join(', ')}</span> (${minPct}%). Vuelve a la Práctica sin fin y fíjate bien en su lugar en el pentagrama. ¡Tú puedes! 💪`;
+    }
+  }
+
+  body.innerHTML=noteRows+lvRows+`<div class="rep-msg">${msg}</div>`;
+  $('reportModal').classList.add('on');
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+$('modeLevels').addEventListener('click', renderLevels);
+$('modeEndless').addEventListener('click', startEndless);
+$('levelsBack').addEventListener('click', goHub);
+$('gameBack').addEventListener('click', ()=> mode==='level' ? renderLevels() : goHub());
+$('reportBtn').addEventListener('click', openReport);
+$('reportClose').addEventListener('click', ()=>$('reportModal').classList.remove('on'));
+$('eraseBtn').addEventListener('click', ()=>$('eraseModal').classList.add('on'));
+$('eraseCancel').addEventListener('click', ()=>$('eraseModal').classList.remove('on'));
+$('eraseConfirm').addEventListener('click', eraseProgress);
+[$('reportModal'),$('eraseModal')].forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('on'); }));
+
+/* =========================================================
+   PERSONALIZACIÓN + ARRANQUE / CONTROL DE ACCESO (PAGADO)
+   ========================================================= */
+function applyName(){
+  $('playerName').textContent=(PLAYER||'estudiante').toUpperCase();
+  $('greetName').textContent=PLAYER||'estudiante';
+}
+function setupAuthListener(loadedUserId){
+  supabase.auth.onAuthStateChange((event, session)=>{
+    if(event==='SIGNED_OUT' || !session){ window.location.replace('../login.html'); return; }
+    if(session.user.id !== loadedUserId){ window.location.replace('../login.html'); }
+  });
+}
+
+(async ()=>{
+  // 1) Requiere sesión.
+  const { data:{ user }, error } = await supabase.auth.getUser();
+  if(error || !user){ window.location.replace('../login.html'); return; }
+  USER_ID = user.id;
+
+  // 2) Música es PAGADA: requiere has_access === true.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('kid_name, has_access')
+    .eq('id', USER_ID)
+    .single();
+  if(profile?.has_access !== true){ window.location.replace('../dashboard.html'); return; }
+
+  const nm=(profile?.kid_name || '').trim();
+  PLAYER = nm || 'estudiante';
+  applyName();
+
+  // 3) Restaurar progreso.
+  await loadProgress();
+  refreshTotals();
+
+  // 4) Revelar app (recién aquí pasa el gate).
+  $('loadingScreen').classList.add('hidden');
+  $('loadingScreen').hidden = true;
+  $('app').classList.remove('hidden');
+  $('app').hidden = false;
+
+  setupAuthListener(USER_ID);
+})();
+</script>
+</body>
+</html>
