@@ -710,6 +710,7 @@ function answer(name, btnEl){
   refreshTotals();
 
   if(mode==='level'){
+    if(ok) correct++;
     dotResults[idx]=ok;
     $('dots').innerHTML=dotsHTML().replace(/cur/,'');
   }
