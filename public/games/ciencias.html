@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmos Quest — Science — My eTutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Fredoka:wght@400;500;600;700&family=Mulish:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --space-1:#070b1e;
+    --space-2:#0c1330;
+    --space-3:#111a45;
+    --navy:#0a1130;
+    --teal:#16e0c0;
+    --teal-deep:#0f9f8a;
+    --teal-dim:#0a6f60;
+    --cyan:#38d6ff;
+    --cyan-deep:#1593c0;
+    --green:#5be08a;
+    --green-deep:#2fae5a;
+    --red:#ff6b6b;
+    --red-deep:#c63d3d;
+    --gold:#ffd56b;
+    --ink:#e8f3ff;
+    --ink-soft:#9fb6d6;
+    --card:rgba(20,30,68,.78);
+    --card-2:rgba(13,20,52,.85);
+    --line:rgba(56,214,255,.26);
+    --glow:rgba(22,224,192,.45);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Mulish',sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(900px 600px at 12% -10%, rgba(56,214,255,.16), transparent 60%),
+      radial-gradient(800px 700px at 110% 115%, rgba(22,224,192,.16), transparent 55%),
+      radial-gradient(700px 500px at 85% 8%, rgba(124,108,255,.14), transparent 60%),
+      linear-gradient(160deg, var(--space-2) 0%, var(--space-1) 55%, #05081a 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding:18px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Starfield */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(1.4px 1.4px at 20% 30%, rgba(255,255,255,.9), transparent),
+      radial-gradient(1.2px 1.2px at 70% 20%, rgba(255,255,255,.7), transparent),
+      radial-gradient(1.6px 1.6px at 40% 70%, rgba(160,230,255,.9), transparent),
+      radial-gradient(1px 1px at 85% 60%, rgba(255,255,255,.7), transparent),
+      radial-gradient(1.3px 1.3px at 55% 45%, rgba(255,255,255,.6), transparent),
+      radial-gradient(1.1px 1.1px at 10% 80%, rgba(180,255,240,.8), transparent),
+      radial-gradient(1.5px 1.5px at 90% 90%, rgba(255,255,255,.8), transparent),
+      radial-gradient(1px 1px at 30% 12%, rgba(255,255,255,.6), transparent);
+    background-repeat:repeat;
+    background-size:520px 520px, 420px 420px, 600px 600px, 380px 380px, 500px 500px, 460px 460px, 540px 540px, 360px 360px;
+    animation:twinkle 6s ease-in-out infinite alternate;
+    pointer-events:none; z-index:0;
+  }
+  @keyframes twinkle{from{opacity:.55;} to{opacity:1;}}
+  .wrap{position:relative; z-index:1; max-width:920px; margin:0 auto;}
+
+  /* ---------- LOADING ---------- */
+  .loading{
+    min-height:80vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; text-align:center;
+  }
+  .loading .badge{
+    font-family:'Orbitron',sans-serif; font-weight:900; font-size:24px; letter-spacing:3px;
+    background:linear-gradient(180deg,var(--teal),var(--teal-deep));
+    color:#04231f; padding:10px 20px; border-radius:12px;
+    box-shadow:0 0 24px var(--glow);
+  }
+  .loading .msg{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600;}
+  .spinner{
+    width:46px; height:46px; border-radius:50%;
+    border:4px solid rgba(56,214,255,.22); border-top-color:var(--teal);
+    animation:spin .8s linear infinite;
+    box-shadow:0 0 18px var(--glow);
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:14px; margin-bottom:18px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand .badge{
+    font-family:'Orbitron',sans-serif; font-weight:700; font-size:18px; letter-spacing:2px;
+    background:linear-gradient(180deg,var(--teal),var(--teal-deep));
+    color:#04231f; padding:9px 15px; border-radius:12px;
+    box-shadow:0 0 20px var(--glow); white-space:nowrap;
+  }
+  .brand h1{
+    font-family:'Orbitron',sans-serif; font-weight:700; line-height:1.05;
+    font-size:clamp(17px,3vw,28px); letter-spacing:1px; color:var(--ink);
+    text-shadow:0 0 16px rgba(56,214,255,.45);
+  }
+  .brand h1 span{color:var(--teal);}
+  .head-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .player-pill{
+    display:flex; align-items:center; gap:10px;
+    background:var(--card); border:2px solid var(--teal-deep);
+    padding:8px 16px; border-radius:999px;
+    font-family:'Fredoka',sans-serif; font-weight:600;
+    box-shadow:0 0 16px rgba(22,224,192,.22);
+  }
+  .player-pill .who{font-size:12px; color:var(--ink-soft); font-weight:500;}
+  .player-pill .nm{font-size:18px; color:var(--teal); letter-spacing:.5px;}
+  .back-link{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:14px;
+    color:var(--ink); text-decoration:none;
+    border:2px solid var(--cyan-deep); border-radius:999px; padding:8px 14px;
+    background:var(--card);
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .back-link:hover{background:var(--space-3); border-color:var(--cyan);}
+
+  /* ---------- SCOREBAR ---------- */
+  .scorebar{
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+    margin-bottom:16px;
+  }
+  .score-box{
+    flex:1 1 160px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:16px; padding:12px 18px;
+    box-shadow:inset 0 0 0 1px rgba(56,214,255,.12), 0 8px 22px rgba(0,0,0,.35);
+  }
+  .score-box .lbl{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:13px; text-transform:uppercase; letter-spacing:1px;}
+  .score-box .val{font-family:'Orbitron',sans-serif; font-weight:700; font-size:24px; color:var(--teal);}
+  .progress-box{flex:2 1 240px;}
+  .progress-box .lbl{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:13px; margin-bottom:6px; display:flex; justify-content:space-between;}
+  .bar{height:14px; border-radius:999px; background:rgba(56,214,255,.12); overflow:hidden; border:1px solid var(--line);}
+  .bar > i{display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,var(--teal),var(--cyan)); transition:width .5s cubic-bezier(.2,.8,.2,1); box-shadow:0 0 12px var(--glow);}
+
+  /* ---------- TOPIC LIST (ORBITS) ---------- */
+  .timeline-intro{text-align:center; margin:6px 0 22px;}
+  .timeline-intro h2{
+    font-family:'Orbitron',sans-serif; font-weight:700; color:var(--ink);
+    font-size:clamp(18px,3.4vw,28px); line-height:1.1; letter-spacing:1px;
+    text-shadow:0 0 16px rgba(56,214,255,.4);
+  }
+  .timeline-intro p{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600; margin-top:8px;}
+
+  .timeline{position:relative; padding:6px 0;}
+  .timeline::before{
+    content:""; position:absolute; left:30px; top:14px; bottom:14px; width:4px;
+    background:linear-gradient(180deg,var(--teal),var(--cyan-deep));
+    border-radius:999px; opacity:.5; box-shadow:0 0 12px var(--glow);
+  }
+  .tema-card{
+    position:relative; display:flex; align-items:center; gap:16px;
+    margin:0 0 16px 62px; padding:16px 18px; cursor:pointer;
+    background:var(--card);
+    border:2px solid var(--line); border-radius:18px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+    transition:transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .tema-card:hover{transform:translateY(-3px); border-color:var(--teal);
+    box-shadow:0 12px 30px rgba(22,224,192,.28);}
+  .tema-card .node{
+    position:absolute; left:-50px; top:50%; transform:translateY(-50%);
+    width:44px; height:44px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--cyan), var(--cyan-deep));
+    border:3px solid var(--space-1);
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+    box-shadow:0 0 16px var(--glow); z-index:2;
+  }
+  .tema-card.full .node{background:radial-gradient(circle at 35% 30%, #8bf0ad, var(--green-deep));}
+  .tema-card .body{flex:1 1 auto; min-width:0;}
+  .tema-card .nm{
+    font-family:'Fredoka',sans-serif; font-weight:700; color:var(--ink);
+    font-size:clamp(15px,2.4vw,18px); line-height:1.15; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .tema-card .check{color:var(--green); font-weight:800;}
+  .tema-card .mini{margin-top:10px;}
+  .tema-card .mini .top{display:flex; justify-content:space-between; font-family:'Fredoka',sans-serif; font-size:12.5px; color:var(--ink-soft); font-weight:600; margin-bottom:5px;}
+  .minibar{height:10px; border-radius:999px; background:rgba(56,214,255,.12); overflow:hidden; border:1px solid var(--line);}
+  .minibar > i{display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,var(--teal),var(--cyan)); transition:width .5s ease;}
+  .tema-card.full .minibar > i{background:linear-gradient(90deg,var(--green-deep),var(--green));}
+  .tema-card .go{
+    font-family:'Fredoka',sans-serif; font-weight:700; color:var(--teal);
+    font-size:24px; flex:0 0 auto;
+  }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:'Fredoka',sans-serif; font-weight:600; cursor:pointer;
+    border:none; border-radius:14px; padding:13px 22px; font-size:17px;
+    background:linear-gradient(180deg,var(--teal),var(--teal-deep));
+    color:#04231f; box-shadow:0 0 22px var(--glow);
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.08); transform:translateY(-2px);}
+  .btn:active{transform:translateY(2px);}
+  .btn.ghost{background:var(--card); color:var(--ink); border:2px solid var(--cyan-deep); box-shadow:none;}
+  .btn.ghost:hover{background:var(--space-3); border-color:var(--cyan);}
+  .btn.danger{background:linear-gradient(180deg,#ff8a8a,var(--red-deep)); color:#fff; box-shadow:0 0 22px rgba(255,107,107,.35);}
+  .btn:disabled{filter:grayscale(.5) brightness(.7); cursor:not-allowed; transform:none;}
+  .center{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:22px;}
+
+  /* ---------- SCREENS ---------- */
+  .screen{
+    text-align:center; padding:32px 22px;
+    background:var(--card-2);
+    border:2px solid var(--teal-deep); border-radius:24px;
+    box-shadow:0 18px 50px rgba(0,0,0,.5), inset 0 0 40px rgba(56,214,255,.06);
+    animation:pop .35s cubic-bezier(.2,1.1,.3,1);
+  }
+  .screen .big{
+    font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(24px,5.5vw,42px); line-height:1.05;
+    color:var(--ink); text-shadow:0 0 20px rgba(56,214,255,.5);
+  }
+  .screen .big .gold{color:var(--teal);}
+  .screen .sub{font-family:'Fredoka',sans-serif; font-size:clamp(15px,2.4vw,20px); color:var(--ink-soft); margin-top:12px; line-height:1.5;}
+  .screen .hi{color:var(--cyan); font-weight:700;}
+  .rules{
+    max-width:560px; margin:22px auto 0; text-align:left;
+    background:rgba(56,214,255,.06); border:1px solid var(--line);
+    border-radius:16px; padding:18px 20px;
+  }
+  .rules li{margin:8px 0 8px 4px; line-height:1.5; list-style:none; position:relative; padding-left:30px; color:var(--ink);}
+  .rules li::before{content:"🚀"; position:absolute; left:0;}
+  .medal{font-size:72px; line-height:1; margin:6px 0;}
+
+  /* ---------- QUESTION SCREEN ---------- */
+  .quiz-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    flex-wrap:wrap; margin-bottom:14px;
+  }
+  .quiz-head .tema-tag{
+    font-family:'Fredoka',sans-serif; font-weight:700; color:var(--ink);
+    font-size:15px; display:flex; align-items:center; gap:8px;
+    background:var(--card); border:2px solid var(--line); border-radius:999px; padding:8px 16px;
+  }
+  .quiz-head .counter{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:14px;}
+  .qprog{height:10px; border-radius:999px; background:rgba(56,214,255,.12); overflow:hidden; border:1px solid var(--line); margin-bottom:18px;}
+  .qprog > i{display:block; height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--teal),var(--cyan)); transition:width .4s ease;}
+
+  .qcard{
+    background:var(--card-2);
+    border:2px solid var(--teal-deep); border-radius:22px;
+    padding:24px; box-shadow:0 14px 40px rgba(0,0,0,.5), inset 0 0 40px rgba(56,214,255,.05);
+    animation:pop .3s cubic-bezier(.2,1.1,.3,1);
+  }
+  @keyframes pop{from{transform:scale(.94) translateY(10px); opacity:0;} to{transform:none; opacity:1;}}
+  .q-text{font-size:clamp(17px,2.6vw,21px); line-height:1.45; font-weight:700; color:var(--ink); margin-bottom:20px;}
+  .opts{display:flex; flex-direction:column; gap:12px;}
+  .opt{
+    font-family:'Mulish',sans-serif; font-weight:600; font-size:16px; text-align:left;
+    cursor:pointer; color:var(--ink); line-height:1.35;
+    background:rgba(10,17,48,.7);
+    border:2px solid var(--line); border-radius:14px;
+    padding:14px 16px 14px 52px; position:relative;
+    transition:transform .1s ease, border-color .15s ease, filter .15s ease;
+  }
+  .opt:hover:not(.locked){border-color:var(--teal); filter:brightness(1.12); transform:translateX(3px);}
+  .opt .key{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:28px; height:28px; border-radius:50%;
+    background:var(--teal-deep); color:#04231f; font-family:'Fredoka',sans-serif; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .opt.correct{border-color:var(--green); background:linear-gradient(180deg, rgba(91,224,138,.28), rgba(47,174,90,.18));}
+  .opt.correct .key{background:var(--green-deep);color:#fff;}
+  .opt.wrong{border-color:var(--red); background:linear-gradient(180deg, rgba(255,107,107,.26), rgba(198,61,61,.16));}
+  .opt.wrong .key{background:var(--red-deep);color:#fff;}
+  .opt.locked{cursor:default;}
+
+  .feedback{margin-top:18px; border-radius:16px; padding:16px 18px; display:none; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;} to{opacity:1;}}
+  .feedback.show{display:block;}
+  .feedback.ok{background:linear-gradient(180deg, rgba(47,174,90,.22), rgba(47,174,90,.1)); border:2px solid rgba(91,224,138,.5);}
+  .feedback.bad{background:linear-gradient(180deg, rgba(198,61,61,.2), rgba(198,61,61,.08)); border:2px solid rgba(255,107,107,.5);}
+  .feedback h3{font-family:'Fredoka',sans-serif; font-size:20px; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .feedback.ok h3{color:var(--green);}
+  .feedback.bad h3{color:var(--red);}
+  .feedback .line{font-size:15px; line-height:1.55; margin-bottom:8px; color:var(--ink);}
+  .feedback .line b{color:var(--cyan);}
+  .feedback .correct-ans{font-weight:700; color:var(--green);}
+
+  /* ---------- OVERLAY / MODALS ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:50; display:none;
+    align-items:center; justify-content:center; padding:18px;
+    background:rgba(4,8,24,.7); backdrop-filter:blur(5px);
+  }
+  .overlay.show{display:flex; animation:fade .25s ease;}
+  .modal{
+    width:min(640px,100%); max-height:92vh; overflow-y:auto;
+    background:var(--card-2);
+    border:2px solid var(--teal-deep); border-radius:22px;
+    padding:24px; box-shadow:0 24px 60px rgba(0,0,0,.6), inset 0 0 50px rgba(56,214,255,.06);
+    animation:pop .3s cubic-bezier(.2,1.2,.3,1); text-align:center;
+  }
+  .modal .cat{font-family:'Fredoka',sans-serif; font-weight:700; color:var(--ink); font-size:17px; display:block; margin-bottom:6px;}
+
+  /* ---------- REPORT ---------- */
+  .report-row{margin:0 0 16px;}
+  .report-row .top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px;}
+  .report-row .nm{font-family:'Fredoka',sans-serif; font-weight:700; font-size:15px; color:var(--ink); text-align:left;}
+  .report-row .nm .ic{margin-right:6px;}
+  .report-row .meta{font-family:'Fredoka',sans-serif; font-size:13px; color:var(--ink-soft); white-space:nowrap;}
+  .repbar{height:13px; border-radius:999px; background:rgba(56,214,255,.12); overflow:hidden; border:1px solid var(--line);}
+  .repbar > i{display:block; height:100%; width:0%; border-radius:999px; transition:width .5s ease;}
+  .repbar > i.good{background:linear-gradient(90deg,var(--green-deep),var(--green));}
+  .repbar > i.mid{background:linear-gradient(90deg,var(--teal-deep),var(--teal));}
+  .repbar > i.low{background:linear-gradient(90deg,var(--red-deep),var(--red));}
+  .report-row.untried{opacity:.7;}
+  .report-row.untried .meta{color:var(--teal);}
+  .report-msg{
+    margin-top:8px; background:rgba(56,214,255,.07); border:1px solid var(--teal-deep);
+    border-radius:16px; padding:16px 18px; line-height:1.55; font-size:15px; text-align:left; color:var(--ink);
+  }
+  .report-msg b{color:var(--cyan);}
+  .report-msg .strong{color:var(--green); font-weight:700;}
+  .report-msg .weak{color:var(--red); font-weight:700;}
+
+  .hidden{display:none !important;}
+
+  .confetti{position:fixed; width:10px; height:14px; top:-20px; z-index:60; border-radius:2px; pointer-events:none;}
+  @keyframes fall{to{transform:translateY(108vh) rotate(620deg); opacity:.9;}}
+
+  @media (max-width:560px){
+    .tema-card{margin-left:54px; padding:14px;}
+    .tema-card .node{left:-46px; width:38px; height:38px; font-size:18px;}
+    .timeline::before{left:26px;}
+    .qcard{padding:18px;}
+    .score-box .val{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div class="wrap" id="loadingScreen">
+  <div class="loading">
+    <div class="badge">SCIENCE</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="msg">Launching your mission...</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="wrap hidden" id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="badge">SCIENCE</div>
+      <h1>Cosmos <span>Quest</span></h1>
+    </div>
+    <div class="head-right">
+      <div class="player-pill">
+        <span class="who">Explorer</span>
+        <span class="nm" id="playerName">STUDENT</span>
+      </div>
+      <a class="back-link" href="../dashboard.html">← Back to home</a>
+    </div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="screen">
+    <div class="medal">🚀</div>
+    <div class="big">Hello, <span class="gold" id="greetName">student</span>!</div>
+    <div class="sub">Get ready to explore <span class="hi">ecosystems, the solar system, the universe</span> and the scientists who discovered it all. Blast off! 🌌</div>
+    <ul class="rules">
+      <li>There are <b>5 topics</b> to explore. Tap one to travel through all its questions.</li>
+      <li>Each question has <b>4 options</b> (A, B, C and D). Tap the one you think is correct.</li>
+      <li>If you're <b>right</b>, you earn points and grow your streak. Either way, you'll see an <b>explanation</b> that teaches you more.</li>
+      <li>Your progress is <b>saved automatically</b>: close it and continue later, even on another device!</li>
+      <li>Check your <b>Study report</b> to see your strongest topics and the ones to review.</li>
+    </ul>
+    <div class="center">
+      <button class="btn" id="startBtn">Start the mission! 🛸</button>
+    </div>
+  </div>
+
+  <!-- GAME AREA (TOPIC LIST) -->
+  <div id="gameArea" class="hidden">
+    <div class="scorebar">
+      <div class="score-box">
+        <span class="lbl" id="scoreLbl">Points</span>
+        <span class="val" id="scoreVal">0</span>
+      </div>
+      <div class="score-box" style="flex:0 1 150px;">
+        <span class="lbl">Streak</span>
+        <span class="val" id="streakVal" style="font-size:20px;">0 🔥</span>
+      </div>
+      <div class="progress-box">
+        <div class="lbl"><span>Total progress</span><span id="progTxt">0 / 0</span></div>
+        <div class="bar"><i id="progBar"></i></div>
+      </div>
+    </div>
+
+    <div class="timeline-intro">
+      <h2>Choose your destination</h2>
+      <p>Pick a topic to explore the cosmos.</p>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <div class="center">
+      <button class="btn ghost" id="reportBtn">📊 Study report</button>
+      <button class="btn danger" id="eraseBtn">🗑️ Erase my progress</button>
+    </div>
+  </div>
+
+  <!-- QUIZ AREA (single topic walkthrough) -->
+  <div id="quizArea" class="hidden">
+    <div class="quiz-head">
+      <span class="tema-tag" id="quizTema">🪐 Topic</span>
+      <span class="counter" id="quizCounter">Question 1 of 1</span>
+    </div>
+    <div class="qprog"><i id="quizProgBar"></i></div>
+
+    <div class="qcard">
+      <div class="q-text" id="qText"></div>
+      <div class="opts" id="qOpts"></div>
+      <div class="feedback" id="qFeedback"></div>
+      <div class="center" style="margin-top:18px;">
+        <button class="btn hidden" id="qContinue">Continue ▶</button>
+        <button class="btn ghost" id="quizExitBtn">Back to map</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOPIC COMPLETE OVERLAY ===== -->
+<div class="overlay" id="temaDoneOverlay">
+  <div class="modal">
+    <div class="medal">🛰️</div>
+    <span class="cat" id="temaDoneTitle">Topic complete!</span>
+    <div class="sub" id="temaDoneMsg" style="font-family:'Fredoka',sans-serif;color:var(--ink-soft);margin-top:8px;line-height:1.5;"></div>
+    <div class="center" style="margin-top:22px;">
+      <button class="btn" id="temaDoneBackBtn">Back to map 🗺️</button>
+      <button class="btn ghost" id="temaDoneReportBtn">📊 See report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FULL COMPLETION OVERLAY ===== -->
+<div class="overlay" id="completionOverlay">
+  <div class="modal">
+    <div class="medal">🏆</div>
+    <span class="cat" style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:24px;color:var(--teal);letter-spacing:1px;">MISSION COMPLETE!</span>
+    <div class="sub" id="completionMsg" style="font-family:'Fredoka',sans-serif;color:var(--ink-soft);margin-top:12px;line-height:1.5;"></div>
+    <div class="center" style="margin-top:22px;">
+      <button class="btn" id="compReportBtn">📊 See my report</button>
+      <button class="btn ghost" id="compCloseBtn">Keep exploring</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REPORT OVERLAY ===== -->
+<div class="overlay" id="reportOverlay">
+  <div class="modal" style="text-align:left;">
+    <span class="cat" style="text-align:center;">📊 Study report</span>
+    <div id="reportBody" style="margin-top:14px;"></div>
+    <div class="center" style="margin-top:18px;">
+      <button class="btn" id="reportCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ERASE CONFIRM OVERLAY ===== -->
+<div class="overlay" id="eraseOverlay">
+  <div class="modal">
+    <div class="medal">🗑️</div>
+    <span class="cat" style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:22px;color:var(--teal);letter-spacing:1px;">Erase progress</span>
+    <div class="sub" style="font-family:'Fredoka',sans-serif;color:var(--ink-soft);margin-top:12px;line-height:1.5;">Are you sure you want to erase ALL of your Science progress? This cannot be undone.</div>
+    <div class="center" style="margin-top:24px;">
+      <button class="btn danger" id="eraseConfirmBtn">Yes, erase everything</button>
+      <button class="btn ghost" id="eraseCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "../js/supabase.js";
+
+/* =========================================================
+   QUESTION BANK — SCIENCE (English)
+   5 topics; each card: { q, opts:[], correct:<idx>, ex, d:<1-3> }
+   (Embedded inline from science_preguntas.js; source untouched.)
+   ========================================================= */
+const TOPICS = [
+
+  { name:"ECOSYSTEMS", icon:"🌳", q:[
+    { q:"What is an ecosystem?", opts:["A community of living things interacting with their non-living environment","A single animal living alone","A type of rock","A man-made machine"], correct:0, ex:"An ecosystem is all the living things (plants, animals, microbes) interacting with each other and with non-living parts (water, air, soil, sunlight) in an area.", d:1 },
+    { q:"Which of these is a NON-living (abiotic) part of an ecosystem?", opts:["Sunlight","A rabbit","A tree","A mushroom"], correct:0, ex:"Abiotic (non-living) parts include sunlight, water, air, temperature, and soil. Rabbits, trees, and mushrooms are living (biotic).", d:2 },
+    { q:"A desert ecosystem is mainly characterized by—", opts:["Very little rainfall and extreme temperatures","Heavy rain all year","Being covered by ocean","Thick rainforest trees"], correct:0, ex:"Deserts are dry (very little rain) with big temperature swings — hot days and cold nights. Plants and animals there are adapted to save water.", d:1 },
+    { q:"Which ecosystem has the GREATEST variety of plants and animals (biodiversity)?", opts:["Tropical rainforest","Desert","Tundra","Open parking lot"], correct:0, ex:"Tropical rainforests are warm and wet year-round, supporting an enormous variety of living things — the highest biodiversity on land.", d:2 },
+    { q:"The frozen, treeless ecosystem with very cold temperatures is called the—", opts:["Tundra","Rainforest","Coral reef","Grassland"], correct:0, ex:"The tundra is cold and treeless, with frozen ground (permafrost). Only hardy plants like mosses and small shrubs survive.", d:2 },
+    { q:"Which is an example of an AQUATIC (water) ecosystem?", opts:["A coral reef","A desert","A grassland","A forest"], correct:0, ex:"Coral reefs, lakes, rivers, and oceans are aquatic ecosystems. Deserts, grasslands, and forests are land (terrestrial) ecosystems.", d:1 },
+    { q:"In an ecosystem, plants are called PRODUCERS because they—", opts:["Make their own food using sunlight","Eat other animals","Break down dead things","Drink only water"], correct:0, ex:"Producers (plants) make their own food from sunlight through photosynthesis. Consumers eat other living things; decomposers break down dead matter.", d:2 },
+    { q:"An animal that eats only plants is called a—", opts:["Herbivore","Carnivore","Decomposer","Producer"], correct:0, ex:"Herbivores eat plants; carnivores eat meat; omnivores eat both. Decomposers (like fungi) break down dead material.", d:1 },
+    { q:"What do decomposers (like fungi and bacteria) do in an ecosystem?", opts:["Break down dead plants and animals, returning nutrients to the soil","Produce sunlight","Hunt large animals","Make oxygen from rocks"], correct:0, ex:"Decomposers break down dead organisms and waste, recycling nutrients back into the soil so producers can use them again.", d:2 },
+    { q:"What usually happens if one species is removed from an ecosystem?", opts:["It can affect many other living things connected to it","Nothing changes at all","The sun stops shining","The ecosystem instantly disappears"], correct:0, ex:"Living things are connected in food chains and webs, so removing one species can affect many others that depend on it.", d:3 },
+  ]},
+
+  { name:"THE SOLAR SYSTEM", icon:"🪐", q:[
+    { q:"What is at the CENTER of our solar system?", opts:["The Sun","The Earth","The Moon","Jupiter"], correct:0, ex:"The Sun is at the center of the solar system. All the planets orbit (go around) the Sun.", d:1 },
+    { q:"How many planets are in our solar system?", opts:["8","9","7","12"], correct:0, ex:"There are 8 planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune. (Pluto is now called a dwarf planet.)", d:1 },
+    { q:"Which planet is CLOSEST to the Sun?", opts:["Mercury","Venus","Earth","Mars"], correct:0, ex:"Mercury is the closest planet to the Sun and also the smallest planet.", d:1 },
+    { q:"What is the correct order of the first four planets from the Sun?", opts:["Mercury, Venus, Earth, Mars","Earth, Mars, Venus, Mercury","Venus, Mercury, Mars, Earth","Mars, Earth, Venus, Mercury"], correct:0, ex:"From the Sun outward: Mercury, Venus, Earth, Mars (the rocky inner planets), then Jupiter, Saturn, Uranus, Neptune.", d:2 },
+    { q:"Which is the LARGEST planet in our solar system?", opts:["Jupiter","Earth","Saturn","Mars"], correct:0, ex:"Jupiter is the largest planet — a giant ball of gas. Saturn is the second largest.", d:1 },
+    { q:"Which planet is famous for its beautiful rings?", opts:["Saturn","Mercury","Mars","Venus"], correct:0, ex:"Saturn is famous for its bright rings made of ice and rock. (Other gas giants have faint rings too, but Saturn's are the most spectacular.)", d:1 },
+    { q:"Which planet is known as the 'Red Planet'?", opts:["Mars","Jupiter","Venus","Neptune"], correct:0, ex:"Mars looks red because its soil is rich in iron oxide (rust). It's the fourth planet from the Sun.", d:1 },
+    { q:"What is the name of Earth's only natural satellite?", opts:["The Moon","Titan","Phobos","Europa"], correct:0, ex:"The Moon is Earth's only natural satellite. It orbits Earth and causes the tides.", d:1 },
+    { q:"The four planets closest to the Sun are rocky. What are the four farther planets mostly made of?", opts:["Gas (gas giants)","Solid iron","Ice cream","Water only"], correct:0, ex:"Jupiter, Saturn, Uranus, and Neptune are 'gas giants' — huge planets made mostly of gases, unlike the small rocky inner planets.", d:2 },
+    { q:"Why do the planets stay in orbit around the Sun?", opts:["The Sun's gravity pulls on them","They are tied with ropes","They are pushed by wind","They float with no reason"], correct:0, ex:"The Sun's gravity pulls the planets toward it, keeping them moving in their orbits instead of flying off into space.", d:2 },
+    { q:"What is a star, like our Sun?", opts:["A huge glowing ball of hot gas that gives off light and heat","A large cold rock","A type of planet","A frozen comet"], correct:0, ex:"A star is an enormous ball of hot gas that produces its own light and heat. Our Sun is the closest star to Earth.", d:2 },
+  ]},
+
+  { name:"HISTORICAL ASTRONOMERS", icon:"🔭", q:[
+    { q:"Before Copernicus, most people believed the 'geocentric' model. What did it say?", opts:["The Earth is the center and everything orbits around it","The Sun is the center","There is no center","The Moon is the center"], correct:0, ex:"The geocentric model (from ancient Greeks like Ptolemy) put the EARTH at the center, with the Sun, Moon, and planets orbiting it.", d:2 },
+    { q:"Which astronomer proposed that the SUN, not the Earth, is the center (the heliocentric model)?", opts:["Nicolaus Copernicus","Ptolemy","Aristotle","Isaac Newton"], correct:0, ex:"Nicolaus Copernicus (1473–1543) proposed the heliocentric model: the Sun at the center, with Earth and the planets orbiting it.", d:2 },
+    { q:"The word 'heliocentric' means the center is the—", opts:["Sun","Earth","Moon","Galaxy"], correct:0, ex:"'Helio' means Sun. Heliocentric = Sun-centered. 'Geo' means Earth, so geocentric = Earth-centered.", d:2 },
+    { q:"Which astronomer used an early telescope to discover four moons of Jupiter?", opts:["Galileo Galilei","Copernicus","Kepler","Ptolemy"], correct:0, ex:"Galileo Galilei (1564–1642) used a telescope to discover Jupiter's four large moons, supporting the idea that not everything orbits Earth.", d:2 },
+    { q:"What important tool did Galileo use to study the sky in a new way?", opts:["The telescope","A microscope","A calculator","A compass"], correct:0, ex:"Galileo improved and used the telescope to observe the Moon's craters, Jupiter's moons, and the phases of Venus.", d:1 },
+    { q:"Johannes Kepler discovered that the planets orbit the Sun in what shape?", opts:["Ellipses (ovals), not perfect circles","Perfect squares","Straight lines","Triangles"], correct:0, ex:"Kepler (1571–1630) showed that planets move around the Sun in ellipses (oval shapes), correcting the idea of perfect circles.", d:3 },
+    { q:"Isaac Newton explained WHY planets stay in orbit. What was his big idea?", opts:["Gravity — a force that pulls objects toward each other","Magnetism from the Moon","Wind in space","Electricity"], correct:0, ex:"Isaac Newton described gravity, the force that pulls objects together. The Sun's gravity keeps the planets in their orbits.", d:2 },
+    { q:"Match the astronomer to the contribution:", opts:["Copernicus = Sun-centered model · Galileo = telescope discoveries · Newton = gravity","Copernicus = gravity · Galileo = ellipses · Newton = telescope","Copernicus = telescope · Galileo = gravity · Newton = Sun-centered","All three did exactly the same thing"], correct:0, ex:"Copernicus → heliocentric (Sun-centered) model; Galileo → telescope discoveries (Jupiter's moons); Kepler → elliptical orbits; Newton → gravity.", d:3 },
+    { q:"How did the telescope change astronomy?", opts:["It let people see farther and discover things invisible to the naked eye","It made the stars disappear","It was only used for reading books","It replaced the Sun"], correct:0, ex:"The telescope let astronomers see distant objects (like moons and craters) for the first time, leading to many new discoveries.", d:2 },
+  ]},
+
+  { name:"UNIVERSE TIMELINE", icon:"🌌", q:[
+    { q:"According to scientists, how did the universe begin?", opts:["With the Big Bang","With a giant rock","With the first humans","With the Moon"], correct:0, ex:"Scientists explain the beginning of the universe with the Big Bang: about 13.8 billion years ago, the universe began from an extremely hot, dense point and expanded.", d:1 },
+    { q:"About how long ago did the Big Bang happen?", opts:["About 13.8 billion years ago","About 100 years ago","About 1 million years ago","About 5,000 years ago"], correct:0, ex:"The Big Bang happened about 13.8 billion years ago — an enormous amount of time.", d:2 },
+    { q:"Right after the Big Bang, the universe was—", opts:["Extremely hot and dense, then it expanded and cooled","Cold and empty forever","Full of planets already","Made of solid ice"], correct:0, ex:"The early universe was incredibly hot and dense. As it expanded, it cooled down, allowing matter to form.", d:2 },
+    { q:"Which formed FIRST after the universe cooled?", opts:["Tiny particles and atoms","Humans","Cities","Smartphones"], correct:0, ex:"As the universe cooled, tiny particles joined to form the first atoms — the building blocks of all matter.", d:2 },
+    { q:"What is a galaxy?", opts:["An enormous collection of stars, gas, and dust held together by gravity","A single planet","A small moon","A type of comet"], correct:0, ex:"A galaxy is a huge group of stars (often billions), plus gas and dust, held together by gravity. Our galaxy is the Milky Way.", d:1 },
+    { q:"What is the name of the galaxy we live in?", opts:["The Milky Way","Andromeda","The Big Dipper","Orion"], correct:0, ex:"We live in the Milky Way galaxy, which contains our Sun and more than 100 billion other stars.", d:1 },
+    { q:"Put these in the correct ORDER (earliest first):", opts:["Big Bang → first atoms → first stars → galaxies → solar system","Solar system → galaxies → first stars → Big Bang","First stars → Big Bang → galaxies → atoms","Galaxies → Big Bang → solar system → atoms"], correct:0, ex:"Order: Big Bang → atoms form → first stars shine → stars gather into galaxies → our solar system forms.", d:3 },
+    { q:"About how old is our solar system (the Sun and planets)?", opts:["About 4.6 billion years old","About 100 years old","About 13.8 billion years old","About 1 million years old"], correct:0, ex:"Our solar system formed about 4.6 billion years ago — much later than the Big Bang (13.8 billion years ago).", d:3 },
+    { q:"Our solar system formed from a giant spinning cloud of gas and dust called a—", opts:["Solar nebula","Black hole","Galaxy cluster","Comet tail"], correct:0, ex:"The Sun and planets formed from a collapsing, spinning cloud of gas and dust called the solar nebula.", d:3 },
+    { q:"Is the universe still changing today?", opts:["Yes — it is still expanding and stars are still forming","No, it stopped long ago","It is shrinking to nothing","It never changes"], correct:0, ex:"The universe is still expanding today, and new stars continue to form in galaxies.", d:2 },
+  ]},
+
+  { name:"ANCIENT CONTRIBUTIONS", icon:"🏛️", q:[
+    { q:"Why did ancient civilizations study the sky?", opts:["To track time, seasons, farming, and navigation","To watch television","To play video games","For no reason at all"], correct:0, ex:"Ancient peoples watched the Sun, Moon, and stars to make calendars, know when to plant crops, navigate, and hold ceremonies.", d:1 },
+    { q:"The ancient Maya (in Mexico and Central America) are famous for developing a sophisticated—", opts:["Calendar based on careful sky observations","Telescope","Space rocket","Computer"], correct:0, ex:"The Maya carefully observed the stars and planets (like Venus) and created sophisticated calendars to track time.", d:2 },
+    { q:"The ancient Egyptians aligned their pyramids and used a calendar based on—", opts:["The Sun and stars (like the star Sirius)","Television signals","Ocean tides only","Random guessing"], correct:0, ex:"Egyptians built a solar calendar and used the rising of the star Sirius to predict the Nile's flooding. Their pyramids align with stars.", d:2 },
+    { q:"The ancient Babylonians (in Mesopotamia) are known for—", opts:["Recording star positions and creating early star catalogs","Inventing the telescope","Landing on the Moon","Building cars"], correct:0, ex:"The Babylonians of Mesopotamia recorded the movements of stars and planets on clay tablets, creating some of the earliest star catalogs.", d:3 },
+    { q:"The ancient Greeks added what to astronomy?", opts:["Mathematics and geometry to explain the sky","Electricity","Photography","Rockets"], correct:0, ex:"The Greeks used mathematics and geometry to build models of the sky and explain the motion of the planets.", d:2 },
+    { q:"How did ancient sailors use the stars?", opts:["To navigate and find their way across the sea","To cook food","To send text messages","To grow plants"], correct:0, ex:"Ancient sailors used the positions of stars and constellations to navigate across oceans, before modern instruments existed.", d:1 },
+    { q:"Why were calendars so important to ancient farming civilizations?", opts:["They told people when to plant and harvest crops","They were just decorations","They predicted the lottery","They had no real use"], correct:0, ex:"Calendars based on the Sun and stars told farmers the right time to plant and harvest, which was vital for survival.", d:2 },
+    { q:"Match the ancient civilization to its astronomy achievement:", opts:["Maya = detailed calendar · Egyptians = pyramids aligned to stars · Babylonians = star records","Maya = telescope · Egyptians = rockets · Babylonians = computers","Maya = electricity · Egyptians = cars · Babylonians = airplanes","All of them invented the telescope"], correct:0, ex:"Maya → advanced calendars; Egyptians → solar calendar and star-aligned pyramids; Babylonians → early star catalogs on clay tablets.", d:3 },
+  ]},
+
+];
+
+/* =========================================================
+   CONSTANTS / STATE
+   ========================================================= */
+const SUBJECT = "ciencias";
+const TOTAL_Q = TOPICS.reduce((s,t)=>s+t.q.length,0);
+const LETTERS = ["A","B","C","D"];
+const POINTS_PER_DIFF = 100; // points = difficulty (d) × 100
+
+let USER_ID = null;
+let KID_NAME = "student";
+
+let score = 0;
+let streak = 0;
+let answered = {};            // { "<ti>_<qi>": { correct: bool } } -> ALWAYS by question identity
+let completionShown = false;
+
+// Active topic session state
+let activeTema = -1;          // index of the open topic
+let playOrder = [];           // SHUFFLED order of qIndices (display only)
+let playPos = 0;              // current position within playOrder
+let current = null;           // { ti, qi, shuffled, answeredThisQ }
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (id)=>document.getElementById(id);
+function show(id){ $(id).classList.add('show'); }
+function hide(id){ $(id).classList.remove('show'); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function shuffle(arr){ for(let k=arr.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[arr[k],arr[j]]=[arr[j],arr[k]];} return arr; }
+
+function answeredCount(){ return Object.keys(answered).length; }
+function totalCorrect(){ return Object.values(answered).filter(a=>a && a.correct).length; }
+function temaAnsweredCount(ti){
+  let n=0; TOPICS[ti].q.forEach((_,qi)=>{ if(answered[`${ti}_${qi}`]) n++; }); return n;
+}
+
+/* =========================================================
+   SAVE TO SUPABASE (UPSERT with coalescing)
+   ========================================================= */
+function buildByTopic(){
+  const by = {};
+  TOPICS.forEach((tema,ti)=>{
+    let correct=0, wrong=0;
+    tema.q.forEach((_,qi)=>{
+      const a = answered[`${ti}_${qi}`];
+      if(a){ a.correct ? correct++ : wrong++; }
+    });
+    if(correct+wrong>0) by[tema.name] = { correct, wrong, total: correct+wrong };
+  });
+  return by;
+}
+function buildData(){
+  return {
+    answered,
+    score,
+    byTopic: buildByTopic(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+let saving=false, dirty=false;
+async function saveProgress(){
+  dirty = true;
+  if(saving) return;
+  saving = true;
+  try{
+    while(dirty){
+      dirty = false;
+      const data = buildData();
+      const { error } = await supabase
+        .from('progress')
+        .upsert(
+          { user_id: USER_ID, subject: SUBJECT, data, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,subject' }
+        );
+      if(error) console.error('Error saving progress:', error.message);
+    }
+  } finally {
+    saving = false;
+  }
+}
+
+async function loadProgress(){
+  const { data: row } = await supabase
+    .from('progress')
+    .select('data')
+    .eq('user_id', USER_ID)
+    .eq('subject', SUBJECT)
+    .maybeSingle();
+  if(row && row.data){
+    const d = row.data;
+    answered = (d.answered && typeof d.answered === 'object') ? d.answered : {};
+    score    = Number.isFinite(d.score) ? d.score : 0;
+  } else {
+    answered = {}; score = 0;
+  }
+}
+
+/* =========================================================
+   SCOREBOARD + TOPIC LIST (LANDING)
+   ========================================================= */
+function updateScoreboard(){
+  $('scoreVal').textContent = score;
+  $('streakVal').textContent = `${streak} 🔥`;
+  const ac = answeredCount();
+  $('progTxt').textContent = `${ac} / ${TOTAL_Q}`;
+  $('progBar').style.width = (TOTAL_Q ? (ac/TOTAL_Q*100) : 0) + '%';
+}
+
+function buildTimeline(){
+  const tl = $('timeline');
+  tl.innerHTML = '';
+  TOPICS.forEach((tema,ti)=>{
+    const total = tema.q.length;
+    const done = temaAnsweredCount(ti);
+    const full = done >= total;
+    const pct = total ? Math.round(done/total*100) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'tema-card' + (full ? ' full' : '');
+    card.innerHTML = `
+      <div class="node">${full ? '✓' : tema.icon}</div>
+      <div class="body">
+        <div class="nm"><span>${esc(tema.name)}</span>${full ? '<span class="check">✓ Complete</span>' : ''}</div>
+        <div class="mini">
+          <div class="top"><span>${tema.icon} ${done} / ${total} questions</span><span>${pct}%</span></div>
+          <div class="minibar"><i style="width:${pct}%"></i></div>
+        </div>
+      </div>
+      <div class="go">▶</div>`;
+    card.addEventListener('click', ()=>startTema(ti));
+    tl.appendChild(card);
+  });
+  updateScoreboard();
+}
+
+/* =========================================================
+   TOPIC FLOW (walks through ALL its questions)
+   ========================================================= */
+function startTema(ti){
+  activeTema = ti;
+  // Question order shuffled for DISPLAY only; saving uses qi identity.
+  playOrder = shuffle(TOPICS[ti].q.map((_,i)=>i));
+  playPos = 0;
+  $('gameArea').classList.add('hidden');
+  $('quizArea').classList.remove('hidden');
+  window.scrollTo({ top:0, behavior:'smooth' });
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const ti = activeTema;
+  const tema = TOPICS[ti];
+  const qi = playOrder[playPos];           // real question identity
+  const qd = tema.q[qi];
+  current = { ti, qi, answeredThisQ:false };
+
+  $('quizTema').innerHTML = `${tema.icon} ${esc(tema.name)}`;
+  $('quizCounter').textContent = `Question ${playPos+1} of ${playOrder.length}`;
+  $('quizProgBar').style.width = (playPos/playOrder.length*100) + '%';
+  $('qText').textContent = qd.q;
+
+  // Shuffle options (the correct one is not always in the same place)
+  current.shuffled = shuffle(qd.opts.map((t,i)=>({text:t, correct:i===qd.correct})));
+
+  const optsBox = $('qOpts');
+  optsBox.innerHTML = '';
+  current.shuffled.forEach((opt,idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${LETTERS[idx]}</span>${esc(opt.text)}`;
+    b.addEventListener('click', ()=>answer(idx));
+    optsBox.appendChild(b);
+  });
+
+  const fb = $('qFeedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  $('qContinue').classList.add('hidden');
+}
+
+function answer(idx){
+  if(current.answeredThisQ) return;
+  current.answeredThisQ = true;
+
+  const { ti, qi } = current;
+  const qd = TOPICS[ti].q[qi];
+  const correctIdx = current.shuffled.findIndex(o=>o.correct);
+  const isRight = current.shuffled[idx].correct;
+  const pts = (qd.d || 1) * POINTS_PER_DIFF;
+
+  // Lock and mark options (without re-triggering handlers)
+  document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
+    const clone = b.cloneNode(true);
+    if(i===correctIdx) clone.classList.add('correct');
+    if(i===idx && !isRight) clone.classList.add('wrong');
+    clone.classList.add('locked');
+    b.replaceWith(clone);
+  });
+
+  // Record by question IDENTITY (overwrites on replay, no double-counting)
+  answered[`${ti}_${qi}`] = { correct: isRight };
+
+  const fb = $('qFeedback');
+  if(isRight){
+    streak++;
+    score += pts; // fixed bank: points accumulate, even on replay
+    fb.className = 'feedback ok show';
+    fb.innerHTML = `<h3>Correct! 🎉</h3>
+      <div class="line">You earned <b>${pts} points</b>${streak>1?` (streak of <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">${esc(qd.ex)}</div>`;
+    confettiBurst();
+  } else {
+    streak = 0;
+    fb.className = 'feedback bad show';
+    fb.innerHTML = `<h3>🔭 Let's learn</h3>
+      <div class="line">You chose: <b>${LETTERS[idx]}) ${esc(current.shuffled[idx].text)}</b>, but that wasn't the right answer.</div>
+      <div class="line">${esc(qd.ex)}</div>
+      <div class="line correct-ans">✔ Correct answer: ${esc(current.shuffled[correctIdx].text)}</div>
+      <div class="line">Keep going, ${esc(KID_NAME)}! Every mistake teaches you something. 💪</div>`;
+  }
+
+  $('qContinue').classList.remove('hidden');
+  $('qContinue').textContent = (playPos < playOrder.length-1) ? 'Continue ▶' : 'Finish topic 🛰️';
+  updateScoreboard();
+  saveProgress();
+}
+
+function continueQuestion(){
+  playPos++;
+  if(playPos < playOrder.length){
+    renderQuestion();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    finishTema();
+  }
+}
+
+function finishTema(){
+  const ti = activeTema;
+  const tema = TOPICS[ti];
+  $('quizArea').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildTimeline();
+
+  // Completed the WHOLE bank?
+  if(answeredCount() >= TOTAL_Q){
+    if(!completionShown){
+      completionShown = true;
+      setTimeout(showCompletion, 300);
+    }
+    return;
+  }
+
+  // Summary of the topic just played
+  const by = buildByTopic();
+  const rec = by[tema.name] || { correct:0, total:tema.q.length };
+  const pct = tema.q.length ? Math.round((rec.correct||0)/tema.q.length*100) : 0;
+  $('temaDoneTitle').textContent = `${tema.icon} ${tema.name}`;
+  $('temaDoneMsg').innerHTML =
+    `You explored this topic and got <b>${rec.correct||0}</b> out of <b>${tema.q.length}</b> right (<b>${pct}%</b>).<br>Keep going with another topic, ${esc(KID_NAME)}!`;
+  show('temaDoneOverlay');
+  confettiBurst();
+}
+
+function exitTema(){
+  // Leaving mid-way: answered questions are already saved by identity.
+  $('quizArea').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  current = null;
+  buildTimeline();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* =========================================================
+   COMPLETION (100%)
+   ========================================================= */
+function showCompletion(){
+  const tc = totalCorrect();
+  $('completionMsg').innerHTML =
+    `Congratulations, <span style="color:var(--teal);font-weight:700;">${esc(KID_NAME)}</span>! You explored all <b>${TOTAL_Q}</b> questions of the cosmos and got <b>${tc}</b> right.<br>You're a true space scientist now. 🌟`;
+  confettiBurst(); confettiBurst();
+  show('completionOverlay');
+}
+
+/* =========================================================
+   STUDY REPORT
+   ========================================================= */
+function openReport(){
+  const by = buildByTopic();
+  const attempted = [];
+  let html = '';
+
+  TOPICS.forEach((tema)=>{
+    const rec = by[tema.name];
+    if(rec && rec.total>0){
+      const pct = Math.round(rec.correct/rec.total*100);
+      const cls = pct>=80 ? 'good' : (pct>=50 ? 'mid' : 'low');
+      attempted.push({ name:tema.name, icon:tema.icon, pct });
+      html += `
+        <div class="report-row">
+          <div class="top">
+            <span class="nm"><span class="ic">${tema.icon}</span>${esc(tema.name)}</span>
+            <span class="meta">${rec.total} / ${tema.q.length} answered · <b style="color:var(--cyan)">${pct}%</b></span>
+          </div>
+          <div class="repbar"><i class="${cls}" style="width:${pct}%"></i></div>
+        </div>`;
+    } else {
+      html += `
+        <div class="report-row untried">
+          <div class="top">
+            <span class="nm"><span class="ic">${tema.icon}</span>${esc(tema.name)}</span>
+            <span class="meta">Not tried yet — give it a go!</span>
+          </div>
+          <div class="repbar"><i class="mid" style="width:0%"></i></div>
+        </div>`;
+    }
+  });
+
+  let msg = '';
+  if(attempted.length === 0){
+    msg = `You haven't answered any questions yet, ${esc(KID_NAME)}! Tap a topic to begin, and you'll see your strengths here. 💪`;
+  } else {
+    const maxPct = Math.max(...attempted.map(a=>a.pct));
+    const minPct = Math.min(...attempted.map(a=>a.pct));
+    const strong = attempted.filter(a=>a.pct===maxPct).map(a=>a.name);
+    const weak = attempted.filter(a=>a.pct===minPct).map(a=>a.name);
+    const fmt = (arr)=>arr.map(n=>esc(n)).join(', ');
+    if(maxPct === minPct){
+      msg = `You're going steady, ${esc(KID_NAME)}! You've got <b>${maxPct}%</b> correct on what you've tried. Keep exploring more topics to discover your science superpowers. 🌟`;
+    } else {
+      msg = `Your strongest topic: <span class="strong">${fmt(strong)}</span> (${maxPct}% correct). Awesome work, ${esc(KID_NAME)}! 🎉<br><br>
+        Worth reviewing: <span class="weak">${fmt(weak)}</span> (${minPct}%). Explore that topic again and read the explanations; you'll see how much you improve! 💪`;
+    }
+  }
+  html += `<div class="report-msg">${msg}</div>`;
+
+  $('reportBody').innerHTML = html;
+  show('reportOverlay');
+}
+
+/* =========================================================
+   ERASE PROGRESS (UPDATE to empty object, NEVER delete)
+   ========================================================= */
+async function eraseProgress(){
+  const emptyData = { answered:{}, score:0, byTopic:{}, updatedAt:new Date().toISOString() };
+  const { error } = await supabase
+    .from('progress')
+    .upsert(
+      { user_id: USER_ID, subject: SUBJECT, data: emptyData, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,subject' }
+    );
+  if(error){ console.error('Error erasing progress:', error.message); }
+
+  answered = {}; score = 0; streak = 0;
+  current = null; completionShown = false; activeTema = -1;
+  hide('eraseOverlay');
+  $('quizArea').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildTimeline();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
+function confettiBurst(){
+  const colors = ['#16e0c0','#38d6ff','#5be08a','#ffd56b','#7c6cff','#e8f3ff'];
+  for(let i=0;i<24;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animation = `fall ${1.6+Math.random()*1.4}s linear forwards`;
+    c.style.animationDelay = (Math.random()*.3)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3400);
+  }
+}
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+$('startBtn').addEventListener('click', ()=>{
+  $('startScreen').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildTimeline();
+});
+$('qContinue').addEventListener('click', continueQuestion);
+$('quizExitBtn').addEventListener('click', exitTema);
+$('temaDoneBackBtn').addEventListener('click', ()=>{ hide('temaDoneOverlay'); buildTimeline(); });
+$('temaDoneReportBtn').addEventListener('click', ()=>{ hide('temaDoneOverlay'); openReport(); });
+$('compReportBtn').addEventListener('click', ()=>{ hide('completionOverlay'); openReport(); });
+$('compCloseBtn').addEventListener('click', ()=>hide('completionOverlay'));
+$('reportBtn').addEventListener('click', openReport);
+$('reportCloseBtn').addEventListener('click', ()=>hide('reportOverlay'));
+$('eraseBtn').addEventListener('click', ()=>show('eraseOverlay'));
+$('eraseCancelBtn').addEventListener('click', ()=>hide('eraseOverlay'));
+$('eraseConfirmBtn').addEventListener('click', eraseProgress);
+
+/* =========================================================
+   BOOT / ACCESS CONTROL (PAID subject)
+   ========================================================= */
+function setupAuthListener(loadedUserId){
+  supabase.auth.onAuthStateChange((event, session)=>{
+    if(event === 'SIGNED_OUT' || !session){
+      window.location.replace('../login.html');
+      return;
+    }
+    if(session.user.id !== loadedUserId){
+      window.location.replace('../login.html');
+    }
+  });
+}
+
+(async ()=>{
+  // 1) Requires a session.
+  const { data:{ user }, error } = await supabase.auth.getUser();
+  if(error || !user){
+    window.location.replace('../login.html');
+    return;
+  }
+  USER_ID = user.id;
+
+  // 2) Science is PAID: requires has_access === true.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('kid_name, has_access')
+    .eq('id', USER_ID)
+    .single();
+
+  if(profile?.has_access !== true){
+    window.location.replace('../dashboard.html');
+    return;
+  }
+
+  const nm = (profile?.kid_name || '').trim();
+  KID_NAME = nm || 'student';
+  $('playerName').textContent = (KID_NAME).toUpperCase();
+  $('greetName').textContent = KID_NAME;
+  $('scoreLbl').textContent = `${KID_NAME}'s points`;
+
+  // 3) Restore progress (re-marks answered by question identity).
+  await loadProgress();
+  if(answeredCount() >= TOTAL_Q) completionShown = true;
+
+  // 4) Reveal the app (only now does the gate pass).
+  $('loadingScreen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  // If there is already progress, go straight to the map (skip intro).
+  if(answeredCount() > 0){
+    $('startScreen').classList.add('hidden');
+    $('gameArea').classList.remove('hidden');
+    buildTimeline();
+  }
+
+  setupAuthListener(USER_ID);
+})();
+</script>
+</body>
+</html>
