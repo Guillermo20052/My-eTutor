@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Mundo de las Palabras — My eTutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Mulish:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#fff3ea;
+    --bg-2:#ffe3d2;
+    --bg-3:#ffd2bb;
+    --coral:#e8633f;
+    --coral-hi:#ff8a63;
+    --coral-deep:#c24524;
+    --peach-soft:#ffe0cf;
+    --cream:#fff8f1;
+    --ink:#5a2a18;
+    --ink-soft:#9a5a3f;
+    --orange:#f2933c;
+    --orange-deep:#cf6f1d;
+    --green:#3fa66b;
+    --green-deep:#2c7d4e;
+    --red:#d23f3f;
+    --red-deep:#9c2727;
+    --card:#fffaf4;
+    --line:rgba(194,69,36,.24);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Mulish',sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(255,138,99,.30), transparent 60%),
+      radial-gradient(800px 600px at 112% 118%, rgba(242,147,60,.24), transparent 55%),
+      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding:18px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  /* Subtle floating letters/speech-bubble motif */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.35) 0 6px, transparent 7px),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,.28) 0 5px, transparent 6px);
+    background-size:120px 120px, 160px 160px;
+    pointer-events:none; z-index:0; opacity:.5;
+  }
+  .wrap{position:relative; z-index:1; max-width:920px; margin:0 auto;}
+
+  /* ---------- LOADING ---------- */
+  .loading{
+    min-height:80vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; text-align:center;
+  }
+  .loading .badge{
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; letter-spacing:.5px;
+    background:linear-gradient(180deg,var(--coral-hi),var(--coral));
+    color:#fff; padding:10px 18px; border-radius:14px; transform:rotate(-2deg);
+    box-shadow:0 6px 0 var(--coral-deep), 0 10px 22px rgba(90,42,24,.3);
+  }
+  .loading .msg{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600;}
+  .spinner{
+    width:40px; height:40px; border-radius:50%;
+    border:4px solid rgba(194,69,36,.2); border-top-color:var(--coral);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:14px; margin-bottom:18px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand .badge{
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:22px; letter-spacing:.3px;
+    background:linear-gradient(180deg,var(--coral-hi),var(--coral));
+    color:#fff; padding:9px 14px; border-radius:14px;
+    box-shadow:0 6px 0 var(--coral-deep), 0 10px 22px rgba(90,42,24,.25);
+    transform:rotate(-2deg); white-space:nowrap;
+  }
+  .brand h1{
+    font-family:'Baloo 2',cursive; font-weight:800; line-height:1;
+    font-size:clamp(18px,3.2vw,30px); letter-spacing:.2px; color:var(--coral-deep);
+    text-shadow:0 2px 0 rgba(255,255,255,.5);
+  }
+  .brand h1 span{color:var(--orange-deep);}
+  .head-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .player-pill{
+    display:flex; align-items:center; gap:10px;
+    background:linear-gradient(180deg,var(--card),var(--peach-soft));
+    border:2px solid var(--coral);
+    padding:8px 16px; border-radius:999px;
+    font-family:'Fredoka',sans-serif; font-weight:600;
+    box-shadow:0 6px 16px rgba(90,42,24,.16);
+  }
+  .player-pill .who{font-size:12px; color:var(--ink-soft); font-weight:500;}
+  .player-pill .nm{font-size:18px; color:var(--coral-deep); letter-spacing:.5px;}
+  .back-link{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:14px;
+    color:var(--coral-deep); text-decoration:none;
+    border:2px solid var(--coral); border-radius:999px; padding:8px 14px;
+    background:var(--card);
+    transition:background .15s ease;
+  }
+  .back-link:hover{background:var(--peach-soft);}
+
+  /* ---------- SCOREBAR ---------- */
+  .scorebar{
+    display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+    margin-bottom:16px;
+  }
+  .score-box{
+    flex:1 1 160px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    background:linear-gradient(180deg,var(--card),var(--peach-soft));
+    border:2px solid var(--line);
+    border-radius:16px; padding:12px 18px;
+    box-shadow:inset 0 0 0 1px rgba(232,99,63,.16), 0 8px 20px rgba(90,42,24,.12);
+  }
+  .score-box .lbl{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:13px; text-transform:uppercase; letter-spacing:1px;}
+  .score-box .val{font-family:'Baloo 2',cursive; font-weight:800; font-size:26px; color:var(--coral-deep);}
+  .progress-box{flex:2 1 240px;}
+  .progress-box .lbl{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:13px; margin-bottom:6px; display:flex; justify-content:space-between;}
+  .bar{height:14px; border-radius:999px; background:rgba(194,69,36,.14); overflow:hidden; border:1px solid var(--line);}
+  .bar > i{display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,var(--coral),var(--orange)); transition:width .5s cubic-bezier(.2,.8,.2,1);}
+
+  /* ---------- TOPIC LIST ---------- */
+  .list-intro{text-align:center; margin:6px 0 22px;}
+  .list-intro h2{
+    font-family:'Baloo 2',cursive; font-weight:800; color:var(--coral-deep);
+    font-size:clamp(20px,3.6vw,30px); line-height:1.05;
+  }
+  .list-intro p{font-family:'Fredoka',sans-serif; color:var(--ink-soft); font-weight:600; margin-top:8px;}
+
+  .tema-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px;}
+  .tema-card{
+    position:relative; display:flex; flex-direction:column; gap:10px; cursor:pointer;
+    padding:20px 18px;
+    background:linear-gradient(180deg,var(--card),var(--peach-soft));
+    border:2px solid var(--line); border-radius:22px;
+    box-shadow:0 8px 20px rgba(90,42,24,.12);
+    transition:transform .12s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .tema-card:hover{transform:translateY(-4px); border-color:var(--coral);
+    box-shadow:0 14px 28px rgba(90,42,24,.2);}
+  .tema-card .head{display:flex; align-items:center; gap:12px;}
+  .tema-card .ic{
+    width:52px; height:52px; border-radius:16px; flex:0 0 auto;
+    background:linear-gradient(180deg,var(--coral-hi),var(--coral));
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    box-shadow:0 4px 10px rgba(90,42,24,.22);
+  }
+  .tema-card.full .ic{background:linear-gradient(180deg,#5fc78a,var(--green));}
+  .tema-card .nm{
+    font-family:'Baloo 2',cursive; font-weight:700; color:var(--coral-deep);
+    font-size:clamp(15px,2.4vw,18px); line-height:1.12;
+  }
+  .tema-card .check{display:block; font-family:'Fredoka',sans-serif; font-weight:700; font-size:12.5px; color:var(--green-deep); margin-top:2px;}
+  .tema-card .mini .top{display:flex; justify-content:space-between; font-family:'Fredoka',sans-serif; font-size:12.5px; color:var(--ink-soft); font-weight:600; margin-bottom:5px;}
+  .minibar{height:10px; border-radius:999px; background:rgba(194,69,36,.14); overflow:hidden; border:1px solid var(--line);}
+  .minibar > i{display:block; height:100%; width:0%; border-radius:999px;
+    background:linear-gradient(90deg,var(--coral),var(--orange)); transition:width .5s ease;}
+  .tema-card.full .minibar > i{background:linear-gradient(90deg,var(--green),#7fd6a3);}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:'Fredoka',sans-serif; font-weight:600; cursor:pointer;
+    border:none; border-radius:14px; padding:13px 22px; font-size:17px;
+    background:linear-gradient(180deg,var(--coral-hi),var(--coral));
+    color:#fff; box-shadow:0 6px 0 var(--coral-deep), 0 10px 22px rgba(90,42,24,.2);
+    transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.05); transform:translateY(-2px);}
+  .btn:active{transform:translateY(3px); box-shadow:0 3px 0 var(--coral-deep);}
+  .btn.ghost{background:var(--card); color:var(--coral-deep); border:2px solid var(--coral); box-shadow:none;}
+  .btn.ghost:hover{background:var(--peach-soft);}
+  .btn.danger{background:linear-gradient(180deg,#e87171,var(--red)); color:#fff;
+    box-shadow:0 6px 0 var(--red-deep), 0 10px 22px rgba(90,42,24,.2);}
+  .btn:disabled{filter:grayscale(.5) brightness(.85); cursor:not-allowed; transform:none;}
+  .center{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-top:22px;}
+
+  /* ---------- SCREENS ---------- */
+  .screen{
+    text-align:center; padding:32px 22px;
+    background:linear-gradient(180deg,var(--card),var(--peach-soft));
+    border:2px solid var(--coral); border-radius:24px;
+    box-shadow:0 18px 50px rgba(90,42,24,.18);
+    animation:pop .35s cubic-bezier(.2,1.1,.3,1);
+  }
+  .screen .big{
+    font-family:'Baloo 2',cursive; font-weight:800; font-size:clamp(26px,6vw,46px); line-height:1.02;
+    color:var(--coral-deep); text-shadow:0 2px 0 rgba(255,255,255,.5);
+  }
+  .screen .big .gold{color:var(--orange-deep);}
+  .screen .sub{font-family:'Fredoka',sans-serif; font-size:clamp(15px,2.4vw,20px); color:var(--ink-soft); margin-top:12px; line-height:1.5;}
+  .screen .hi{color:var(--orange-deep); font-weight:700;}
+  .rules{
+    max-width:560px; margin:22px auto 0; text-align:left;
+    background:rgba(194,69,36,.07); border:1px solid var(--line);
+    border-radius:16px; padding:18px 20px;
+  }
+  .rules li{margin:8px 0 8px 4px; line-height:1.5; list-style:none; position:relative; padding-left:30px; color:var(--ink);}
+  .rules li::before{content:"📖"; position:absolute; left:0;}
+  .medal{font-size:72px; line-height:1; margin:6px 0;}
+
+  /* ---------- QUESTION SCREEN ---------- */
+  .quiz-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    flex-wrap:wrap; margin-bottom:14px;
+  }
+  .quiz-head .tema-tag{
+    font-family:'Fredoka',sans-serif; font-weight:700; color:var(--coral-deep);
+    font-size:15px; display:flex; align-items:center; gap:8px;
+    background:var(--card); border:2px solid var(--line); border-radius:999px; padding:8px 16px;
+  }
+  .quiz-head .counter{font-family:'Fredoka',sans-serif; font-weight:600; color:var(--ink-soft); font-size:14px;}
+  .qprog{height:10px; border-radius:999px; background:rgba(194,69,36,.14); overflow:hidden; border:1px solid var(--line); margin-bottom:18px;}
+  .qprog > i{display:block; height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--coral),var(--orange)); transition:width .4s ease;}
+
+  .qcard{
+    background:linear-gradient(180deg,var(--card),var(--peach-soft));
+    border:2px solid var(--coral); border-radius:22px;
+    padding:24px; box-shadow:0 14px 40px rgba(90,42,24,.16);
+    animation:pop .3s cubic-bezier(.2,1.1,.3,1);
+  }
+  @keyframes pop{from{transform:scale(.94) translateY(10px); opacity:0;} to{transform:none; opacity:1;}}
+  .q-text{font-size:clamp(17px,2.6vw,21px); line-height:1.45; font-weight:700; color:var(--coral-deep); margin-bottom:20px;}
+  .opts{display:flex; flex-direction:column; gap:12px;}
+  .opt{
+    font-family:'Mulish',sans-serif; font-weight:600; font-size:16px; text-align:left;
+    cursor:pointer; color:var(--ink); line-height:1.35;
+    background:var(--cream);
+    border:2px solid var(--line); border-radius:14px;
+    padding:14px 16px 14px 52px; position:relative;
+    transition:transform .1s ease, border-color .15s ease, filter .15s ease;
+  }
+  .opt:hover:not(.locked){border-color:var(--coral); filter:brightness(1.01); transform:translateX(3px);}
+  .opt .key{
+    position:absolute; left:12px; top:50%; transform:translateY(-50%);
+    width:28px; height:28px; border-radius:50%;
+    background:var(--coral); color:#fff; font-family:'Fredoka',sans-serif; font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+  }
+  .opt.correct{border-color:var(--green); background:linear-gradient(180deg,#d6f0e0,#bce6cd);}
+  .opt.correct .key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red); background:linear-gradient(180deg,#f5d2d2,#edb8b8);}
+  .opt.wrong .key{background:var(--red);color:#fff;}
+  .opt.locked{cursor:default;}
+
+  .feedback{margin-top:18px; border-radius:16px; padding:16px 18px; display:none; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;} to{opacity:1;}}
+  .feedback.show{display:block;}
+  .feedback.ok{background:linear-gradient(180deg, rgba(63,166,107,.2), rgba(63,166,107,.08)); border:2px solid rgba(63,166,107,.5);}
+  .feedback.bad{background:linear-gradient(180deg, rgba(210,63,63,.16), rgba(210,63,63,.07)); border:2px solid rgba(210,63,63,.5);}
+  .feedback h3{font-family:'Fredoka',sans-serif; font-size:20px; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .feedback.ok h3{color:var(--green-deep);}
+  .feedback.bad h3{color:var(--red-deep);}
+  .feedback .line{font-size:15px; line-height:1.55; margin-bottom:8px; color:var(--ink);}
+  .feedback .line b{color:var(--orange-deep);}
+  .feedback .correct-ans{font-weight:700; color:var(--green-deep);}
+
+  /* ---------- OVERLAY / MODALS ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:50; display:none;
+    align-items:center; justify-content:center; padding:18px;
+    background:rgba(90,42,24,.5); backdrop-filter:blur(4px);
+  }
+  .overlay.show{display:flex; animation:fade .25s ease;}
+  .modal{
+    width:min(640px,100%); max-height:92vh; overflow-y:auto;
+    background:linear-gradient(180deg,var(--card),var(--peach-soft));
+    border:2px solid var(--coral); border-radius:22px;
+    padding:24px; box-shadow:0 24px 60px rgba(90,42,24,.4);
+    animation:pop .3s cubic-bezier(.2,1.2,.3,1); text-align:center;
+  }
+  .modal .cat{font-family:'Fredoka',sans-serif; font-weight:700; color:var(--coral-deep); font-size:17px; display:block; margin-bottom:6px;}
+
+  /* ---------- REPORT ---------- */
+  .report-row{margin:0 0 16px;}
+  .report-row .top{display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px;}
+  .report-row .nm{font-family:'Fredoka',sans-serif; font-weight:700; font-size:15px; color:var(--coral-deep); text-align:left;}
+  .report-row .nm .ic{margin-right:6px;}
+  .report-row .meta{font-family:'Fredoka',sans-serif; font-size:13px; color:var(--ink-soft); white-space:nowrap;}
+  .repbar{height:13px; border-radius:999px; background:rgba(194,69,36,.14); overflow:hidden; border:1px solid var(--line);}
+  .repbar > i{display:block; height:100%; width:0%; border-radius:999px; transition:width .5s ease;}
+  .repbar > i.good{background:linear-gradient(90deg,var(--green),#7fd6a3);}
+  .repbar > i.mid{background:linear-gradient(90deg,var(--coral),var(--orange));}
+  .repbar > i.low{background:linear-gradient(90deg,var(--red),#e6957f);}
+  .report-row.untried{opacity:.7;}
+  .report-row.untried .meta{color:var(--coral-deep);}
+  .report-msg{
+    margin-top:8px; background:rgba(194,69,36,.08); border:1px solid var(--coral);
+    border-radius:16px; padding:16px 18px; line-height:1.55; font-size:15px; text-align:left; color:var(--ink);
+  }
+  .report-msg b{color:var(--orange-deep);}
+  .report-msg .strong{color:var(--green-deep); font-weight:700;}
+  .report-msg .weak{color:var(--red-deep); font-weight:700;}
+
+  .hidden{display:none !important;}
+
+  .confetti{position:fixed; width:10px; height:14px; top:-20px; z-index:60; border-radius:2px; pointer-events:none;}
+  @keyframes fall{to{transform:translateY(108vh) rotate(620deg); opacity:.9;}}
+
+  @media (max-width:560px){
+    .tema-grid{grid-template-columns:1fr;}
+    .qcard{padding:18px;}
+    .score-box .val{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== LOADING ===== -->
+<div class="wrap" id="loadingScreen">
+  <div class="loading">
+    <div class="badge">ESPAÑOL</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="msg">Cargando tus palabras...</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="wrap hidden" id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="badge">ESPAÑOL</div>
+      <h1>El Mundo de<br>las <span>Palabras</span></h1>
+    </div>
+    <div class="head-right">
+      <div class="player-pill">
+        <span class="who">Lector</span>
+        <span class="nm" id="playerName">ESTUDIANTE</span>
+      </div>
+      <a class="back-link" href="../dashboard.html">← Volver al inicio</a>
+    </div>
+  </div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="screen">
+    <div class="medal">📖</div>
+    <div class="big">¡Hola, <span class="gold" id="greetName">estudiante</span>!</div>
+    <div class="sub">Vamos a jugar con las <span class="hi">palabras</span>: historietas, adivinanzas, adverbios y palabras homófonas. ¡Listo para descubrir tus súper poderes con el lenguaje!</div>
+    <ul class="rules">
+      <li>Hay <b>4 temas</b>. Toca uno para recorrer todas sus preguntas.</li>
+      <li>Cada pregunta tiene <b>4 opciones</b> (A, B, C y D). Toca la que creas correcta.</li>
+      <li>Si <b>aciertas</b>, ganas puntos y subes tu racha. En cualquier caso verás una <b>explicación</b> que te enseña más.</li>
+      <li>Tu progreso se <b>guarda solo</b>: puedes cerrar y continuar después, ¡hasta en otro dispositivo!</li>
+      <li>Revisa tu <b>Reporte de estudio</b> para ver tus temas fuertes y los que conviene repasar.</li>
+    </ul>
+    <div class="center">
+      <button class="btn" id="startBtn">¡Comenzar a jugar! ✏️</button>
+    </div>
+  </div>
+
+  <!-- GAME AREA (TOPIC LIST) -->
+  <div id="gameArea" class="hidden">
+    <div class="scorebar">
+      <div class="score-box">
+        <span class="lbl" id="scoreLbl">Puntos</span>
+        <span class="val" id="scoreVal">0</span>
+      </div>
+      <div class="score-box" style="flex:0 1 150px;">
+        <span class="lbl">Racha</span>
+        <span class="val" id="streakVal" style="font-size:22px;">0 🔥</span>
+      </div>
+      <div class="progress-box">
+        <div class="lbl"><span>Progreso total</span><span id="progTxt">0 / 0</span></div>
+        <div class="bar"><i id="progBar"></i></div>
+      </div>
+    </div>
+
+    <div class="list-intro">
+      <h2>Elige un tema</h2>
+      <p>Toca una tarjeta para empezar a jugar con las palabras.</p>
+    </div>
+
+    <div class="tema-grid" id="temaGrid"></div>
+
+    <div class="center">
+      <button class="btn ghost" id="reportBtn">📊 Reporte de estudio</button>
+      <button class="btn danger" id="eraseBtn">🗑️ Borrar mi progreso</button>
+    </div>
+  </div>
+
+  <!-- QUIZ AREA (single topic walkthrough) -->
+  <div id="quizArea" class="hidden">
+    <div class="quiz-head">
+      <span class="tema-tag" id="quizTema">📖 Tema</span>
+      <span class="counter" id="quizCounter">Pregunta 1 de 1</span>
+    </div>
+    <div class="qprog"><i id="quizProgBar"></i></div>
+
+    <div class="qcard">
+      <div class="q-text" id="qText"></div>
+      <div class="opts" id="qOpts"></div>
+      <div class="feedback" id="qFeedback"></div>
+      <div class="center" style="margin-top:18px;">
+        <button class="btn hidden" id="qContinue">Continuar ▶</button>
+        <button class="btn ghost" id="quizExitBtn">Salir a los temas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOPIC COMPLETE OVERLAY ===== -->
+<div class="overlay" id="temaDoneOverlay">
+  <div class="modal">
+    <div class="medal">🎖️</div>
+    <span class="cat" id="temaDoneTitle">¡Tema completado!</span>
+    <div class="sub" id="temaDoneMsg" style="font-family:'Fredoka',sans-serif;color:var(--ink-soft);margin-top:8px;line-height:1.5;"></div>
+    <div class="center" style="margin-top:22px;">
+      <button class="btn" id="temaDoneBackBtn">Volver a los temas 📚</button>
+      <button class="btn ghost" id="temaDoneReportBtn">📊 Ver reporte</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FULL COMPLETION OVERLAY ===== -->
+<div class="overlay" id="completionOverlay">
+  <div class="modal">
+    <div class="medal">🏆</div>
+    <span class="cat" style="font-family:'Baloo 2',cursive;font-weight:800;font-size:26px;color:var(--coral-deep);">¡DOMINASTE LAS PALABRAS!</span>
+    <div class="sub" id="completionMsg" style="font-family:'Fredoka',sans-serif;color:var(--ink-soft);margin-top:12px;line-height:1.5;"></div>
+    <div class="center" style="margin-top:22px;">
+      <button class="btn" id="compReportBtn">📊 Ver mi reporte</button>
+      <button class="btn ghost" id="compCloseBtn">Seguir jugando</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REPORT OVERLAY ===== -->
+<div class="overlay" id="reportOverlay">
+  <div class="modal" style="text-align:left;">
+    <span class="cat" style="text-align:center;">📊 Reporte de estudio</span>
+    <div id="reportBody" style="margin-top:14px;"></div>
+    <div class="center" style="margin-top:18px;">
+      <button class="btn" id="reportCloseBtn">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ERASE CONFIRM OVERLAY ===== -->
+<div class="overlay" id="eraseOverlay">
+  <div class="modal">
+    <div class="medal">🗑️</div>
+    <span class="cat" style="font-family:'Baloo 2',cursive;font-weight:800;font-size:24px;color:var(--coral-deep);">Borrar progreso</span>
+    <div class="sub" style="font-family:'Fredoka',sans-serif;color:var(--ink-soft);margin-top:12px;line-height:1.5;">¿Seguro que quieres borrar TODO tu progreso de Español? Esto no se puede deshacer.</div>
+    <div class="center" style="margin-top:24px;">
+      <button class="btn danger" id="eraseConfirmBtn">Sí, borrar todo</button>
+      <button class="btn ghost" id="eraseCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "../js/supabase.js";
+
+/* =========================================================
+   BANCO DE PREGUNTAS — ESPAÑOL (5° grado, 3er periodo)
+   4 temas; cada carta: { q, opts:[], correct:<idx>, ex, d:<1-3> }
+   ========================================================= */
+const TEMAS = [
+
+  { name:"LA HISTORIETA", icon:"💬", q:[
+    { q:"¿Qué es una historieta?", opts:["Una forma de expresión artística que cuenta historias con dibujos","Un tipo de poema con rimas","Una lista de palabras","Una canción"], correct:0, ex:"La historieta es una forma de expresión artística que cuenta historias con dibujos, combinando imágenes y texto en secuencia.", d:1 },
+    { q:"¿Con qué otro nombre se conoce a la historieta?", opts:["Cómic","Novela","Adivinanza","Refrán"], correct:0, ex:"La historieta también se conoce como cómic.", d:1 },
+    { q:"La historieta combina dos cosas en secuencia. ¿Cuáles son?", opts:["Imágenes y texto","Música y baile","Números y letras","Colores y sonidos"], correct:0, ex:"La historieta combina imágenes y texto en secuencia.", d:1 },
+    { q:"¿Cómo se llaman los recuadros que contienen las escenas de una historieta?", opts:["Viñetas","Globos","Onomatopeyas","Bocadillos"], correct:0, ex:"Las viñetas son los recuadros que contienen las escenas.", d:1 },
+    { q:"Además de contener las escenas, ¿qué marcan las viñetas en la historia?", opts:["El paso del tiempo","El precio","El número de páginas","El idioma"], correct:0, ex:"Las viñetas marcan el paso del tiempo en la historia y pueden tener diferentes formas y tamaños.", d:2 },
+    { q:"¿Cómo se llaman los globos de texto donde aparecen los diálogos de los personajes?", opts:["Bocadillos","Viñetas","Onomatopeyas","Signos cinéticos"], correct:0, ex:"Los diálogos van en globos de texto o bocadillos.", d:1 },
+    { q:"En una historieta, ¿qué muestran las ilustraciones?", opts:["La acción y los personajes","El precio del cómic","Los nombres de los autores","La fecha"], correct:0, ex:"Las ilustraciones son los dibujos que muestran la acción y los personajes.", d:1 },
+    { q:"¿Qué son las onomatopeyas en una historieta?", opts:["Palabras que representan sonidos (¡POW!, ¡RING!)","Líneas que muestran movimiento","Recuadros con escenas","Símbolos de emociones"], correct:0, ex:"Las onomatopeyas son palabras que representan sonidos, como ¡POW! o ¡RING!", d:1 },
+    { q:"En una historieta, ¿qué son los «signos cinéticos»?", opts:["Líneas que muestran movimiento","Palabras que imitan sonidos","Globos de diálogo","Recuadros de escenas"], correct:0, ex:"Los signos cinéticos son líneas que muestran movimiento.", d:2 },
+    { q:"Los corazones o rayos que representan emociones en una historieta son—", opts:["Metáforas visuales","Onomatopeyas","Viñetas","Bocadillos"], correct:0, ex:"Las metáforas visuales son símbolos para emociones, como corazones o rayos.", d:2 },
+    { q:"Empareja correctamente el efecto especial con su definición:", opts:["Onomatopeya = sonido · Signo cinético = movimiento · Metáfora visual = emoción","Onomatopeya = movimiento · Signo cinético = emoción · Metáfora visual = sonido","Onomatopeya = emoción · Signo cinético = sonido · Metáfora visual = movimiento","Todas significan lo mismo"], correct:0, ex:"Onomatopeya = sonido (¡POW!); signo cinético = líneas de movimiento; metáfora visual = símbolo de emoción (corazón, rayo).", d:3 },
+  ]},
+
+  { name:"LAS ADIVINANZAS", icon:"🧩", q:[
+    { q:"¿Qué combina una adivinanza?", opts:["Poesía con ingenio en verso","Números con dibujos","Música con baile","Historia con geografía"], correct:0, ex:"La adivinanza combina poesía con ingenio en verso.", d:1 },
+    { q:"Una adivinanza es un tipo de—", opts:["Enigma poético","Cuento largo","Lista de adverbios","Historieta"], correct:0, ex:"Las adivinanzas son enigmas poéticos: metáforas y versos breves que desafían la mente.", d:1 },
+    { q:"¿Cómo son los versos de una adivinanza?", opts:["Cortos, completos y autosuficientes, que expresan la idea con claridad","Largos y sin sentido","Siempre de diez líneas","Sin ninguna rima ni idea"], correct:0, ex:"Los versos de una adivinanza son cortos, completos y autosuficientes, y expresan la idea central con claridad.", d:2 },
+    { q:"¿Qué recursos usan las adivinanzas para crear el enigma poético?", opts:["Metáforas, analogías y juegos de palabras","Solo números","Dibujos a color","Onomatopeyas"], correct:0, ex:"Las adivinanzas usan metáforas, analogías y juegos de palabras para crear el enigma poético.", d:2 },
+    { q:"¿Cuál es uno de los propósitos de una adivinanza?", opts:["Entretener, enseñar y estimular el pensamiento creativo","Vender productos","Marcar el paso del tiempo","Indicar el modo de una acción"], correct:0, ex:"Las adivinanzas buscan entretener, enseñar y estimular el pensamiento creativo y la reflexión.", d:1 },
+    { q:"Una adivinanza «desafía la mente» principalmente porque—", opts:["Es un enigma que hay que resolver con ingenio","Es muy larga","Tiene muchos dibujos","No tiene respuesta"], correct:0, ex:"Es un enigma poético que reta a pensar para descubrir la respuesta.", d:2 },
+  ]},
+
+  { name:"LOS ADVERBIOS", icon:"⚡", q:[
+    { q:"¿Qué es un adverbio?", opts:["Una palabra que expresa las circunstancias de un evento (modo, tiempo o lugar)","Un dibujo de una historieta","Un verso de una adivinanza","Un sonido"], correct:0, ex:"El adverbio es un tipo de palabra que expresa las circunstancias de un evento: ofrece información sobre el modo, el tiempo o el lugar de la acción.", d:1 },
+    { q:"Un adverbio ofrece información acerca del modo, el tiempo o el ___ en que se desarrolla la acción.", opts:["lugar","color","precio","nombre"], correct:0, ex:"El adverbio informa sobre el modo, el tiempo o el lugar en que se desarrolla la acción.", d:1 },
+    { q:"¿A qué categoría de adverbio pertenece «aquí»?", opts:["Lugar","Tiempo","Modo","Duda"], correct:0, ex:"«Aquí» es un adverbio de LUGAR (indica espacio): aquí, allí, ahí, allá, cerca, lejos, arriba, abajo...", d:1 },
+    { q:"¿Cuál de estas palabras es un adverbio de LUGAR?", opts:["lejos","ayer","rápidamente","quizás"], correct:0, ex:"«Lejos» indica espacio = adverbio de lugar. «Ayer» es tiempo, «rápidamente» es modo, «quizás» es duda.", d:2 },
+    { q:"¿A qué categoría pertenece el adverbio «ayer»?", opts:["Tiempo","Lugar","Modo","Cantidad"], correct:0, ex:"«Ayer» indica el momento = adverbio de TIEMPO (ayer, hoy, después).", d:1 },
+    { q:"¿Cuál es un adverbio de TIEMPO?", opts:["después","arriba","mucho","no"], correct:0, ex:"«Después» indica momento = adverbio de tiempo. «Arriba» es lugar, «mucho» es cantidad, «no» es negación.", d:2 },
+    { q:"El adverbio «rápidamente» pertenece a la categoría de—", opts:["Modo","Lugar","Tiempo","Afirmación"], correct:0, ex:"«Rápidamente» indica la manera = adverbio de MODO (bien, mal, rápidamente).", d:1 },
+    { q:"¿Cuál de estos es un adverbio de MODO?", opts:["bien","hoy","aquí","jamás"], correct:0, ex:"«Bien» indica la manera = adverbio de modo. «Hoy» es tiempo, «aquí» es lugar, «jamás» es negación.", d:2 },
+    { q:"¿A qué categoría pertenece el adverbio «mucho»?", opts:["Cantidad","Modo","Lugar","Duda"], correct:0, ex:"«Mucho» indica grado o medida = adverbio de CANTIDAD (mucho, poco, muy).", d:1 },
+    { q:"¿Cuál es un adverbio de CANTIDAD?", opts:["muy","ahí","ayer","sí"], correct:0, ex:"«Muy» indica grado o medida = adverbio de cantidad.", d:2 },
+    { q:"Los adverbios «sí», «también» y «ciertamente» son de—", opts:["Afirmación","Negación","Duda","Lugar"], correct:0, ex:"«Sí, también, ciertamente» son adverbios de AFIRMACIÓN.", d:2 },
+    { q:"¿A qué categoría pertenecen «no», «jamás» y «nunca»?", opts:["Negación","Afirmación","Duda","Tiempo"], correct:0, ex:"«No, jamás, nunca» son adverbios de NEGACIÓN.", d:1 },
+    { q:"¿Cuál de estas palabras es un adverbio de NEGACIÓN?", opts:["nunca","también","quizás","muy"], correct:0, ex:"«Nunca» es de negación. «También» es afirmación, «quizás» es duda, «muy» es cantidad.", d:2 },
+    { q:"Los adverbios «quizás», «tal vez» y «probablemente» son de—", opts:["Duda","Afirmación","Negación","Modo"], correct:0, ex:"«Quizás, tal vez, probablemente» son adverbios de DUDA.", d:2 },
+    { q:"¿Cuántas categorías de adverbios menciona el temario?", opts:["Siete (lugar, tiempo, modo, cantidad, afirmación, negación, duda)","Tres","Cinco","Diez"], correct:0, ex:"Son 7 categorías: lugar, tiempo, modo, cantidad, afirmación, negación y duda.", d:3 },
+    { q:"Empareja adverbio y categoría:", opts:["cerca = lugar · hoy = tiempo · mal = modo","cerca = tiempo · hoy = modo · mal = lugar","cerca = modo · hoy = lugar · mal = tiempo","Todos son de cantidad"], correct:0, ex:"«Cerca» = lugar; «hoy» = tiempo; «mal» = modo.", d:3 },
+  ]},
+
+  { name:"PALABRAS HOMÓFONAS", icon:"🔤", q:[
+    { q:"¿Qué son las palabras homófonas?", opts:["Palabras que se escriben diferente pero suenan igual y tienen significado distinto","Palabras que se escriben igual","Palabras sin significado","Palabras que riman"], correct:0, ex:"Las homófonas se escriben diferente, suenan igual y tienen significado distinto. Igual pronunciación, distinta ortografía y distinto significado.", d:1 },
+    { q:"Las palabras homófonas tienen igual ___ pero distinta ortografía y significado.", opts:["pronunciación","longitud","número de letras","categoría"], correct:0, ex:"Las homófonas tienen igual pronunciación (suenan igual), pero distinta ortografía y significado.", d:2 },
+    { q:"«Botar» significa arrojar o dar botes. ¿Cuál es su homófona que significa «emitir votos»?", opts:["votar","botas","bota","votos"], correct:0, ex:"«Botar» (arrojar) y «votar» (emitir votos) son homófonas.", d:2 },
+    { q:"¿Qué significa «cabo» (homófona de «cavo»)?", opts:["Punta o grado militar","Verbo cavar","Un animal","Un color"], correct:0, ex:"«Cabo» = punta o grado militar; «cavo» = del verbo cavar.", d:2 },
+    { q:"«Calló» (del verbo callar) suena igual que «cayó». ¿De qué verbo viene «cayó»?", opts:["Caer","Callar","Cazar","Cavar"], correct:0, ex:"«Calló» viene de callar (guardar silencio); «cayó» viene de caer.", d:2 },
+    { q:"¿Cuál es el significado de «sede» (homófona de «cede»)?", opts:["Local o lugar","Verbo ceder","Verbo saber","Tener sed"], correct:0, ex:"«Sede» = local o lugar; «cede» = del verbo ceder.", d:2 },
+    { q:"«Cepa» significa «tronco de la vid». ¿Cuál es su homófona, del verbo saber?", opts:["sepa","sede","cede","cierra"], correct:0, ex:"«Cepa» (tronco de la vid) y «sepa» (verbo saber) son homófonas.", d:2 },
+    { q:"¿Qué significa «ciego» (homófona de «siego»)?", opts:["Invidente (que no ve)","Verbo segar","Cerrar","Un número"], correct:0, ex:"«Ciego» = invidente; «siego» = del verbo segar (cortar mies).", d:2 },
+    { q:"«Cierra» viene del verbo cerrar. ¿Qué significa su homófona «sierra»?", opts:["Instrumento de corte (o cadena de montañas)","Verbo cerrar","Un número","Un color"], correct:0, ex:"«Cierra» = verbo cerrar; «sierra» = instrumento de corte.", d:2 },
+    { q:"«Cien» es un número. ¿Qué significa su homófona «sien»?", opts:["La frente (parte de la cabeza)","El número 100","Verbo cerrar","Un animal"], correct:0, ex:"«Cien» = número 100; «sien» = parte lateral de la frente.", d:2 },
+    { q:"¿Cuál es la diferencia entre «cocer» y «coser»?", opts:["Cocer = cocinar; coser = unir con hilo y aguja","Son la misma palabra","Cocer = coser ropa; coser = cocinar","Ninguna significa nada"], correct:0, ex:"«Cocer» = cocinar; «coser» = unir con hilo y aguja (verbo coser).", d:3 },
+    { q:"«Combino» viene del verbo combinar. ¿Qué significa su homófona «convino»?", opts:["Del verbo convenir (acordar)","Una bebida","Un color","Verbo combinar también"], correct:0, ex:"«Combino» = del verbo combinar; «convino» = del verbo convenir (acordar).", d:3 },
+    { q:"En la oración «Mañana voy a ___ por mi candidato», ¿qué homófona es correcta?", opts:["votar","botar","botas","bota"], correct:0, ex:"«Votar» = emitir votos (elección). «Botar» sería arrojar algo.", d:3 },
+    { q:"«Ella se ___ y nadie supo qué pensaba.» ¿Qué homófona es correcta?", opts:["calló","cayó","cabo","cavo"], correct:0, ex:"«Calló» (del verbo callar = guardó silencio) es la correcta aquí; «cayó» sería del verbo caer.", d:3 },
+  ]},
+
+];
+
+/* =========================================================
+   CONSTANTES / ESTADO
+   ========================================================= */
+const SUBJECT = "espanol";
+const TOTAL_Q = TEMAS.reduce((s,t)=>s+t.q.length,0);
+const LETTERS = ["A","B","C","D"];
+const POINTS_PER_DIFF = 100; // puntos = dificultad (d) × 100
+
+let USER_ID = null;
+let KID_NAME = "estudiante";
+
+let score = 0;
+let streak = 0;
+let answered = {};            // { "<ti>_<qi>": { correct: bool } } -> SIEMPRE por identidad de pregunta
+let completionShown = false;
+
+// Estado de la sesión de un tema en curso
+let activeTema = -1;
+let playOrder = [];           // orden BARAJADO de qIndices (solo display)
+let playPos = 0;
+let current = null;           // { ti, qi, shuffled, answeredThisQ }
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $ = (id)=>document.getElementById(id);
+function show(id){ $(id).classList.add('show'); }
+function hide(id){ $(id).classList.remove('show'); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function shuffle(arr){ for(let k=arr.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[arr[k],arr[j]]=[arr[j],arr[k]];} return arr; }
+
+function answeredCount(){ return Object.keys(answered).length; }
+function totalCorrect(){ return Object.values(answered).filter(a=>a && a.correct).length; }
+function temaAnsweredCount(ti){
+  let n=0; TEMAS[ti].q.forEach((_,qi)=>{ if(answered[`${ti}_${qi}`]) n++; }); return n;
+}
+
+/* =========================================================
+   GUARDADO EN SUPABASE (UPSERT con coalescing)
+   ========================================================= */
+function buildByTema(){
+  const by = {};
+  TEMAS.forEach((tema,ti)=>{
+    let correct=0, wrong=0;
+    tema.q.forEach((_,qi)=>{
+      const a = answered[`${ti}_${qi}`];
+      if(a){ a.correct ? correct++ : wrong++; }
+    });
+    if(correct+wrong>0) by[tema.name] = { correct, wrong, total: correct+wrong };
+  });
+  return by;
+}
+function buildData(){
+  return {
+    answered,
+    score,
+    byTema: buildByTema(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+let saving=false, dirty=false;
+async function saveProgress(){
+  dirty = true;
+  if(saving) return;
+  saving = true;
+  try{
+    while(dirty){
+      dirty = false;
+      const data = buildData();
+      const { error } = await supabase
+        .from('progress')
+        .upsert(
+          { user_id: USER_ID, subject: SUBJECT, data, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id,subject' }
+        );
+      if(error) console.error('Error al guardar progreso:', error.message);
+    }
+  } finally {
+    saving = false;
+  }
+}
+
+async function loadProgress(){
+  const { data: row } = await supabase
+    .from('progress')
+    .select('data')
+    .eq('user_id', USER_ID)
+    .eq('subject', SUBJECT)
+    .maybeSingle();
+  if(row && row.data){
+    const d = row.data;
+    answered = (d.answered && typeof d.answered === 'object') ? d.answered : {};
+    score    = Number.isFinite(d.score) ? d.score : 0;
+  } else {
+    answered = {}; score = 0;
+  }
+}
+
+/* =========================================================
+   MARCADOR + LISTA DE TEMAS (LANDING)
+   ========================================================= */
+function updateScoreboard(){
+  $('scoreVal').textContent = score;
+  $('streakVal').textContent = `${streak} 🔥`;
+  const ac = answeredCount();
+  $('progTxt').textContent = `${ac} / ${TOTAL_Q}`;
+  $('progBar').style.width = (TOTAL_Q ? (ac/TOTAL_Q*100) : 0) + '%';
+}
+
+function buildTemaGrid(){
+  const grid = $('temaGrid');
+  grid.innerHTML = '';
+  TEMAS.forEach((tema,ti)=>{
+    const total = tema.q.length;
+    const done = temaAnsweredCount(ti);
+    const full = done >= total;
+    const pct = total ? Math.round(done/total*100) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'tema-card' + (full ? ' full' : '');
+    card.innerHTML = `
+      <div class="head">
+        <div class="ic">${full ? '✓' : tema.icon}</div>
+        <div>
+          <div class="nm">${esc(tema.name)}</div>
+          ${full ? '<span class="check">✓ Completo</span>' : ''}
+        </div>
+      </div>
+      <div class="mini">
+        <div class="top"><span>${done} / ${total} preguntas</span><span>${pct}%</span></div>
+        <div class="minibar"><i style="width:${pct}%"></i></div>
+      </div>`;
+    card.addEventListener('click', ()=>startTema(ti));
+    grid.appendChild(card);
+  });
+  updateScoreboard();
+}
+
+/* =========================================================
+   FLUJO DE UN TEMA (recorre TODAS sus preguntas)
+   ========================================================= */
+function startTema(ti){
+  activeTema = ti;
+  // Orden de preguntas barajado SOLO para mostrar; el guardado usa identidad qi.
+  playOrder = shuffle(TEMAS[ti].q.map((_,i)=>i));
+  playPos = 0;
+  $('gameArea').classList.add('hidden');
+  $('quizArea').classList.remove('hidden');
+  window.scrollTo({ top:0, behavior:'smooth' });
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const ti = activeTema;
+  const tema = TEMAS[ti];
+  const qi = playOrder[playPos];           // identidad real de la pregunta
+  const qd = tema.q[qi];
+  current = { ti, qi, answeredThisQ:false };
+
+  $('quizTema').innerHTML = `${tema.icon} ${esc(tema.name)}`;
+  $('quizCounter').textContent = `Pregunta ${playPos+1} de ${playOrder.length}`;
+  $('quizProgBar').style.width = (playPos/playOrder.length*100) + '%';
+  $('qText').textContent = qd.q;
+
+  // Barajar opciones (la correcta no siempre en el mismo lugar)
+  current.shuffled = shuffle(qd.opts.map((t,i)=>({text:t, correct:i===qd.correct})));
+
+  const optsBox = $('qOpts');
+  optsBox.innerHTML = '';
+  current.shuffled.forEach((opt,idx)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${LETTERS[idx]}</span>${esc(opt.text)}`;
+    b.addEventListener('click', ()=>answer(idx));
+    optsBox.appendChild(b);
+  });
+
+  const fb = $('qFeedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  $('qContinue').classList.add('hidden');
+}
+
+function answer(idx){
+  if(current.answeredThisQ) return;
+  current.answeredThisQ = true;
+
+  const { ti, qi } = current;
+  const qd = TEMAS[ti].q[qi];
+  const correctIdx = current.shuffled.findIndex(o=>o.correct);
+  const isRight = current.shuffled[idx].correct;
+  const pts = (qd.d || 1) * POINTS_PER_DIFF;
+
+  // Bloquear y marcar opciones (sin re-disparar handlers)
+  document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
+    const clone = b.cloneNode(true);
+    if(i===correctIdx) clone.classList.add('correct');
+    if(i===idx && !isRight) clone.classList.add('wrong');
+    clone.classList.add('locked');
+    b.replaceWith(clone);
+  });
+
+  // Registrar por IDENTIDAD de pregunta (sobrescribe en repaso, sin duplicar conteos)
+  answered[`${ti}_${qi}`] = { correct: isRight };
+
+  const fb = $('qFeedback');
+  if(isRight){
+    streak++;
+    score += pts; // banco fijo: los puntos se acumulan, incluso en repaso
+    fb.className = 'feedback ok show';
+    fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
+      <div class="line">Sumaste <b>${pts} puntos</b>${streak>1?` (racha de <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">${esc(qd.ex)}</div>`;
+    confettiBurst();
+  } else {
+    streak = 0;
+    fb.className = 'feedback bad show';
+    fb.innerHTML = `<h3>📖 Aprendamos</h3>
+      <div class="line">Elegiste: <b>${LETTERS[idx]}) ${esc(current.shuffled[idx].text)}</b>, pero no era la correcta.</div>
+      <div class="line">${esc(qd.ex)}</div>
+      <div class="line correct-ans">✔ Respuesta correcta: ${esc(current.shuffled[correctIdx].text)}</div>
+      <div class="line">¡No te detengas, ${esc(KID_NAME)}! Cada error te enseña algo. 💪</div>`;
+  }
+
+  $('qContinue').classList.remove('hidden');
+  $('qContinue').textContent = (playPos < playOrder.length-1) ? 'Continuar ▶' : 'Terminar tema 🎖️';
+  updateScoreboard();
+  saveProgress();
+}
+
+function continueQuestion(){
+  playPos++;
+  if(playPos < playOrder.length){
+    renderQuestion();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  } else {
+    finishTema();
+  }
+}
+
+function finishTema(){
+  const ti = activeTema;
+  const tema = TEMAS[ti];
+  $('quizArea').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildTemaGrid();
+
+  // ¿Completó TODO el banco?
+  if(answeredCount() >= TOTAL_Q){
+    if(!completionShown){
+      completionShown = true;
+      setTimeout(showCompletion, 300);
+    }
+    return;
+  }
+
+  // Resumen del tema recién jugado
+  const by = buildByTema();
+  const rec = by[tema.name] || { correct:0, total:tema.q.length };
+  const pct = tema.q.length ? Math.round((rec.correct||0)/tema.q.length*100) : 0;
+  $('temaDoneTitle').textContent = `${tema.icon} ${tema.name}`;
+  $('temaDoneMsg').innerHTML =
+    `Recorriste este tema y acertaste <b>${rec.correct||0}</b> de <b>${tema.q.length}</b> (<b>${pct}%</b>).<br>¡Sigue con otro tema, ${esc(KID_NAME)}!`;
+  show('temaDoneOverlay');
+  confettiBurst();
+}
+
+function exitTema(){
+  // Salir a la mitad: lo respondido ya quedó guardado por identidad.
+  $('quizArea').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  current = null;
+  buildTemaGrid();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* =========================================================
+   COMPLETADO (100%)
+   ========================================================= */
+function showCompletion(){
+  const tc = totalCorrect();
+  $('completionMsg').innerHTML =
+    `¡Felicidades, <span style="color:var(--orange-deep);font-weight:700;">${esc(KID_NAME)}</span>! Respondiste las <b>${TOTAL_Q}</b> preguntas y acertaste <b>${tc}</b>.<br>Ya eres todo un experto del lenguaje. ✏️📚`;
+  confettiBurst(); confettiBurst();
+  show('completionOverlay');
+}
+
+/* =========================================================
+   REPORTE DE ESTUDIO
+   ========================================================= */
+function openReport(){
+  const by = buildByTema();
+  const attempted = [];
+  let html = '';
+
+  TEMAS.forEach((tema)=>{
+    const rec = by[tema.name];
+    if(rec && rec.total>0){
+      const pct = Math.round(rec.correct/rec.total*100);
+      const cls = pct>=80 ? 'good' : (pct>=50 ? 'mid' : 'low');
+      attempted.push({ name:tema.name, icon:tema.icon, pct });
+      html += `
+        <div class="report-row">
+          <div class="top">
+            <span class="nm"><span class="ic">${tema.icon}</span>${esc(tema.name)}</span>
+            <span class="meta">${rec.total} / ${tema.q.length} resp. · <b style="color:var(--orange-deep)">${pct}%</b></span>
+          </div>
+          <div class="repbar"><i class="${cls}" style="width:${pct}%"></i></div>
+        </div>`;
+    } else {
+      html += `
+        <div class="report-row untried">
+          <div class="top">
+            <span class="nm"><span class="ic">${tema.icon}</span>${esc(tema.name)}</span>
+            <span class="meta">Sin intentar aún — ¡pruébalo!</span>
+          </div>
+          <div class="repbar"><i class="mid" style="width:0%"></i></div>
+        </div>`;
+    }
+  });
+
+  let msg = '';
+  if(attempted.length === 0){
+    msg = `¡Aún no respondes preguntas, ${esc(KID_NAME)}! Toca un tema para empezar y aquí verás en qué eres fuerte. 💪`;
+  } else {
+    const maxPct = Math.max(...attempted.map(a=>a.pct));
+    const minPct = Math.min(...attempted.map(a=>a.pct));
+    const strong = attempted.filter(a=>a.pct===maxPct).map(a=>a.name);
+    const weak = attempted.filter(a=>a.pct===minPct).map(a=>a.name);
+    const fmt = (arr)=>arr.map(n=>esc(n)).join(', ');
+    if(maxPct === minPct){
+      msg = `¡Vas parejo, ${esc(KID_NAME)}! Llevas <b>${maxPct}%</b> de aciertos en lo que has intentado. Sigue jugando con más temas para descubrir tus súper poderes con el lenguaje. 🌟`;
+    } else {
+      msg = `Tu tema más fuerte: <span class="strong">${fmt(strong)}</span> (${maxPct}% de aciertos). ¡Excelente, ${esc(KID_NAME)}! 🎉<br><br>
+        Lo que conviene repasar: <span class="weak">${fmt(weak)}</span> (${minPct}%). Vuelve a jugar ese tema y lee las explicaciones; ¡verás cómo mejoras! 💪`;
+    }
+  }
+  html += `<div class="report-msg">${msg}</div>`;
+
+  $('reportBody').innerHTML = html;
+  show('reportOverlay');
+}
+
+/* =========================================================
+   BORRAR PROGRESO (UPDATE a objeto vacío, NUNCA delete)
+   ========================================================= */
+async function eraseProgress(){
+  const emptyData = { answered:{}, score:0, byTema:{}, updatedAt:new Date().toISOString() };
+  const { error } = await supabase
+    .from('progress')
+    .upsert(
+      { user_id: USER_ID, subject: SUBJECT, data: emptyData, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,subject' }
+    );
+  if(error){ console.error('Error al borrar progreso:', error.message); }
+
+  answered = {}; score = 0; streak = 0;
+  current = null; completionShown = false; activeTema = -1;
+  hide('eraseOverlay');
+  $('quizArea').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildTemaGrid();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
+function confettiBurst(){
+  const colors = ['#e8633f','#ff8a63','#f2933c','#cf6f1d','#3fa66b','#fff8f1'];
+  for(let i=0;i<24;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animation = `fall ${1.6+Math.random()*1.4}s linear forwards`;
+    c.style.animationDelay = (Math.random()*.3)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3400);
+  }
+}
+
+/* =========================================================
+   EVENTOS
+   ========================================================= */
+$('startBtn').addEventListener('click', ()=>{
+  $('startScreen').classList.add('hidden');
+  $('gameArea').classList.remove('hidden');
+  buildTemaGrid();
+});
+$('qContinue').addEventListener('click', continueQuestion);
+$('quizExitBtn').addEventListener('click', exitTema);
+$('temaDoneBackBtn').addEventListener('click', ()=>{ hide('temaDoneOverlay'); buildTemaGrid(); });
+$('temaDoneReportBtn').addEventListener('click', ()=>{ hide('temaDoneOverlay'); openReport(); });
+$('compReportBtn').addEventListener('click', ()=>{ hide('completionOverlay'); openReport(); });
+$('compCloseBtn').addEventListener('click', ()=>hide('completionOverlay'));
+$('reportBtn').addEventListener('click', openReport);
+$('reportCloseBtn').addEventListener('click', ()=>hide('reportOverlay'));
+$('eraseBtn').addEventListener('click', ()=>show('eraseOverlay'));
+$('eraseCancelBtn').addEventListener('click', ()=>hide('eraseOverlay'));
+$('eraseConfirmBtn').addEventListener('click', eraseProgress);
+
+/* =========================================================
+   ARRANQUE / CONTROL DE ACCESO (materia PAGADA)
+   ========================================================= */
+function setupAuthListener(loadedUserId){
+  supabase.auth.onAuthStateChange((event, session)=>{
+    if(event === 'SIGNED_OUT' || !session){
+      window.location.replace('../login.html');
+      return;
+    }
+    if(session.user.id !== loadedUserId){
+      window.location.replace('../login.html');
+    }
+  });
+}
+
+(async ()=>{
+  // 1) Requiere sesión.
+  const { data:{ user }, error } = await supabase.auth.getUser();
+  if(error || !user){
+    window.location.replace('../login.html');
+    return;
+  }
+  USER_ID = user.id;
+
+  // 2) Español es PAGADO: requiere has_access === true.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('kid_name, has_access')
+    .eq('id', USER_ID)
+    .single();
+
+  if(profile?.has_access !== true){
+    window.location.replace('../dashboard.html');
+    return;
+  }
+
+  const nm = (profile?.kid_name || '').trim();
+  KID_NAME = nm || 'estudiante';
+  $('playerName').textContent = (KID_NAME).toUpperCase();
+  $('greetName').textContent = KID_NAME;
+  $('scoreLbl').textContent = `Puntos de ${KID_NAME}`;
+
+  // 3) Restaurar progreso (re-marca lo respondido por identidad de pregunta).
+  await loadProgress();
+  if(answeredCount() >= TOTAL_Q) completionShown = true;
+
+  // 4) Revelar app (recién aquí pasa el gate).
+  $('loadingScreen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  // Si ya hay progreso, ir directo a los temas (saltar intro).
+  if(answeredCount() > 0){
+    $('startScreen').classList.add('hidden');
+    $('gameArea').classList.remove('hidden');
+    buildTemaGrid();
+  }
+
+  setupAuthListener(USER_ID);
+})();
+</script>
+</body>
+</html>
