@@ -266,9 +266,18 @@ let playerName='estudiante';
 const px=t=>String(t).replace(/\{name\}/g, playerName);
 function updateNames(){ document.querySelectorAll('.pname').forEach(e=>e.textContent=playerName); const pn=$('playerName'); if(pn) pn.textContent=playerName; try{document.title=playerName+"'s English Power-Up Arcade";}catch(e){} }
 let state;
-function freshState(){ const o={}; STATIONS.forEach(s=>o[s.id]={earned:false,finished:false,lastPct:null,deck:null,answers:null,seenPool:[],misses:[]}); return {xp:0,streak:0,bestStreak:0,lifelines:LIVES,stations:o}; }
+function freshState(){ const o={}; STATIONS.forEach(s=>o[s.id]={earned:false,finished:false,lastPct:null,deck:null,answers:null,seenPool:[],misses:[]}); return {xp:0,streak:0,bestStreak:0,lifelines:LIVES,stations:o,mastered:{}}; }
 function initState(){ state=freshState(); }
 initState();
+/* Rendimiento decreciente / anti-farm: la PRIMERA vez que se acierta una pregunta
+   (por su id estable) otorga la XP completa de esa respuesta y se marca en
+   state.mastered; cualquier acierto posterior del MISMO id otorga solo el 20%.
+   state.mastered SOBREVIVE al borrado de progreso. */
+function awardXP(cardId, base){
+  if(cardId && state.mastered[cardId]){ const r=Math.round(base*0.2); state.xp+=r; return r; }
+  if(cardId) state.mastered[cardId]=true;
+  state.xp+=base; return base;
+}
 const isMcq=c=>c.t==='mcq';
 const ssn=sid=>state.stations[sid];
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
@@ -327,7 +336,7 @@ function buildData(){
   STATIONS.forEach(s=>{ const o=ssn(s.id);
     st[s.id]={earned:o.earned, finished:o.finished, lastPct:o.lastPct, seenPool:o.seenPool||[], answers:o.answers||null, misses:(o.misses||[]).map(c=>c.id)}; });
   // score = el número del leaderboard (= XP acumulado del juego).
-  return { stations:st, xp:state.xp, streak:state.streak, bestStreak:state.bestStreak, lifelines:state.lifelines, score:state.xp, updatedAt:new Date().toISOString() };
+  return { stations:st, xp:state.xp, streak:state.streak, bestStreak:state.bestStreak, lifelines:state.lifelines, mastered:state.mastered, score:state.xp, updatedAt:new Date().toISOString() };
 }
 async function loadProgress(){
   if(!USER_ID) return false;
@@ -338,6 +347,7 @@ async function loadProgress(){
     .eq('subject', SUBJECT)
     .maybeSingle();
   const d = row && row.data;
+  if(d && d.mastered && typeof d.mastered==='object') state.mastered=d.mastered;
   if(!d || !d.stations) return false;
   state.xp=d.xp||0; state.streak=d.streak||0; state.bestStreak=d.bestStreak||0; state.lifelines=(d.lifelines==null?LIVES:d.lifelines);
   STATIONS.forEach(s=>{ const o=ssn(s.id); const sv=d.stations&&d.stations[s.id];
@@ -371,7 +381,9 @@ async function saveProgress(){
 function autosave(){ saveProgress(); }
 async function eraseProgress(){
   // Borrar = UPDATE a un objeto vacío (NUNCA delete; la tabla no tiene política de delete).
-  const emptyData={ stations:{}, xp:0, streak:0, bestStreak:0, lifelines:LIVES, score:0, updatedAt:new Date().toISOString() };
+  // CONSERVA 'mastered' (anti-farm): tras borrar, repetir preguntas ya dominadas da 20%.
+  const keepMastered = (state && state.mastered) ? state.mastered : {};
+  const emptyData={ stations:{}, xp:0, streak:0, bestStreak:0, lifelines:LIVES, mastered:keepMastered, score:0, updatedAt:new Date().toISOString() };
   if(USER_ID){
     const { error } = await supabase
       .from('progress')
@@ -381,7 +393,7 @@ async function eraseProgress(){
       );
     if(error) console.error('Error al borrar progreso:', error.message);
   }
-  examCleanup(); initState(); showScreen('hub'); renderHub();
+  examCleanup(); initState(); state.mastered=keepMastered; showScreen('hub'); renderHub();
 }
 
 function syncStats(){ $('xp').textContent=state.xp; $('badges').textContent=badgesEarned()+'/'+STATIONS.length; $('streak').textContent=state.bestStreak; $('lifelines').textContent=state.lifelines; }
@@ -472,10 +484,12 @@ function pick(c,i,btn){
   if(i===c.correct){
     const firstTry=active.triedWrong.length===0;
     document.querySelectorAll('#opts .opt').forEach(b=>b.disabled=true); btn.classList.add('correct');
-    state.xp += firstTry?100:50;
+    const base=firstTry?100:50;
+    const wasMastered=!!state.mastered[c.id];
+    const gained=awardXP(c.id, base);
     if(firstTry){ state.streak++; state.bestStreak=Math.max(state.bestStreak,state.streak); removeMiss(cur.id,c); } else { state.streak=0; addMiss(cur.id,c); }
     ans()[curIdx]={result:'correct',firstTry,picked:i};
-    sOk(); confettiBurst(); fb.className='fb right show'; fb.innerHTML=`<div class="hd">${firstTry?'✅ Correct! +100 XP':'✅ Correct! +50 XP'}</div>${c.why}`;
+    sOk(); confettiBurst(); fb.className='fb right show'; fb.innerHTML=`<div class="hd">✅ Correct! +${gained} XP${wasMastered?' (repaso · 20%)':''}</div>${c.why}`;
     syncStats(); buildNext(); autosave();
   } else {
     if(active.triedWrong.length===0){ active.triedWrong.push(i); btn.classList.add('wrong'); btn.disabled=true; state.streak=0; syncStats(); sBad();
@@ -552,7 +566,7 @@ function renderBoss(){
 function bossPick(c,i,btn){
   document.querySelectorAll('#bopts .opt').forEach(b=>{b.disabled=true; if(+b.dataset.i===c.correct) b.classList.add('correct');});
   const fb=$('bfb');
-  if(i===c.correct){ boss.score++; state.xp+=50; sOk(); confettiBurst(); fb.className='fb right show'; fb.innerHTML=`<div class="hd">✅ Correct! +50 XP</div>${c.why}`; }
+  if(i===c.correct){ boss.score++; const wasMastered=!!state.mastered[c.id]; const g=awardXP(c.id,50); sOk(); confettiBurst(); fb.className='fb right show'; fb.innerHTML=`<div class="hd">✅ Correct! +${g} XP${wasMastered?' (repaso · 20%)':''}</div>${c.why}`; }
   else { btn.classList.add('wrong'); boss.missed.push(c.tag); sBad(); const trap=c.traps&&c.traps[i]?`<span class="trap">${c.traps[i]}</span>`:''; fb.className='fb wrong show'; fb.innerHTML=`<div class="hd">Not this time</div>${c.why}${trap}`; }
   syncStats(); const nb=document.createElement('button'); nb.className='nextbtn'; nb.textContent=boss.idx>=boss.qs.length-1?'See results →':'Next →'; nb.onclick=()=>{ sClick(); boss.idx++; renderBoss(); }; $('bnext').appendChild(nb);
 }
@@ -625,7 +639,7 @@ function renderPractice(){
 function practicePick(ref,c,i,btn){
   document.querySelectorAll('#bopts .opt').forEach(b=>{b.disabled=true; if(+b.dataset.i===c.correct) b.classList.add('correct');});
   const fb=$('bfb');
-  if(i===c.correct){ boss.score++; state.xp+=100; removeMiss(ref.sid,c); sOk(); confettiBurst(); fb.className='fb right show'; fb.innerHTML=`<div class="hd">✅ Fixed it! +100 XP — cleared from review</div>${c.why}`; }
+  if(i===c.correct){ boss.score++; const wasMastered=!!state.mastered[c.id]; const g=awardXP(c.id,100); removeMiss(ref.sid,c); sOk(); confettiBurst(); fb.className='fb right show'; fb.innerHTML=`<div class="hd">✅ Fixed it! +${g} XP${wasMastered?' (repaso · 20%)':' — cleared from review'}</div>${c.why}`; }
   else { btn.classList.add('wrong'); sBad(); const trap=c.traps&&c.traps[i]?`<span class="trap">${c.traps[i]}</span>`:''; fb.className='fb wrong show'; fb.innerHTML=`<div class="hd">Keep this one in mind</div>${c.why}${trap}`; }
   syncStats(); const nb=document.createElement('button'); nb.className='nextbtn'; nb.textContent=boss.idx>=boss.qs.length-1?'Finish →':'Next →'; nb.onclick=()=>{ sClick(); boss.idx++; renderPractice(); }; $('bnext').appendChild(nb);
 }
@@ -688,8 +702,8 @@ function gradeExam(timeUp){
   let correct=0; const byArea={}; const missed=[];
   STATIONS.forEach(s=>byArea[s.id]={name:s.name,icon:s.icon,tot:0,ok:0});
   exam.qs.forEach((q,i)=>{ byArea[q.areaId].tot++; const a=exam.answers[i];
-    if(a===q.c.correct){ correct++; byArea[q.areaId].ok++; } else { missed.push({q,picked:a}); addMiss(q.areaId,q.c); } });
-  const tot=exam.qs.length, pct=Math.round(correct/tot*100); state.xp+=correct*20; syncStats(); autosave();
+    if(a===q.c.correct){ correct++; byArea[q.areaId].ok++; awardXP(q.c.id, 20); } else { missed.push({q,picked:a}); addMiss(q.areaId,q.c); } });
+  const tot=exam.qs.length, pct=Math.round(correct/tot*100); syncStats(); autosave();
   let verdict,vcolor;
   if(pct>=90){verdict='🏆 Exam Ready!';vcolor='var(--ok)';}
   else if(pct>=75){verdict='🥇 Almost there — a little more review';vcolor='var(--gold)';}

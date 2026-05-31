@@ -727,6 +727,7 @@ let KID_NAME = "estudiante";
 let score = 0;
 let streak = 0;
 let answered = {};            // { "<ci>_<qi>": { correct: bool } }
+let mastered = {};            // { "<ci>_<qi>": true } -> dominadas alguna vez; SOBREVIVE al borrado (anti-farm)
 let finalDone = false;
 
 let tileOrder = [];           // por categoría: orden barajado de qIndices (pregunta -> tile)
@@ -781,6 +782,7 @@ function buildData(){
   return {
     answered,
     score,
+    mastered,
     byCategory: buildByCategory(),
     finalDone,
     updatedAt: new Date().toISOString(),
@@ -820,9 +822,10 @@ async function loadProgress(){
     const d = row.data;
     answered  = (d.answered && typeof d.answered === 'object') ? d.answered : {};
     score     = Number.isFinite(d.score) ? d.score : 0;
+    mastered  = (d.mastered && typeof d.mastered === 'object') ? d.mastered : {};
     finalDone = d.finalDone === true;
   } else {
-    answered = {}; score = 0; finalDone = false;
+    answered = {}; score = 0; mastered = {}; finalDone = false;
   }
 }
 
@@ -950,13 +953,20 @@ function answer(idx){
     answered[`${ci}_${qi}`] = { correct: isRight };
   }
 
+  // Rendimiento decreciente: la PRIMERA vez que se domina una pregunta vale los
+  // puntos completos; cualquier acierto posterior (incluso tras borrar) vale 20%.
+  const qid = `${ci}_${qi}`;
+  const isRepeat = isRight && mastered[qid] === true;
+  const gained = isRight ? (isRepeat ? Math.round(current.points * 0.2) : current.points) : 0;
+  if(isRight && !isRepeat) mastered[qid] = true;
+
   const fb = $('qFeedback');
   if(isRight){
     streak++;
-    score += current.points;
+    score += gained;
     fb.className = 'feedback ok show';
     fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
-      <div class="line">Sumaste <b>${current.points} puntos</b>${streak>1?` (racha de <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">Sumaste <b>${gained} puntos</b>${isRepeat?` (repaso: 20% de ${current.points})`:''}${streak>1?` · racha de <b>${streak}</b> 🔥`:''}, ${esc(KID_NAME)}.</div>
       <div class="line">${esc(qd.ex)}</div>`;
     confettiBurst();
   } else {
@@ -1147,7 +1157,8 @@ function openReport(){
    BORRAR PROGRESO (UPDATE a objeto vacío, NUNCA delete)
    ========================================================= */
 async function eraseProgress(){
-  const emptyData = { answered:{}, score:0, byCategory:{}, finalDone:false, updatedAt:new Date().toISOString() };
+  // Borrar pone en cero answered/score/byCategory/finalDone, pero CONSERVA 'mastered' (anti-farm).
+  const emptyData = { answered:{}, score:0, mastered, byCategory:{}, finalDone:false, updatedAt:new Date().toISOString() };
   const { error } = await supabase
     .from('progress')
     .upsert(
@@ -1156,7 +1167,7 @@ async function eraseProgress(){
     );
   if(error){ console.error('Error al borrar progreso:', error.message); }
 
-  // resetear estado en memoria
+  // resetear estado en memoria (mastered se conserva para el anti-farm)
   answered = {}; score = 0; streak = 0; finalDone = false;
   current = null; completionShown = false;
   shuffleTiles(); // nueva partida -> nuevo orden de tiles

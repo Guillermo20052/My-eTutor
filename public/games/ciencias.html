@@ -577,6 +577,7 @@ let KID_NAME = "student";
 let score = 0;
 let streak = 0;
 let answered = {};            // { "<ti>_<qi>": { correct: bool } } -> ALWAYS by question identity
+let mastered = {};            // { "<ti>_<qi>": true } -> ever answered correctly; SURVIVES erase (anti-farm)
 let completionShown = false;
 
 // Active topic session state
@@ -619,6 +620,7 @@ function buildData(){
   return {
     answered,
     score,
+    mastered,
     byTopic: buildByTopic(),
     updatedAt: new Date().toISOString(),
   };
@@ -657,8 +659,9 @@ async function loadProgress(){
     const d = row.data;
     answered = (d.answered && typeof d.answered === 'object') ? d.answered : {};
     score    = Number.isFinite(d.score) ? d.score : 0;
+    mastered = (d.mastered && typeof d.mastered === 'object') ? d.mastered : {};
   } else {
-    answered = {}; score = 0;
+    answered = {}; score = 0; mastered = {};
   }
 }
 
@@ -753,7 +756,13 @@ function answer(idx){
   const qd = TOPICS[ti].q[qi];
   const correctIdx = current.shuffled.findIndex(o=>o.correct);
   const isRight = current.shuffled[idx].correct;
-  const pts = (qd.d || 1) * POINTS_PER_DIFF;
+  const fullPts = (qd.d || 1) * POINTS_PER_DIFF;
+  // Diminishing returns: the FIRST time a question is mastered it's worth full
+  // points; any later correct answer (even after erasing) is worth only 20%.
+  const qid = `${ti}_${qi}`;
+  const isRepeat = isRight && mastered[qid] === true;
+  const pts = isRight ? (isRepeat ? Math.round(fullPts * 0.2) : fullPts) : 0;
+  if(isRight && !isRepeat) mastered[qid] = true;
 
   // Lock and mark options (without re-triggering handlers)
   document.querySelectorAll('#qOpts .opt').forEach((b,i)=>{
@@ -770,10 +779,10 @@ function answer(idx){
   const fb = $('qFeedback');
   if(isRight){
     streak++;
-    score += pts; // fixed bank: points accumulate, even on replay
+    score += pts;
     fb.className = 'feedback ok show';
     fb.innerHTML = `<h3>Correct! 🎉</h3>
-      <div class="line">You earned <b>${pts} points</b>${streak>1?` (streak of <b>${streak}</b> 🔥)`:''}, ${esc(KID_NAME)}.</div>
+      <div class="line">You earned <b>${pts} points</b>${isRepeat?` (review: 20% of ${fullPts})`:''}${streak>1?` · streak of <b>${streak}</b> 🔥`:''}, ${esc(KID_NAME)}.</div>
       <div class="line">${esc(qd.ex)}</div>`;
     confettiBurst();
   } else {
@@ -909,7 +918,8 @@ function openReport(){
    ERASE PROGRESS (UPDATE to empty object, NEVER delete)
    ========================================================= */
 async function eraseProgress(){
-  const emptyData = { answered:{}, score:0, byTopic:{}, updatedAt:new Date().toISOString() };
+  // Erase zeroes answered/score/byTopic, but PRESERVES 'mastered' (anti-farm).
+  const emptyData = { answered:{}, score:0, mastered, byTopic:{}, updatedAt:new Date().toISOString() };
   const { error } = await supabase
     .from('progress')
     .upsert(
