@@ -422,7 +422,7 @@
       <div class="wager-box">
         <div class="amt" id="wagerAmt">0</div>
         <input type="range" id="wagerRange" min="0" max="0" step="50" value="0">
-        <div class="tiny">Arrastra para elegir tu apuesta (de 0 hasta todos tus puntos).</div>
+        <div class="tiny">Arrastra para elegir tu apuesta (de 0 hasta tus puntos, máximo 1,000,000).</div>
       </div>
       <div class="center" style="margin-top:18px;">
         <button class="btn" id="lockWagerBtn">Apostar y ver la pregunta 🎯</button>
@@ -721,11 +721,18 @@ const CATS = [
   ]},
 ];
 
-const FINAL = {
-  q:"La GRAN idea que une todo el estudio: en todos los sacramentos hay Alguien que actúa de verdad por medio del sacerdote, aunque no lo veamos. En la Eucaristía el sacerdote habla «in persona Christi», y en la Confesión el sacerdote es solo un instrumento. ¿QUIÉN es el que de verdad actúa y obra el milagro en los sacramentos?",
-  opts:["Jesús (Dios) mismo","Solamente el sacerdote por su esfuerzo","Los fieles que están en la Misa","Los santos del cielo"], correct:0,
-  ex:"En TODOS los sacramentos es JESÚS mismo quien actúa. En la Eucaristía el sacerdote habla «in persona Christi» y el pan y el vino se vuelven el Cuerpo y la Sangre de Cristo; en la Confesión, quien realmente perdona es Dios, y el sacerdote es su instrumento."
-};
+// El Jeopardy Final ya NO usa una pregunta fija (eso permitía memorizar la
+// respuesta y farmear puntos). En su lugar se elige una pregunta AL AZAR de
+// todo el banco de Religión (cualquier categoría) cada vez que se juega.
+function pickRandomFinalQuestion(){
+  const pool = [];
+  CATS.forEach(cat=>{
+    cat.q.forEach(qd=>{
+      pool.push({ q: qd.q, opts: qd.opts, correct: qd.correct, ex: qd.ex });
+    });
+  });
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 /* =========================================================
    CONSTANTES / ESTADO
@@ -733,6 +740,7 @@ const FINAL = {
 const SUBJECT = "religion";
 const TOTAL_Q = CATS.reduce((s,c)=>s+c.q.length,0);
 const LETTERS = ["A","B","C","D"];
+const MAX_BET = 1000000;       // tope de apuesta del Jeopardy Final (anti-farm)
 
 let USER_ID = null;
 let KID_NAME = "estudiante";
@@ -748,6 +756,7 @@ let tileOrder = [];           // por categoría: orden barajado de qIndices (pre
 let current = null;           // { ci, qi, points, shuffled }
 let wager = 0;
 let finalShuffled = [];
+let finalQ = null;            // pregunta del Jeopardy Final: se elige AL AZAR de todo el banco cada vez
 let completionShown = false;
 
 /* =========================================================
@@ -1027,11 +1036,17 @@ function showCompletion(){
 /* =========================================================
    JEOPARDY FINAL
    ========================================================= */
+function maxWager(){
+  // La apuesta nunca puede pasar del puntaje disponible ni del tope global.
+  return Math.max(0, Math.min(score, MAX_BET));
+}
 function openFinal(){
   if(answeredCount() < TOTAL_Q) return;
+  // Elegir AL AZAR la pregunta del Final, de todo el banco, en cada partida.
+  finalQ = pickRandomFinalQuestion();
   $('finalScoreShow').textContent = score;
   const range = $('wagerRange');
-  range.max = Math.max(0, score);
+  range.max = maxWager();      // tope: min(puntaje, 1,000,000)
   range.value = 0;
   wager = 0;
   $('wagerAmt').textContent = 0;
@@ -1040,15 +1055,19 @@ function openFinal(){
   show('finalOverlay');
 }
 function updateWager(){
-  wager = parseInt($('wagerRange').value) || 0;
+  // Clamp entre 0 y min(puntaje, 1,000,000), por si el input se manipula.
+  wager = Math.max(0, Math.min(parseInt($('wagerRange').value) || 0, maxWager()));
   $('wagerAmt').textContent = wager;
 }
 function lockWager(){
+  // Reasegurar el tope antes de procesar la apuesta (defensa en la lógica).
+  wager = Math.max(0, Math.min(wager, maxWager()));
+  $('wagerAmt').textContent = wager;
   $('wagerStep').classList.add('hidden');
   $('finalQStep').classList.remove('hidden');
-  $('finalQText').textContent = FINAL.q;
+  $('finalQText').textContent = finalQ.q;
 
-  finalShuffled = FINAL.opts.map((t,i)=>({text:t, correct:i===FINAL.correct}));
+  finalShuffled = finalQ.opts.map((t,i)=>({text:t, correct:i===finalQ.correct}));
   for(let k=finalShuffled.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[finalShuffled[k],finalShuffled[j]]=[finalShuffled[j],finalShuffled[k]];}
 
   const box = $('finalOpts');
@@ -1065,6 +1084,8 @@ function lockWager(){
   $('finalContinue').classList.add('hidden');
 }
 function answerFinal(idx){
+  // Tope final antes de aplicar: ninguna apuesta mayor a min(puntaje, 1,000,000) se procesa.
+  wager = Math.max(0, Math.min(wager, maxWager()));
   const correctIdx = finalShuffled.findIndex(o=>o.correct);
   const isRight = finalShuffled[idx].correct;
   document.querySelectorAll('#finalOpts .opt').forEach((b,i)=>{
@@ -1080,14 +1101,14 @@ function answerFinal(idx){
     fb.className = 'feedback ok show';
     fb.innerHTML = `<h3>¡Correcto! 🎉</h3>
       <div class="line">Ganaste tu apuesta de <b>${wager} puntos</b>.</div>
-      <div class="line">${esc(FINAL.ex)}</div>`;
+      <div class="line">${esc(finalQ.ex)}</div>`;
     confettiBurst();
   } else {
     score = Math.max(0, score - wager);
     fb.className = 'feedback bad show';
     fb.innerHTML = `<h3>📚 Repaso</h3>
       <div class="line">Apostaste <b>${wager} puntos</b> y esta vez no acertaste.</div>
-      <div class="line">${esc(FINAL.ex)}</div>
+      <div class="line">${esc(finalQ.ex)}</div>
       <div class="line correct-ans">✔ Respuesta correcta: ${esc(finalShuffled[correctIdx].text)}</div>`;
   }
   finalDone = true;
@@ -1174,18 +1195,22 @@ function openReport(){
    BORRAR PROGRESO (UPDATE a objeto vacío, NUNCA delete)
    ========================================================= */
 async function eraseProgress(){
-  // Borrar pone en cero answered/score/byCategory/finalDone, pero CONSERVA 'mastered' (anti-farm).
-  const emptyData = { answered:{}, score:0, mastered, byCategory:{}, finalDone:false, updatedAt:new Date().toISOString() };
+  // Borrar reinicia SOLO el estado del tablero para volver a jugar
+  // (answered, byCategory, finalDone), pero CONSERVA los puntos ya ganados
+  // ('score') y las preguntas dominadas ('mastered'). Así el total de la tabla
+  // de posiciones NO baja al borrar, y el anti-farm sigue intacto.
+  const resetData = { answered:{}, score, mastered, byCategory:{}, finalDone:false, updatedAt:new Date().toISOString() };
   const { error } = await supabase
     .from('progress')
     .upsert(
-      { user_id: USER_ID, subject: SUBJECT, data: emptyData, updated_at: new Date().toISOString() },
+      { user_id: USER_ID, subject: SUBJECT, data: resetData, updated_at: new Date().toISOString() },
       { onConflict: 'user_id,subject' }
     );
   if(error){ console.error('Error al borrar progreso:', error.message); }
 
-  // resetear estado en memoria (mastered se conserva para el anti-farm)
-  answered = {}; score = 0; streak = 0; finalDone = false;
+  // resetear SOLO el estado de la sesión/tablero en memoria.
+  // 'score' y 'mastered' se conservan (puntos ganados + anti-farm).
+  answered = {}; streak = 0; finalDone = false;
   current = null; completionShown = false;
   shuffleTiles(); // nueva partida -> nuevo orden de tiles
   hide('eraseOverlay');
