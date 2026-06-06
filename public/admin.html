@@ -16,6 +16,30 @@
         padding:4px 10px;border-radius:999px;
       }
 
+      .school-tabs{
+        display:flex;gap:8px;margin-bottom:16px;
+        background:var(--card);border:1px solid var(--line);
+        border-radius:16px;padding:6px;box-shadow:var(--shadow-sm);
+      }
+      .school-tabs button{
+        flex:1;border:0;background:transparent;cursor:pointer;
+        font-family:'Fredoka',sans-serif;font-weight:600;color:var(--soft);
+        padding:11px 14px;border-radius:11px;font-size:1rem;
+        transition:background .15s,color .15s;
+      }
+      .school-tabs button.active{
+        background:linear-gradient(145deg,var(--blue),var(--blue-d));color:#fff;
+        box-shadow:0 6px 14px -8px rgba(31,143,208,.9);
+      }
+      .school-tabs button:not(.active):hover{background:var(--sky);color:var(--navy)}
+      .school-tabs button.tab-redwood.active{
+        background:linear-gradient(145deg,#a63d3d,#8b2e2e);
+        box-shadow:0 6px 14px -8px rgba(139,46,46,.9);
+      }
+      .school-tabs .tab-count{
+        display:block;font-size:.72rem;font-weight:800;opacity:.85;margin-top:2px;
+      }
+
       .counter{
         display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;
       }
@@ -92,6 +116,17 @@
         </div>
       </header>
 
+      <nav class="school-tabs" role="tablist" aria-label="Escuela">
+        <button type="button" class="active" id="tab-blueridge" role="tab" aria-selected="true">
+          🏔️ Blueridge
+          <span class="tab-count" id="count-blueridge">— estudiantes</span>
+        </button>
+        <button type="button" class="tab-redwood" id="tab-redwood" role="tab" aria-selected="false">
+          🌲 Redwood
+          <span class="tab-count" id="count-redwood">— estudiantes</span>
+        </button>
+      </nav>
+
       <section class="counter">
         <div class="stat">
           <div class="n" id="stat-total">—</div>
@@ -157,6 +192,10 @@
       const searchEl = document.getElementById("search");
       const statTotalEl = document.getElementById("stat-total");
       const statAccessEl = document.getElementById("stat-access");
+      const tabBlueridge = document.getElementById("tab-blueridge");
+      const tabRedwood = document.getElementById("tab-redwood");
+      const countBlueridgeEl = document.getElementById("count-blueridge");
+      const countRedwoodEl = document.getElementById("count-redwood");
 
       const modalEl = document.getElementById("confirm-modal");
       const confirmTitle = document.getElementById("confirm-title");
@@ -218,6 +257,7 @@
         const s = students.find((x) => x.id === id);
         if (s) s.has_access = nextAccess;
         closeConfirm();
+        updateTabCounts();
         renderRows(searchEl.value);
         renderCounter();
       });
@@ -230,6 +270,37 @@
 
       // ---------- Data ----------
       let students = []; // all non-admin profiles, cached client-side
+      let activeSchool = "blueridge"; // 'blueridge' | 'redwood'
+
+      function studentSchool(s) {
+        return s.school === "redwood" ? "redwood" : "blueridge";
+      }
+
+      function studentsForTab() {
+        return students.filter((s) => studentSchool(s) === activeSchool);
+      }
+
+      function updateTabCounts() {
+        const br = students.filter((s) => studentSchool(s) === "blueridge").length;
+        const rw = students.filter((s) => studentSchool(s) === "redwood").length;
+        countBlueridgeEl.textContent =
+          br === 1 ? "1 estudiante" : `${br} estudiantes`;
+        countRedwoodEl.textContent =
+          rw === 1 ? "1 estudiante" : `${rw} estudiantes`;
+      }
+
+      function switchSchoolTab(school) {
+        activeSchool = school;
+        tabBlueridge.classList.toggle("active", school === "blueridge");
+        tabRedwood.classList.toggle("active", school === "redwood");
+        tabBlueridge.setAttribute("aria-selected", school === "blueridge" ? "true" : "false");
+        tabRedwood.setAttribute("aria-selected", school === "redwood" ? "true" : "false");
+        renderCounter();
+        renderRows(searchEl.value);
+      }
+
+      tabBlueridge.addEventListener("click", () => switchSchoolTab("blueridge"));
+      tabRedwood.addEventListener("click", () => switchSchoolTab("redwood"));
 
       function fmtDate(iso) {
         if (!iso) return "—";
@@ -251,21 +322,23 @@
       }
 
       function renderCounter() {
-        const total = students.length;
-        const withAccess = students.filter((s) => s.has_access === true).length;
+        const list = studentsForTab();
+        const total = list.length;
+        const withAccess = list.filter((s) => s.has_access === true).length;
         statTotalEl.textContent = total;
         statAccessEl.textContent = withAccess;
       }
 
       function renderRows(query) {
         const q = (query || "").trim().toLowerCase();
-        const list = q
-          ? students.filter(
-              (s) =>
-                (s.parent_email || "").toLowerCase().includes(q) ||
-                (s.kid_name || "").toLowerCase().includes(q)
-            )
-          : students;
+        let list = studentsForTab();
+        if (q) {
+          list = list.filter(
+            (s) =>
+              (s.parent_email || "").toLowerCase().includes(q) ||
+              (s.kid_name || "").toLowerCase().includes(q)
+          );
+        }
 
         rowsEl.innerHTML = "";
         if (list.length === 0) {
@@ -304,7 +377,7 @@
         // Exclude admin rows from the student list/counter.
         const { data, error } = await supabase
           .from("profiles")
-          .select("id, kid_name, parent_email, has_access, created_at, is_admin")
+          .select("id, kid_name, parent_email, has_access, created_at, is_admin, school")
           .neq("is_admin", true)
           .order("created_at", { ascending: false });
 
@@ -313,6 +386,7 @@
         } else {
           students = data || [];
         }
+        updateTabCounts();
         renderCounter();
         renderRows(searchEl.value);
       }
