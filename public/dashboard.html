@@ -537,7 +537,8 @@
           : "¡Hola!";
 
         // Player pill (name starts plain blue; rank treatment applied later).
-        document.getElementById("player-name").textContent = kidName || "Estudiante";
+        document.getElementById("player-name").textContent =
+          kidName || (isRedwood ? "Alumna" : "Estudiante");
         document.getElementById("avatar").textContent = kidName
           ? kidName.charAt(0).toUpperCase()
           : "?";

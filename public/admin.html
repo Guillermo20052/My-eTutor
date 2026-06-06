@@ -61,7 +61,7 @@
         box-shadow:var(--shadow-sm);overflow:hidden;
       }
       .tablewrap{overflow-x:auto}
-      table{width:100%;border-collapse:collapse;min-width:560px}
+      table{width:100%;border-collapse:collapse;min-width:720px}
       th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:.92rem}
       th{
         font-family:'Fredoka',sans-serif;font-weight:600;color:var(--soft);
@@ -73,6 +73,12 @@
       .access-yes{color:var(--green);font-weight:800}
       .access-no{color:var(--red);font-weight:800}
       td .btn{font-size:.82rem;padding:8px 14px;white-space:nowrap}
+      td .row-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+      .hidden-badge{
+        display:inline-block;margin-left:6px;font-size:.68rem;font-weight:800;
+        color:var(--soft);background:var(--sky);padding:2px 8px;border-radius:999px;
+        vertical-align:middle;text-transform:uppercase;letter-spacing:.04em;
+      }
 
       .empty{padding:22px 16px;text-align:center;color:var(--soft);font-weight:700}
 
@@ -205,13 +211,13 @@
       const confirmOk = document.getElementById("confirm-ok");
       const confirmCancel = document.getElementById("confirm-cancel");
 
-      let pendingAction = null; // { id, nextAccess }
+      let pendingAction = null; // { kind: 'access'|'hidden', id, nextValue }
 
       // ---------- Modal helpers ----------
-      function openConfirm({ id, name, email, currentAccess }) {
-        const nextAccess = !currentAccess;
-        pendingAction = { id, nextAccess };
-        if (nextAccess) {
+      function openConfirmAccess({ id, name, email, currentAccess }) {
+        const nextValue = !currentAccess;
+        pendingAction = { kind: "access", id, nextValue };
+        if (nextValue) {
           confirmIcon.textContent = "🔑";
           confirmTitle.textContent = "Otorgar acceso";
           confirmText.textContent = "Vas a otorgar acceso a:";
@@ -227,6 +233,26 @@
         confirmWho.textContent = `${name || "(sin nombre)"} · ${email || "(sin correo)"}`;
         modalEl.classList.add("on");
       }
+
+      function openConfirmHidden({ id, name, email, currentHidden }) {
+        const nextValue = !currentHidden;
+        pendingAction = { kind: "hidden", id, nextValue };
+        if (nextValue) {
+          confirmIcon.textContent = "🙈";
+          confirmTitle.textContent = "Ocultar de la tabla";
+          confirmText.textContent = "Vas a ocultar de la tabla de posiciones a:";
+          confirmOk.textContent = "Ocultar";
+          confirmOk.className = "btn danger";
+        } else {
+          confirmIcon.textContent = "👁";
+          confirmTitle.textContent = "Mostrar en la tabla";
+          confirmText.textContent = "Vas a volver a mostrar en la tabla de posiciones a:";
+          confirmOk.textContent = "Mostrar";
+          confirmOk.className = "btn primary";
+        }
+        confirmWho.textContent = `${name || "(sin nombre)"} · ${email || "(sin correo)"}`;
+        modalEl.classList.add("on");
+      }
       function closeConfirm() {
         modalEl.classList.remove("on");
         pendingAction = null;
@@ -238,24 +264,34 @@
 
       confirmOk.addEventListener("click", async () => {
         if (!pendingAction) return;
-        const { id, nextAccess } = pendingAction;
+        const { kind, id, nextValue } = pendingAction;
         confirmOk.disabled = true;
+
+        const patch =
+          kind === "access" ? { has_access: nextValue } : { hidden: nextValue };
 
         const { error } = await supabase
           .from("profiles")
-          .update({ has_access: nextAccess })
+          .update(patch)
           .eq("id", id);
 
         confirmOk.disabled = false;
 
         if (error) {
-          alert("No se pudo actualizar el acceso. Inténtalo de nuevo.");
+          alert(
+            kind === "access"
+              ? "No se pudo actualizar el acceso. Inténtalo de nuevo."
+              : "No se pudo actualizar la visibilidad. Inténtalo de nuevo."
+          );
           return;
         }
 
         // Update local cache, re-render the affected row + counter (no full reload).
         const s = students.find((x) => x.id === id);
-        if (s) s.has_access = nextAccess;
+        if (s) {
+          if (kind === "access") s.has_access = nextValue;
+          else s.hidden = nextValue;
+        }
         closeConfirm();
         updateTabCounts();
         renderRows(searchEl.value);
@@ -350,25 +386,42 @@
         for (const s of list) {
           const tr = document.createElement("tr");
           const access = s.has_access === true;
+          const hidden = s.hidden === true;
           tr.innerHTML = `
-            <td><span class="name">${escapeHtml(s.kid_name || "(sin nombre)")}</span></td>
+            <td><span class="name">${escapeHtml(s.kid_name || "(sin nombre)")}</span>${hidden ? ' <span class="hidden-badge">oculto</span>' : ""}</td>
             <td><span class="email">${escapeHtml(s.parent_email || "—")}</span></td>
             <td>${access ? '<span class="access-yes">✅ Sí</span>' : '<span class="access-no">❌ No</span>'}</td>
             <td>${fmtDate(s.created_at)}</td>
-            <td></td>
+            <td><div class="row-actions"></div></td>
           `;
-          const btn = document.createElement("button");
-          btn.className = access ? "btn ghost" : "btn primary";
-          btn.textContent = access ? "Quitar acceso" : "Otorgar acceso";
-          btn.addEventListener("click", () =>
-            openConfirm({
+          const actions = tr.querySelector(".row-actions");
+
+          const accessBtn = document.createElement("button");
+          accessBtn.className = access ? "btn ghost" : "btn primary";
+          accessBtn.textContent = access ? "Quitar acceso" : "Otorgar acceso";
+          accessBtn.addEventListener("click", () =>
+            openConfirmAccess({
               id: s.id,
               name: s.kid_name,
               email: s.parent_email,
               currentAccess: access,
             })
           );
-          tr.lastElementChild.appendChild(btn);
+          actions.appendChild(accessBtn);
+
+          const hiddenBtn = document.createElement("button");
+          hiddenBtn.className = hidden ? "btn primary" : "btn ghost";
+          hiddenBtn.textContent = hidden ? "Mostrar" : "Ocultar";
+          hiddenBtn.addEventListener("click", () =>
+            openConfirmHidden({
+              id: s.id,
+              name: s.kid_name,
+              email: s.parent_email,
+              currentHidden: hidden,
+            })
+          );
+          actions.appendChild(hiddenBtn);
+
           rowsEl.appendChild(tr);
         }
       }
@@ -377,7 +430,7 @@
         // Exclude admin rows from the student list/counter.
         const { data, error } = await supabase
           .from("profiles")
-          .select("id, kid_name, parent_email, has_access, created_at, is_admin, school")
+          .select("id, kid_name, parent_email, has_access, hidden, created_at, is_admin, school")
           .neq("is_admin", true)
           .order("created_at", { ascending: false });
 
