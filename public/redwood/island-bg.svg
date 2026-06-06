@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="ocean" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5eb8d4"/>
+      <stop offset="45%" stop-color="#3a9fbe"/>
+      <stop offset="100%" stop-color="#2d8a9e"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f5e6c8"/>
+      <stop offset="100%" stop-color="#e8d4a8"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4caf6a"/>
+      <stop offset="100%" stop-color="#2d8a5e"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b5a3c"/>
+      <stop offset="100%" stop-color="#6b4428"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#2d8a5e"/>
+      <stop offset="100%" stop-color="#52b878"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ocean band -->
+  <rect x="0" y="620" width="1440" height="280" fill="url(#ocean)"/>
+
+  <!-- Wave crests -->
+  <path d="M0 640 Q120 620 240 640 T480 640 T720 640 T960 640 T1200 640 T1440 640 L1440 680 Q1320 660 1200 680 T960 680 T720 680 T480 680 T240 680 T0 680 Z" fill="#7ecfe6" opacity="0.55"/>
+  <path d="M0 700 Q180 680 360 700 T720 700 T1080 700 T1440 700 L1440 740 Q1260 720 1080 740 T720 740 T360 740 T0 740 Z" fill="#9adcf0" opacity="0.35"/>
+
+  <!-- Center island -->
+  <ellipse cx="720" cy="655" rx="210" ry="38" fill="url(#sand)"/>
+  <path d="M560 655 Q620 590 720 575 Q820 590 880 655 Z" fill="url(#hill)"/>
+  <ellipse cx="720" cy="600" rx="95" ry="28" fill="#3d9e62" opacity="0.85"/>
+
+  <!-- Left palm -->
+  <g transform="translate(40 520)">
+    <path d="M48 280 Q52 180 58 90 Q62 40 68 0" stroke="url(#trunk)" stroke-width="18" fill="none" stroke-linecap="round"/>
+    <path d="M68 20 Q20 40 8 85 Q35 70 68 55 Z" fill="url(#leaf)"/>
+    <path d="M68 35 Q5 55 0 110 Q40 85 68 75 Z" fill="url(#leaf)"/>
+    <path d="M68 50 Q30 30 55 0 Q75 25 68 50 Z" fill="url(#leaf)"/>
+    <path d="M68 45 Q110 25 130 5 Q115 45 68 65 Z" fill="url(#leaf)"/>
+    <path d="M68 60 Q120 50 145 75 Q105 85 68 80 Z" fill="url(#leaf)"/>
+    <path d="M68 70 Q125 80 150 120 Q100 100 68 95 Z" fill="url(#leaf)"/>
+  </g>
+
+  <!-- Right palm -->
+  <g transform="translate(1280 500) scale(-1 1)">
+    <path d="M48 300 Q54 190 60 80 Q64 35 70 0" stroke="url(#trunk)" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path d="M70 25 Q15 48 5 95 Q38 78 70 60 Z" fill="url(#leaf)"/>
+    <path d="M70 42 Q8 62 2 118 Q42 92 70 78 Z" fill="url(#leaf)"/>
+    <path d="M70 38 Q28 18 52 0 Q72 22 70 38 Z" fill="url(#leaf)"/>
+    <path d="M70 55 Q108 32 128 10 Q112 48 70 68 Z" fill="url(#leaf)"/>
+    <path d="M70 68 Q118 58 138 82 Q98 92 70 88 Z" fill="url(#leaf)"/>
+  </g>
+
+  <!-- Corner greenery -->
+  <g opacity="0.75">
+    <ellipse cx="120" cy="820" rx="160" ry="70" fill="#2d8a5e"/>
+    <ellipse cx="1320" cy="830" rx="180" ry="75" fill="#358f5f"/>
+    <ellipse cx="0" cy="760" rx="120" ry="55" fill="#3d9e62"/>
+    <ellipse cx="1440" cy="770" rx="130" ry="60" fill="#3d9e62"/>
+  </g>
+
+  <!-- Tropical leaves (left edge) -->
+  <g transform="translate(0 420)" opacity="0.6">
+    <path d="M0 80 Q60 40 90 0 Q70 50 40 90 Q20 100 0 80 Z" fill="#52b878"/>
+    <path d="M10 140 Q80 100 110 55 Q85 120 50 155 Q25 160 10 140 Z" fill="#2d8a5e"/>
+  </g>
+  <g transform="translate(1380 400) scale(-1 1)" opacity="0.6">
+    <path d="M0 80 Q60 40 90 0 Q70 50 40 90 Q20 100 0 80 Z" fill="#52b878"/>
+    <path d="M10 130 Q75 95 105 50 Q80 115 48 148 Q22 152 10 130 Z" fill="#2d8a5e"/>
+  </g>
+</svg>
