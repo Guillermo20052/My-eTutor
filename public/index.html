@@ -6,10 +6,16 @@
     <title>My eTutor</title>
     <link rel="stylesheet" href="./css/theme.css" />
     <style>
-      .loader{
+      /* Author display:flex beats UA [hidden]{display:none} — force hide. */
+      .loader[hidden],
+      .picker-wrap[hidden]{display:none !important}
+
+      .loader,
+      .picker-wrap{
         min-height:70vh;display:flex;flex-direction:column;
         align-items:center;justify-content:center;gap:16px;text-align:center;
       }
+      .loader{gap:16px}
       .loader .brand{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);font-size:1.6rem}
       .loader .brand span{color:var(--blue)}
       .loader .msg{color:var(--soft);font-weight:800;font-size:1rem}
@@ -20,7 +26,7 @@
       }
       @keyframes spin{to{transform:rotate(360deg)}}
 
-      .picker-wrap{max-width:480px;margin:0 auto;padding-top:12vh}
+      .picker-wrap{max-width:480px;margin:0 auto;width:100%}
       .picker-brand{text-align:center;margin-bottom:28px}
       .picker-brand .t{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);font-size:1.6rem}
       .picker-brand .t span{color:var(--blue)}
@@ -29,7 +35,7 @@
         margin-bottom:22px;line-height:1.5;
       }
       .picker-welcome em{font-style:normal;color:var(--ink);font-weight:800}
-      .picker-grid{display:flex;flex-direction:column;gap:14px}
+      .picker-grid{display:flex;flex-direction:column;gap:14px;width:100%}
       .school-btn{
         display:flex;align-items:center;gap:16px;width:100%;padding:18px 20px;
         border-radius:18px;border:2px solid var(--line);background:#fff;
