@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Español · Ortografía · Redwood eTutor</title>
+    <title>Language Arts · Redwood eTutor</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <style>
       :root {
@@ -40,9 +40,7 @@
       }
       .brand-block p { color: var(--soft); font-weight: 700; font-size: .88rem; }
 
-      .scorebar {
-        display: flex; gap: 10px; flex-wrap: wrap;
-      }
+      .scorebar { display: flex; gap: 10px; flex-wrap: wrap; }
       .scorebox {
         background: #fff; border: 2px solid #f0cfc7; border-radius: 14px;
         padding: 8px 14px; text-align: center; min-width: 88px;
@@ -77,7 +75,6 @@
       .panel { display: none; }
       .panel.on { display: block; }
 
-      /* ---------- Estudiar ---------- */
       .lesson {
         background: #fff; border: 2px solid #f0cfc7; border-radius: 22px;
         padding: 22px 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
@@ -107,9 +104,8 @@
         border: 2px solid rgba(45, 138, 94, .35);
         color: var(--ink); font-weight: 700; line-height: 1.5; font-size: .94rem;
       }
-      .recuerda::before { content: "💡 Recuerda: "; color: var(--rw-leaf); font-weight: 800; }
+      .recuerda::before { content: "💡 Remember: "; color: var(--rw-leaf); font-weight: 800; }
 
-      /* ---------- Jugar ---------- */
       .game-card {
         background: #fff; border: 2px solid #f0cfc7; border-radius: 24px;
         padding: 24px 20px; box-shadow: var(--shadow-sm);
@@ -117,94 +113,81 @@
       .mech-tag {
         display: inline-block; font-size: .74rem; font-weight: 800;
         color: var(--rw-accent); background: var(--rw-sky);
-        padding: 5px 12px; border-radius: 999px; margin-bottom: 10px;
-      }
-      .round-instruction {
-        font-family: "Fredoka", sans-serif; font-weight: 700;
-        font-size: clamp(1.05rem, 3.8vw, 1.28rem); color: var(--rw-accent-d);
-        text-align: center; line-height: 1.45; margin-bottom: 16px;
+        padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
       }
       .prompt {
         font-family: "Fredoka", sans-serif; font-weight: 700;
-        font-size: clamp(1.2rem, 4vw, 1.55rem); color: var(--navy);
-        text-align: center; line-height: 1.45; margin-bottom: 18px;
+        font-size: clamp(1.1rem, 3.5vw, 1.45rem); color: var(--navy);
+        text-align: center; line-height: 1.45; margin-bottom: 14px;
         word-break: break-word;
       }
-      .fill-word-line {
-        display: flex; align-items: center; justify-content: center;
-        flex-wrap: wrap; gap: 6px;
+      .word-big {
         font-family: "Fredoka", sans-serif; font-weight: 700;
-        font-size: clamp(1.5rem, 5vw, 2.1rem); color: var(--navy);
-        line-height: 1.3;
+        font-size: clamp(2rem, 6vw, 2.8rem); color: var(--rw-accent-d);
+        text-align: center; margin-bottom: 16px;
       }
-      .fill-part { white-space: nowrap; }
-      .fill-blank-slot {
-        display: inline-block; box-sizing: border-box;
-        min-width: 52px; height: 1.35em; padding: 0 6px;
-        border: 3px solid var(--rw-accent); border-radius: 12px;
-        background: var(--rw-sky); color: var(--rw-accent-d);
-        text-align: center; font: inherit; font-weight: 800;
-        text-transform: lowercase; vertical-align: middle;
+      .passage-box {
+        background: var(--rw-sand); border: 2px solid #f0cfc7; border-radius: 16px;
+        padding: 16px 18px; margin-bottom: 16px; color: var(--ink);
+        font-weight: 600; line-height: 1.6; font-size: .98rem;
       }
-      .fill-blank-slot:focus {
-        outline: 3px solid rgba(166, 61, 61, .35); outline-offset: 2px;
+      .subhint {
+        text-align: center; color: var(--soft); font-weight: 700;
+        font-size: .88rem; margin-bottom: 12px;
       }
-      .fill-note {
-        margin-top: 12px; font-size: 1rem; font-weight: 800;
-        color: var(--soft); text-align: center;
+      .picked-row {
+        display: flex; flex-direction: column; gap: 8px;
+        margin-bottom: 14px; min-height: 24px;
       }
-
-      .fill-row {
-        display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-        margin-bottom: 8px;
+      .picked-item {
+        display: flex; align-items: center; gap: 10px;
+        background: #e8f8ef; border: 2px solid rgba(45, 138, 94, .3);
+        border-radius: 12px; padding: 10px 14px;
+        font-weight: 700; color: var(--navy); font-size: .95rem;
       }
-      .btn {
-        font-family: "Fredoka", sans-serif; font-weight: 700; font-size: .95rem;
-        border: 0; border-radius: 12px; padding: 11px 20px; cursor: pointer;
-        background: linear-gradient(145deg, var(--rw-accent), var(--rw-accent-d));
-        color: #fff; box-shadow: var(--shadow-sm);
+      .picked-item .num {
+        flex: none; width: 28px; height: 28px; border-radius: 50%;
+        background: var(--rw-leaf); color: #fff;
+        display: grid; place-items: center; font-family: "Fredoka", sans-serif;
+        font-size: .85rem;
       }
-      .btn:disabled { opacity: .55; cursor: not-allowed; }
-      .btn.ghost {
-        background: #fff; color: var(--rw-accent-d);
-        border: 2px solid #f0cfc7;
+      .built-sentence {
+        min-height: 48px; padding: 12px 14px; border-radius: 14px;
+        background: var(--rw-sky); border: 2px dashed #f0cfc7;
+        margin-bottom: 14px; font-weight: 700; color: var(--navy);
+        line-height: 1.5; text-align: center;
+      }
+      .fragment-box {
+        background: var(--rw-sand); border: 2px solid #f0cfc7;
+        border-radius: 14px; padding: 14px; margin-bottom: 14px;
+        font-family: "Fredoka", sans-serif; font-weight: 700;
+        font-size: 1.1rem; color: var(--rw-accent-d); text-align: center;
       }
 
       .chip-row {
         display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
         margin-bottom: 8px;
       }
-      .chip {
-        font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.1rem;
+      .chip, .opt-btn {
+        font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1rem;
         padding: 12px 18px; border-radius: 14px; cursor: pointer;
         border: 2px solid #f0cfc7; background: var(--rw-sand); color: var(--navy);
         transition: transform .12s, border-color .12s, background .12s;
+        text-align: left;
       }
-      .chip:hover:not(:disabled) {
+      .opt-btn { width: 100%; max-width: 420px; display: block; margin: 0 auto 10px; }
+      .chip:hover:not(:disabled), .opt-btn:hover:not(:disabled) {
         transform: translateY(-2px); border-color: var(--rw-accent);
         background: var(--rw-sky);
       }
-      .chip:disabled { cursor: default; opacity: .7; }
-      .chip.correct { background: #e8f8ef; border-color: var(--rw-ok); color: var(--rw-ok); }
-      .chip.wrong { background: #fdecea; border-color: var(--rw-bad); color: var(--rw-bad); }
-
-      .letter-row {
-        display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-        margin-bottom: 12px;
+      .chip:disabled, .opt-btn:disabled { cursor: default; opacity: .65; }
+      .chip.correct, .opt-btn.correct {
+        background: #e8f8ef; border-color: var(--rw-ok); color: var(--rw-ok);
       }
-      .letter-btn {
-        width: 48px; height: 48px; font-family: "Fredoka", sans-serif;
-        font-weight: 700; font-size: 1.25rem; border-radius: 12px;
-        border: 2px solid #f0cfc7; background: #fff; cursor: pointer;
-        color: var(--navy); transition: transform .12s, border-color .12s;
+      .chip.wrong, .opt-btn.wrong {
+        background: #fdecea; border-color: var(--rw-bad); color: var(--rw-bad);
       }
-      .letter-btn:hover:not(:disabled) {
-        transform: scale(1.06); border-color: var(--rw-accent);
-        background: var(--rw-sky);
-      }
-      .letter-btn:disabled { cursor: default; opacity: .75; }
-      .letter-btn.correct { background: #e8f8ef; border-color: var(--rw-ok); color: var(--rw-ok); }
-      .letter-btn.wrong { background: #fdecea; border-color: var(--rw-bad); color: var(--rw-bad); }
+      .chip.used { opacity: .35; pointer-events: none; }
 
       .feedback {
         margin-top: 16px; padding: 14px 16px; border-radius: 14px;
@@ -241,20 +224,20 @@
     <div class="wrap loader" id="loading">
       <div class="brand">Redwood <span>eTutor</span></div>
       <div class="spinner" aria-hidden="true"></div>
-      <p style="color:var(--soft);font-weight:800">Cargando Español…</p>
+      <p style="color:var(--soft);font-weight:800">Loading Language Arts…</p>
     </div>
 
     <div class="wrap" id="app" hidden>
       <header class="top">
-        <a class="back" href="../dashboard.html">← Volver al panel</a>
+        <a class="back" href="../dashboard.html">← Back to dashboard</a>
         <div class="brand-block">
-          <div class="mascot" aria-hidden="true">🌺📖</div>
-          <h1>Español — Ortografía</h1>
-          <p>Isla del aprendizaje · práctica sin fin</p>
+          <div class="mascot" aria-hidden="true">🌺✍️</div>
+          <h1>Language Arts</h1>
+          <p>Island of learning · endless practice</p>
         </div>
         <div class="scorebar" id="scorebar" hidden>
           <div class="scorebox">
-            <div class="lbl">Sesión</div>
+            <div class="lbl">Session</div>
             <div class="val" id="session-score">0</div>
           </div>
           <div class="scorebox">
@@ -262,7 +245,7 @@
             <div class="val" id="total-score">0</div>
           </div>
           <div class="scorebox">
-            <div class="lbl">Racha</div>
+            <div class="lbl">Streak</div>
             <div class="val" id="streak-val">0 🔥</div>
           </div>
         </div>
@@ -270,10 +253,10 @@
 
       <nav class="tabs" role="tablist">
         <button type="button" class="active" id="tab-study" role="tab" aria-selected="true">
-          📚 Estudiar
+          📚 Study
         </button>
         <button type="button" id="tab-play" role="tab" aria-selected="false">
-          🎮 Jugar
+          🎮 Play
         </button>
       </nav>
 
@@ -284,7 +267,7 @@
       <section class="panel" id="panel-play" role="tabpanel" aria-labelledby="tab-play" hidden>
         <div class="game-card" id="game-area">
           <div class="mech-tag" id="mech-tag"></div>
-          <div class="round-instruction" id="round-instruction" hidden></div>
+          <div id="passage-slot"></div>
           <div class="prompt" id="prompt"></div>
           <div id="interaction"></div>
           <div class="feedback" id="feedback" role="status"></div>
@@ -292,17 +275,18 @@
       </section>
     </div>
 
-    <script src="./espanol_content.js"></script>
+    <script src="./language_arts_content.js"></script>
     <script type="module">
       import { supabase } from "../js/supabase.js";
 
-      const SUBJECT = "espanol";
+      const SUBJECT = "language-arts";
       const MECH_LABELS = {
-        fill: "Escribe la letra",
-        tilde: "Pon la tilde",
-        error: "Caza el error",
+        comprehend: "Read & Answer",
+        sort: "Sort the Word",
+        order: "Order the Events",
+        sentence: "Complete the Sentence",
       };
-      const MECHANICS = ["fill", "tilde", "error"];
+      const MECHANICS = ["comprehend", "sort", "order", "sentence"];
       const ADVANCE_MS = 2200;
 
       let USER_ID = null;
@@ -319,6 +303,15 @@
         return String(s ?? "").replace(/[&<>"']/g, (c) => ({
           "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
         }[c]));
+      }
+
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
       }
 
       function updateScoreboard() {
@@ -359,7 +352,7 @@
                 },
                 { onConflict: "user_id,subject" }
               );
-            if (error) console.error("Error al guardar progreso:", error.message);
+            if (error) console.error("Error saving progress:", error.message);
           }
         } finally {
           saving = false;
@@ -386,10 +379,10 @@
       function renderLessons() {
         const root = $("lessons");
         root.innerHTML = "";
-        const lessons = window.ESPANOL_LESSONS;
+        const lessons = window.LA_LESSONS;
         if (!Array.isArray(lessons) || !lessons.length) {
           root.innerHTML =
-            '<p style="text-align:center;color:var(--soft);font-weight:700">No hay lecciones cargadas.</p>';
+            '<p style="text-align:center;color:var(--soft);font-weight:700">No lessons loaded.</p>';
           return;
         }
         for (const lesson of lessons) {
@@ -402,7 +395,7 @@
             )
             .join("");
           el.innerHTML = `
-            <span class="num">Lección ${escapeHtml(lesson.num ?? lesson.id)}</span>
+            <span class="num">Lesson ${escapeHtml(lesson.num ?? lesson.id)}</span>
             <h2>${escapeHtml(lesson.title)}</h2>
             <p class="sub">${escapeHtml(lesson.subtitle || "")}</p>
             <p class="intro">${escapeHtml(lesson.intro || "")}</p>
@@ -418,7 +411,7 @@
       }
 
       function pickRound() {
-        const bank = window.ESPANOL_BANK;
+        const bank = window.LA_BANK;
         if (!bank) return null;
 
         for (let attempt = 0; attempt < 30; attempt++) {
@@ -465,174 +458,157 @@
         }, ADVANCE_MS);
       }
 
-      function showRoundInstruction(mech) {
-        const el = $("round-instruction");
-        const text = window.ESPANOL_UI?.[mech];
-        if (text) {
-          el.textContent = text;
-          el.hidden = false;
-        } else {
-          el.hidden = true;
+      function finishAnswer(ok, item, pickedEl) {
+        if (answering) return;
+        answering = true;
+        if (pickedEl) {
+          pickedEl.classList.add(ok ? "correct" : "wrong");
         }
+        $("interaction").querySelectorAll("button").forEach((b) => {
+          b.disabled = true;
+        });
+
+        if (ok) {
+          awardCorrect();
+          showFeedback(true, `Correct! +points<br>${escapeHtml(item.why || "")}`);
+        } else {
+          breakStreak();
+          showFeedback(false, `Not quite.<br>${escapeHtml(item.why || "")}`);
+        }
+        scheduleNext();
       }
 
-      function renderFillPrompt(item) {
-        const prompt = item.prompt || item.q || "";
-        const answerLen = String(item.answer ?? "").trim().length;
-        const note = window.ESPANOL_UI?.fillBlankNote?.(answerLen) || "";
-        const u = prompt.indexOf("_");
-        const before = u >= 0 ? prompt.slice(0, u) : prompt;
-        const after = u >= 0 ? prompt.slice(u + 1) : "";
-        const slotW = Math.max(52, answerLen * 34 + 20);
-
-        $("prompt").innerHTML = `
-          <div class="fill-word-line">
-            <span class="fill-part">${escapeHtml(before)}</span>
-            <input
-              type="text"
-              class="fill-blank-slot"
-              id="fill-input"
-              autocomplete="off"
-              spellcheck="false"
-              maxlength="${Math.max(answerLen, 1)}"
-              style="width:${slotW}px"
-              aria-label="Letra que falta"
-            />
-            <span class="fill-part">${escapeHtml(after)}</span>
-          </div>
-          ${note ? `<p class="fill-note">${escapeHtml(note)}</p>` : ""}
-        `;
+      function renderComprehend(item) {
+        $("passage-slot").innerHTML = `<div class="passage-box">${escapeHtml(item.passage)}</div>`;
+        $("prompt").textContent = item.question || "";
+        const wrap = $("interaction");
+        wrap.innerHTML = "";
+        (item.options || []).forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "opt-btn";
+          btn.textContent = opt;
+          btn.addEventListener("click", () => {
+            finishAnswer(i === item.answer, item, btn);
+          });
+          wrap.appendChild(btn);
+        });
       }
 
-      function renderFill(item) {
+      function renderSort(item) {
+        $("passage-slot").innerHTML = "";
+        $("prompt").innerHTML = `<div class="word-big">${escapeHtml(item.word)}</div>`;
+        const wrap = $("interaction");
+        wrap.innerHTML = '<p class="subhint">Tap the correct bucket:</p><div class="chip-row" id="bucket-row"></div>';
+        const row = $("bucket-row");
+        (item.buckets || []).forEach((label, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip";
+          btn.textContent = label;
+          btn.addEventListener("click", () => {
+            finishAnswer(i === item.answer, item, btn);
+          });
+          row.appendChild(btn);
+        });
+      }
+
+      function renderOrder(item) {
+        $("passage-slot").innerHTML = "";
+        $("prompt").textContent = item.intro || "Put the events in order:";
+        const correct = item.events || [];
+        const shuffled = shuffle(correct);
+        const picked = [];
+
         const wrap = $("interaction");
         wrap.innerHTML = `
-          <div class="fill-row">
-            <button type="button" class="btn" id="fill-submit">Comprobar</button>
-          </div>
+          <p class="subhint">Tap each event in order (1st, 2nd, 3rd…)</p>
+          <div class="picked-row" id="picked-order"></div>
+          <div class="chip-row" id="event-chips"></div>
         `;
-        const input = $("fill-input");
-        const submit = $("fill-submit");
-        const check = () => {
-          if (answering) return;
-          const raw = input.value.trim();
-          if (!raw) return;
-          answering = true;
-          submit.disabled = true;
-          input.disabled = true;
+        const pickedEl = $("picked-order");
+        const chipsEl = $("event-chips");
 
-          const ans = raw.toLowerCase();
-          const expected = String(item.answer ?? "").toLowerCase().trim();
-          const ok =
-            ans === expected ||
-            (Array.isArray(item.accept) &&
-              item.accept.some((a) => String(a).toLowerCase().trim() === ans));
-
-          if (ok) {
-            awardCorrect();
-            let msg = "¡Correcto! +puntos";
-            if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
-            showFeedback(true, msg);
-          } else {
-            breakStreak();
-            let msg = `No exactamente. La respuesta es <b>${escapeHtml(item.answer)}</b>.`;
-            if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
-            showFeedback(false, msg);
-          }
-          scheduleNext();
-        };
-        submit.addEventListener("click", check);
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") check();
-        });
-        input.focus();
-      }
-
-      function renderTilde(item) {
-        const wrap = $("interaction");
-        const letters = Array.isArray(item.letters) ? item.letters : [];
-        let html = '<div class="letter-row">';
-        letters.forEach((ch, i) => {
-          html += `<button type="button" class="letter-btn" data-idx="${i}">${escapeHtml(ch)}</button>`;
-        });
-        html += "</div>";
-        if (item.answerIndex === -1) {
-          html +=
-            '<div style="text-align:center"><button type="button" class="btn ghost" id="tilde-none">Ninguna (sin tilde)</button></div>';
-        }
-        wrap.innerHTML = html;
-
-        const finish = (picked, ok) => {
-          if (answering) return;
-          answering = true;
-          wrap.querySelectorAll("button").forEach((b) => (b.disabled = true));
-          if (picked) {
-            picked.classList.add(ok ? "correct" : "wrong");
-          }
-          if (ok) {
-            awardCorrect();
-            let msg = "¡Correcto!";
-            if (item.accented) msg += ` → <b>${escapeHtml(item.accented)}</b>`;
-            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
-            showFeedback(true, msg);
-          } else {
-            breakStreak();
-            let msg = "Incorrecto.";
-            if (item.accented) msg += ` La forma correcta es <b>${escapeHtml(item.accented)}</b>.`;
-            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
-            showFeedback(false, msg);
-          }
-          scheduleNext();
-        };
-
-        wrap.querySelectorAll(".letter-btn").forEach((btn) => {
+        shuffled.forEach((ev, i) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip";
+          btn.textContent = ev;
+          btn.dataset.idx = String(i);
           btn.addEventListener("click", () => {
-            const idx = Number(btn.dataset.idx);
-            finish(btn, idx === item.answerIndex);
+            if (answering || btn.classList.contains("used")) return;
+            btn.classList.add("used");
+            btn.disabled = true;
+            picked.push(ev);
+
+            const row = document.createElement("div");
+            row.className = "picked-item";
+            row.innerHTML = `<span class="num">${picked.length}</span><span>${escapeHtml(ev)}</span>`;
+            pickedEl.appendChild(row);
+
+            if (picked.length === correct.length) {
+              const ok =
+                picked.length === correct.length &&
+                picked.every((e, idx) => e === correct[idx]);
+              finishAnswer(ok, item, null);
+            }
           });
+          chipsEl.appendChild(btn);
         });
-        const noneBtn = $("tilde-none");
-        if (noneBtn) {
-          noneBtn.addEventListener("click", () => {
-            finish(noneBtn, item.answerIndex === -1);
-          });
-        }
       }
 
-      function renderError(item) {
+      function renderSentence(item) {
+        $("passage-slot").innerHTML = "";
         const wrap = $("interaction");
-        const tokens = Array.isArray(item.tokens) ? item.tokens : [];
-        let html = '<div class="chip-row">';
-        tokens.forEach((tok, i) => {
-          html += `<button type="button" class="chip" data-idx="${i}">${escapeHtml(tok)}</button>`;
-        });
-        html += "</div>";
-        wrap.innerHTML = html;
 
-        wrap.querySelectorAll(".chip").forEach((chip) => {
-          chip.addEventListener("click", () => {
-            if (answering) return;
-            answering = true;
-            const idx = Number(chip.dataset.idx);
-            const ok = idx === item.badIndex;
-            wrap.querySelectorAll(".chip").forEach((c) => (c.disabled = true));
-            chip.classList.add(ok ? "correct" : "wrong");
-
-            if (ok) {
-              awardCorrect();
-              let msg = "¡Encontraste el error!";
-              if (item.fixed) msg += ` → <b>${escapeHtml(item.fixed)}</b>`;
-              if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
-              showFeedback(true, msg);
-            } else {
-              breakStreak();
-              let msg = "Esa palabra no es la incorrecta.";
-              if (item.fixed) msg += ` La oración correcta: <b>${escapeHtml(item.fixed)}</b>`;
-              if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
-              showFeedback(false, msg);
-            }
-            scheduleNext();
+        if (item.kind === "fix") {
+          $("prompt").textContent = "Which option makes a complete sentence?";
+          wrap.innerHTML = `
+            <div class="fragment-box">${escapeHtml(item.fragment)}</div>
+          `;
+          (item.options || []).forEach((opt, i) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "opt-btn";
+            btn.textContent = opt;
+            btn.addEventListener("click", () => {
+              finishAnswer(i === item.answer, item, btn);
+            });
+            wrap.appendChild(btn);
           });
+          return;
+        }
+
+        $("prompt").textContent = "Tap the words to build the sentence:";
+        const words = shuffle(item.words || []);
+        const picked = [];
+
+        wrap.innerHTML = `
+          <div class="built-sentence" id="built-sent">Tap words below…</div>
+          <div class="chip-row" id="word-chips"></div>
+        `;
+        const builtEl = $("built-sent");
+        const chipsEl = $("word-chips");
+
+        words.forEach((w) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip";
+          btn.textContent = w;
+          btn.addEventListener("click", () => {
+            if (answering || btn.classList.contains("used")) return;
+            btn.classList.add("used");
+            btn.disabled = true;
+            picked.push(w);
+            builtEl.textContent = picked.join(" ");
+
+            if (picked.length === (item.words || []).length) {
+              const assembled = picked.join(" ");
+              const ok = assembled === item.answer;
+              finishAnswer(ok, item, null);
+            }
+          });
+          chipsEl.appendChild(btn);
         });
       }
 
@@ -640,30 +616,23 @@
         currentRound = pickRound();
         $("feedback").className = "feedback";
         $("feedback").innerHTML = "";
-        $("round-instruction").hidden = true;
+        $("passage-slot").innerHTML = "";
+        $("prompt").textContent = "";
+        $("interaction").innerHTML = "";
 
         if (!currentRound) {
-          $("mech-tag").textContent = "Sin preguntas";
-          $("prompt").textContent =
-            "No hay banco de preguntas cargado todavía.";
-          $("interaction").innerHTML = "";
+          $("mech-tag").textContent = "No questions";
+          $("prompt").textContent = "Question bank not loaded yet.";
           return;
         }
 
         const { mech, item } = currentRound;
         $("mech-tag").textContent = MECH_LABELS[mech] || mech;
-        showRoundInstruction(mech);
 
-        if (mech === "fill") {
-          renderFillPrompt(item);
-          renderFill(item);
-        } else if (mech === "tilde") {
-          $("prompt").textContent = item.word || item.prompt || "";
-          renderTilde(item);
-        } else {
-          $("prompt").textContent = "";
-          renderError(item);
-        }
+        if (mech === "comprehend") renderComprehend(item);
+        else if (mech === "sort") renderSort(item);
+        else if (mech === "order") renderOrder(item);
+        else renderSentence(item);
       }
 
       function setupTabs() {

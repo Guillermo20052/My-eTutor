@@ -440,8 +440,18 @@
     ],
   };
   
+  
+  /* Kid-friendly instructions (Spanish) shown on each game round. 8-year-olds. */
+  const ESPANOL_UI = {
+    fill:  "Escribe la letra que falta para completar la palabra.",
+    tilde: "Toca la vocal que lleva la tilde (´). Si no lleva, toca \"Ninguna\".",
+    error: "Toca la palabra que está mal escrita en la oración.",
+    fillBlankNote: function(n){ return n === 2 ? "Faltan 2 letras" : "Falta 1 letra"; }
+  };
+  
   /* expose for both pages */
   if (typeof window !== "undefined") {
     window.ESPANOL_LESSONS = ESPANOL_LESSONS;
     window.ESPANOL_BANK = ESPANOL_BANK;
+    window.ESPANOL_UI = ESPANOL_UI;
   }
