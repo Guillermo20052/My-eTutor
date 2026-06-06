@@ -465,9 +465,9 @@
         }, ADVANCE_MS);
       }
 
-      function showRoundInstruction(mech) {
+      function showRoundInstruction(mech, item) {
         const el = $("round-instruction");
-        const text = window.ESPANOL_UI?.[mech];
+        const text = item?.ask || window.ESPANOL_UI?.[mech];
         if (text) {
           el.textContent = text;
           el.hidden = false;
@@ -531,12 +531,12 @@
           if (ok) {
             awardCorrect();
             let msg = "¡Correcto! +puntos";
-            if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
+            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
             showFeedback(true, msg);
           } else {
             breakStreak();
             let msg = `No exactamente. La respuesta es <b>${escapeHtml(item.answer)}</b>.`;
-            if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
+            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
             showFeedback(false, msg);
           }
           scheduleNext();
@@ -622,13 +622,13 @@
               awardCorrect();
               let msg = "¡Encontraste el error!";
               if (item.fixed) msg += ` → <b>${escapeHtml(item.fixed)}</b>`;
-              if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
+              if (item.why) msg += `<br>${escapeHtml(item.why)}`;
               showFeedback(true, msg);
             } else {
               breakStreak();
               let msg = "Esa palabra no es la incorrecta.";
               if (item.fixed) msg += ` La oración correcta: <b>${escapeHtml(item.fixed)}</b>`;
-              if (item.hint) msg += `<br>${escapeHtml(item.hint)}`;
+              if (item.why) msg += `<br>${escapeHtml(item.why)}`;
               showFeedback(false, msg);
             }
             scheduleNext();
@@ -652,7 +652,7 @@
 
         const { mech, item } = currentRound;
         $("mech-tag").textContent = MECH_LABELS[mech] || mech;
-        showRoundInstruction(mech);
+        showRoundInstruction(mech, item);
 
         if (mech === "fill") {
           renderFillPrompt(item);
