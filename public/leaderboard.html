@@ -325,13 +325,14 @@
         const avatarEl = document.getElementById("avatar");
         applyHeaderRank(null);
 
-        // Read ONLY the safe leaderboard view.
-        const { data: rows, error } = await supabase
-          .from("leaderboard")
-          .select("*")
-          .order("rank", { ascending: true });
+        // Per-school leaderboard RPC (scoped server-side to caller's school).
+        const { data: rows, error } = await supabase.rpc("leaderboard_for", {
+          p_school: null,
+        });
 
-        const ranking = !error && Array.isArray(rows) ? rows : [];
+        const ranking = (!error && Array.isArray(rows) ? rows : []).sort(
+          (a, b) => Number(a.rank) - Number(b.rank)
+        );
         const mine = ranking.find((r) => r.user_id === myId);
 
         // Fill the header pill from the user's own (privacy-safe) view row.

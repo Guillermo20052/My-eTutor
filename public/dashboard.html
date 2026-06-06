@@ -369,14 +369,13 @@
         chipEl.hidden = false;
       }
 
-      // Read ONLY the leaderboard view to find this user's rank. Fails
+      // Per-school leaderboard RPC to find this user's rank. Fails
       // gracefully (name stays blue) and never blocks the dashboard.
       async function loadHeaderRank(userId) {
         try {
-          const { data: rows, error } = await supabase
-            .from("leaderboard")
-            .select("user_id, rank")
-            .order("rank", { ascending: true });
+          const { data: rows, error } = await supabase.rpc("leaderboard_for", {
+            p_school: null,
+          });
           if (error || !Array.isArray(rows)) return;
           const mine = rows.find((r) => r.user_id === userId);
           if (mine && mine.rank != null) applyHeaderRank(mine.rank);
