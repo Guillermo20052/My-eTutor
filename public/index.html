@@ -19,19 +19,86 @@
         animation:spin .8s linear infinite;
       }
       @keyframes spin{to{transform:rotate(360deg)}}
+
+      .picker-wrap{max-width:480px;margin:0 auto;padding-top:12vh}
+      .picker-brand{text-align:center;margin-bottom:28px}
+      .picker-brand .t{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);font-size:1.6rem}
+      .picker-brand .t span{color:var(--blue)}
+      .picker-welcome{
+        text-align:center;color:var(--soft);font-weight:700;font-size:1rem;
+        margin-bottom:22px;line-height:1.5;
+      }
+      .picker-welcome em{font-style:normal;color:var(--ink);font-weight:800}
+      .picker-grid{display:flex;flex-direction:column;gap:14px}
+      .school-btn{
+        display:flex;align-items:center;gap:16px;width:100%;padding:18px 20px;
+        border-radius:18px;border:2px solid var(--line);background:#fff;
+        text-decoration:none;color:inherit;cursor:pointer;
+        box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s,transform .15s;
+      }
+      .school-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+      .school-btn:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+      .school-btn .ic{
+        flex:none;width:48px;height:48px;border-radius:14px;
+        display:grid;place-items:center;font-size:1.4rem;font-weight:800;
+      }
+      .school-btn .meta{text-align:left}
+      .school-btn .name{
+        font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.15rem;
+        color:var(--navy);margin-bottom:2px;
+      }
+      .school-btn .desc{color:var(--soft);font-weight:700;font-size:.88rem}
+      .school-btn.blueridge:hover{border-color:var(--blue)}
+      .school-btn.blueridge .ic{background:var(--sky);color:var(--blue-d)}
+      .school-btn.redwood:hover{border-color:#a63d3d}
+      .school-btn.redwood .ic{background:#fde8e4;color:#8b2e2e}
+      .school-btn.redwood .name span{color:#a63d3d}
     </style>
   </head>
   <body>
     <div class="wrap">
-      <div class="loader">
+      <div id="loader" class="loader">
         <div class="brand">My <span>eTutor</span></div>
         <div class="spinner" aria-hidden="true"></div>
         <div class="msg">Cargando...</div>
+      </div>
+
+      <div id="picker" class="picker-wrap" hidden>
+        <div class="picker-brand">
+          <div class="t">My <span>eTutor</span></div>
+        </div>
+        <p class="picker-welcome">
+          <em>Elige tu escuela</em> · Choose your school
+        </p>
+        <div class="picker-grid">
+          <a class="school-btn blueridge" href="./login.html">
+            <span class="ic" aria-hidden="true">🏔️</span>
+            <span class="meta">
+              <div class="name">Blueridge</div>
+              <div class="desc">Continúa con tu cuenta actual</div>
+            </span>
+          </a>
+          <a class="school-btn redwood" href="./redwood-login.html">
+            <span class="ic" aria-hidden="true">🌲</span>
+            <span class="meta">
+              <div class="name"><span>Redwood</span></div>
+              <div class="desc">Entrada para estudiantes de Redwood</div>
+            </span>
+          </a>
+        </div>
       </div>
     </div>
 
     <script type="module">
       import { supabase } from "./js/supabase.js";
+
+      const loader = document.getElementById("loader");
+      const picker = document.getElementById("picker");
+
+      function showPicker() {
+        loader.hidden = true;
+        picker.hidden = false;
+      }
 
       (async () => {
         try {
@@ -40,12 +107,13 @@
             data: { user },
             error,
           } = await supabase.auth.getUser();
-          window.location.replace(
-            !error && user ? "./dashboard.html" : "./login.html"
-          );
+          if (!error && user) {
+            window.location.replace("./dashboard.html");
+            return;
+          }
+          showPicker();
         } catch (e) {
-          // Si algo falla al verificar la sesión, ir a iniciar sesión.
-          window.location.replace("./login.html");
+          showPicker();
         }
       })();
     </script>

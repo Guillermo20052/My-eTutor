@@ -14,9 +14,11 @@ create table if not exists public.profiles (
   id           uuid primary key references auth.users (id) on delete cascade,
   kid_name     text,
   parent_email text,
+  school       text        not null default 'blueridge',
   has_access   boolean     not null default false,
   is_admin     boolean     not null default false,
-  created_at   timestamptz not null default now()
+  created_at   timestamptz not null default now(),
+  constraint profiles_school_check check (school in ('blueridge', 'redwood'))
 );
 
 -- progress: per-subject saved game/study state for each user.
@@ -120,15 +122,16 @@ create policy "progress_update_own"
 
 
 -- ---------------------------------------------------------------------
--- 6. PROTECT PRIVILEGED COLUMNS (has_access, is_admin)
+-- 6. PROTECT PRIVILEGED COLUMNS (has_access, is_admin, school)
 --    The RLS UPDATE policy above lets a user edit their own row, but we
---    must stop them from escalating their own has_access / is_admin.
+--    must stop them from escalating their own has_access / is_admin or
+--    switching school to peek at another school's leaderboard.
 --    This trigger fires BEFORE UPDATE and FAILS CLOSED: the only way
---    to change has_access / is_admin is to be a verified admin (via
---    is_admin()). For everyone else the columns are reverted to their
---    old values. There is no session-less (auth.uid() is null) bypass,
---    so bootstrapping the first admin is done by temporarily disabling
---    this trigger (see section 8).
+--    to change has_access / is_admin / school is to be a verified admin
+--    (via is_admin()). For everyone else the columns are reverted to
+--    their old values. There is no session-less (auth.uid() is null)
+--    bypass, so bootstrapping the first admin is done by temporarily
+--    disabling this trigger (see section 8).
 -- ---------------------------------------------------------------------
 create or replace function public.protect_privileged_columns()
 returns trigger
@@ -147,6 +150,7 @@ begin
 
   new.has_access := old.has_access;
   new.is_admin   := old.is_admin;
+  new.school     := old.school;
 
   return new;
 end;
@@ -162,8 +166,8 @@ create trigger protect_privileged_columns
 -- ---------------------------------------------------------------------
 -- 7. AUTO-CREATE A PROFILE ON SIGNUP
 --    When a new row is inserted into auth.users, create the matching
---    profiles row using kid_name + parent_email from signup metadata.
---    SECURITY DEFINER so it can insert despite RLS.
+--    profiles row using kid_name, parent_email, and school from signup
+--    metadata. SECURITY DEFINER so it can insert despite RLS.
 -- ---------------------------------------------------------------------
 create or replace function public.handle_new_user()
 returns trigger
@@ -172,11 +176,16 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, kid_name, parent_email)
+  insert into public.profiles (id, kid_name, parent_email, school)
   values (
     new.id,
     new.raw_user_meta_data ->> 'kid_name',
-    new.raw_user_meta_data ->> 'parent_email'
+    new.raw_user_meta_data ->> 'parent_email',
+    case
+      when new.raw_user_meta_data ->> 'school' in ('blueridge', 'redwood')
+        then new.raw_user_meta_data ->> 'school'
+      else 'blueridge'
+    end
   )
   on conflict (id) do nothing;
 
@@ -231,57 +240,116 @@ as $$
   end;
 $$;
 
--- 8b. The leaderboard VIEW.
---     - One row per NON-admin student (admins excluded via is_admin).
+-- 8b. Per-school leaderboard function.
+--     Replaces the old single-school public.leaderboard view.
+--     - One row per NON-admin student in the requested school.
 --     - LEFT JOIN to progress so a student with NO progress rows still
 --       appears with total_points = 0 (chosen behavior: everyone shows).
 --     - total_points = SUM over the student's progress rows of the
 --       numeric "score" in data->>'score', treating a missing key or a
 --       non-numeric value as 0 (the regex guard avoids cast errors).
---     - rank() computed in SQL, ordered by total_points desc.
+--     - rank() computed in SQL, ordered by total_points desc, within
+--       the school only.
 --
---     SECURITY MODEL: this is an ordinary view (security_invoker = false,
---     i.e. it runs with the OWNER's rights). That is intentional and
---     required: it lets the view read ALL students' rows (the profiles
---     RLS would otherwise restrict a caller to only their own row, which
---     would defeat a leaderboard). It CANNOT leak private data because a
---     view is a fixed projection: the object only has the four columns
---     below, so parent_email / full kid_name / has_access / is_admin are
---     simply not selectable through it.
+--     SECURITY MODEL: SECURITY DEFINER so the function can read all
+--     profiles/progress rows (RLS would otherwise restrict a caller to
+--     only their own row). Cross-school isolation is enforced INSIDE
+--     the function: non-admin callers always get rows for THEIR school
+--     only (p_school is ignored for them). Admins may pass p_school to
+--     view either school's leaderboard. The return type exposes ONLY
+--     the four safe columns; private fields are never selected.
 drop view if exists public.leaderboard;
-create view public.leaderboard
-with (security_invoker = false)
-as
-with totals as (
-  select
-    p.id                                as user_id,
-    public.derive_display_name(p.kid_name) as display_name,
-    coalesce(
-      sum(
-        case
-          when pr.data ->> 'score' ~ '^[+-]?[0-9]+(\.[0-9]+)?$'
-            then (pr.data ->> 'score')::numeric
-          else 0
-        end
-      ),
-      0
-    )                                   as total_points
-  from public.profiles p
-  left join public.progress pr on pr.user_id = p.id
-  where p.is_admin is not true            -- exclude admin accounts
-  group by p.id, p.kid_name
-)
-select
-  user_id,
-  display_name,
-  total_points,
-  rank() over (order by total_points desc) as rank
-from totals;
 
--- 8c. Grants: authenticated users may read it; anonymous users may not.
---     Revoke any default-granted access first, then grant only SELECT
---     to the authenticated role. (anon is never granted, so logged-out
---     visitors cannot read the leaderboard.)
-revoke all on public.leaderboard from public;
-revoke all on public.leaderboard from anon;
-grant select on public.leaderboard to authenticated;
+create or replace function public.leaderboard_for(p_school text)
+returns table (
+  user_id      uuid,
+  display_name text,
+  total_points numeric,
+  rank         bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_caller_school text;
+  v_school        text;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+
+  select p.school
+    into v_caller_school
+  from public.profiles p
+  where p.id = auth.uid();
+
+  if public.is_admin() then
+    v_school := case
+      when p_school in ('blueridge', 'redwood') then p_school
+      else coalesce(v_caller_school, 'blueridge')
+    end;
+  else
+    v_school := coalesce(v_caller_school, 'blueridge');
+  end if;
+
+  return query
+  with totals as (
+    select
+      p.id                                     as user_id,
+      public.derive_display_name(p.kid_name)   as display_name,
+      coalesce(
+        sum(
+          case
+            when pr.data ->> 'score' ~ '^[+-]?[0-9]+(\.[0-9]+)?$'
+              then (pr.data ->> 'score')::numeric
+            else 0
+          end
+        ),
+        0
+      )                                        as total_points
+    from public.profiles p
+    left join public.progress pr on pr.user_id = p.id
+    where p.is_admin is not true
+      and p.school = v_school
+    group by p.id, p.kid_name
+  )
+  select
+    t.user_id,
+    t.display_name,
+    t.total_points,
+    rank() over (order by t.total_points desc) as rank
+  from totals t;
+end;
+$$;
+
+-- 8c. Grants: authenticated users may call it; anonymous users may not.
+revoke all on function public.leaderboard_for(text) from public;
+revoke all on function public.leaderboard_for(text) from anon;
+grant execute on function public.leaderboard_for(text) to authenticated;
+
+
+-- ---------------------------------------------------------------------
+-- 9. MULTI-SCHOOL: profiles.school column (idempotent for existing DBs)
+--     All existing accounts default to 'blueridge'. New signups set
+--     school via handle_new_user (section 7); invalid/missing metadata
+--     defaults to 'blueridge'.
+-- ---------------------------------------------------------------------
+alter table public.profiles
+  add column if not exists school text not null default 'blueridge';
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_school_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_school_check
+      check (school in ('blueridge', 'redwood'));
+  end if;
+end;
+$$;
