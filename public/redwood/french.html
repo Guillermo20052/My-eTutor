@@ -412,9 +412,9 @@
         return null;
       }
 
-      function showRoundInstruction(mech) {
+      function showRoundInstruction(mech, item) {
         const el = $("round-instruction");
-        const text = window.FR_UI?.[mech];
+        const text = item?.ask || window.FR_UI?.[mech];
         if (text) {
           el.textContent = text;
           el.hidden = false;
@@ -557,7 +557,7 @@
 
         const { mech, item } = currentRound;
         $("mech-tag").textContent = MECH_LABELS[mech] || mech;
-        showRoundInstruction(mech);
+        showRoundInstruction(mech, item);
 
         if (mech === "match") renderMatch(item);
         else if (mech === "toFrench") renderToFrench(item);

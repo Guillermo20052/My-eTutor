@@ -115,6 +115,11 @@
         color: var(--rw-accent); background: var(--rw-sky);
         padding: 5px 12px; border-radius: 999px; margin-bottom: 14px;
       }
+      .round-instruction {
+        font-family: "Fredoka", sans-serif; font-weight: 700;
+        font-size: clamp(1.05rem, 3.8vw, 1.28rem); color: var(--rw-accent-d);
+        text-align: center; line-height: 1.45; margin-bottom: 16px;
+      }
       .prompt {
         font-family: "Fredoka", sans-serif; font-weight: 700;
         font-size: clamp(1.1rem, 3.5vw, 1.45rem); color: var(--navy);
@@ -267,6 +272,7 @@
       <section class="panel" id="panel-play" role="tabpanel" aria-labelledby="tab-play" hidden>
         <div class="game-card" id="game-area">
           <div class="mech-tag" id="mech-tag"></div>
+          <div class="round-instruction" id="round-instruction" hidden></div>
           <div id="passage-slot"></div>
           <div class="prompt" id="prompt"></div>
           <div id="interaction"></div>
@@ -428,6 +434,17 @@
           return { mech, item: pool[idx], idx };
         }
         return null;
+      }
+
+      function showRoundInstruction(mech, item) {
+        const el = $("round-instruction");
+        const text = item?.ask || window.LA_UI?.[mech];
+        if (text) {
+          el.textContent = text;
+          el.hidden = false;
+        } else {
+          el.hidden = true;
+        }
       }
 
       function showFeedback(ok, html) {
@@ -616,6 +633,7 @@
         currentRound = pickRound();
         $("feedback").className = "feedback";
         $("feedback").innerHTML = "";
+        $("round-instruction").hidden = true;
         $("passage-slot").innerHTML = "";
         $("prompt").textContent = "";
         $("interaction").innerHTML = "";
@@ -628,6 +646,7 @@
 
         const { mech, item } = currentRound;
         $("mech-tag").textContent = MECH_LABELS[mech] || mech;
+        showRoundInstruction(mech, item);
 
         if (mech === "comprehend") renderComprehend(item);
         else if (mech === "sort") renderSort(item);
