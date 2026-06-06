@@ -620,6 +620,17 @@
         }
         USER_ID = user.id;
 
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("has_access")
+          .eq("id", USER_ID)
+          .single();
+
+        if (profile?.has_access !== true) {
+          window.location.replace("../dashboard.html");
+          return;
+        }
+
         await loadProgress();
         renderLessons();
         setupTabs();

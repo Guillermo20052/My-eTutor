@@ -170,6 +170,21 @@
         border-color:var(--rw-accent);box-shadow:0 14px 28px -12px rgba(166,61,61,.45);
       }
       .redwood-dash .rw-subject:hover .ic{transform:scale(1.06) rotate(-2deg)}
+      .redwood-dash .rw-subject.locked .ic,
+      .redwood-dash .rw-subject.locked h3,
+      .redwood-dash .rw-subject.locked .desc,
+      .redwood-dash .rw-subject.locked .tag{opacity:.45;filter:grayscale(.3)}
+      .redwood-dash .rw-subject.locked::after{
+        content:"🔒";position:absolute;top:12px;right:12px;font-size:1.4rem;
+        background:#fff;border:1px solid #f0cfc7;border-radius:12px;
+        width:40px;height:40px;display:grid;place-items:center;
+        box-shadow:var(--shadow-sm);opacity:1;filter:none;
+      }
+      .redwood-dash .rw-subject.locked:hover{
+        transform:none;border-color:#f0cfc7;
+        box-shadow:0 10px 24px -14px rgba(139,46,46,.35);
+      }
+      .redwood-dash .rw-subject.locked:hover .ic{transform:none}
       @media (max-width:680px){
         .redwood-dash .rw-subject{min-height:190px}
       }
@@ -287,14 +302,14 @@
       ];
 
       const REDWOOD_SUBJECTS = [
-        { id: "espanol",         name: "Español",         icon: "📖", desc: "Lectura y escritura",     href: "./redwood/espanol.html" },
-        { id: "language-arts",   name: "Language Arts",   icon: "✍️", desc: "Reading & writing",       href: "./redwood/language-arts.html" },
-        { id: "french",          name: "French",          icon: "🇫🇷", desc: "Parlez et apprenez",      href: "./redwood/french.html" },
-        { id: "math",            name: "Math",            icon: "🔢", desc: "Numbers & problem solving", href: "./redwood/math.html" },
-        { id: "social-studies",  name: "Social Studies",  icon: "🌺", desc: "History & community",     href: "./redwood/social-studies.html" },
-        { id: "science",         name: "Science",         icon: "🔬", desc: "Explore & discover",      href: "./redwood/science.html" },
-        { id: "religion",        name: "Religión",        icon: "✝️", desc: "Fe y valores",            href: "./redwood/religion.html" },
-        { id: "vida-y-persona",  name: "Vida y Persona",  icon: "🌴", desc: "Crecer con propósito",    href: "./redwood/vida-y-persona.html" },
+        { id: "espanol",         name: "Español",         icon: "📖", desc: "Lectura y escritura",     href: "./redwood/espanol.html",         free: true  },
+        { id: "language-arts",   name: "Language Arts",   icon: "✍️", desc: "Reading & writing",       href: "./redwood/language-arts.html",   free: false },
+        { id: "french",          name: "French",          icon: "🇫🇷", desc: "Parlez et apprenez",      href: "./redwood/french.html",          free: false },
+        { id: "math",            name: "Math",            icon: "🔢", desc: "Numbers & problem solving", href: "./redwood/math.html",            free: false },
+        { id: "social-studies",  name: "Social Studies",  icon: "🌺", desc: "History & community",     href: "./redwood/social-studies.html",  free: false },
+        { id: "science",         name: "Science",         icon: "🔬", desc: "Explore & discover",      href: "./redwood/science.html",         free: true  },
+        { id: "religion",        name: "Religión",        icon: "✝️", desc: "Fe y valores",            href: "./redwood/religion.html",        free: false },
+        { id: "vida-y-persona",  name: "Vida y Persona",  icon: "🌴", desc: "Crecer con propósito",    href: "./redwood/vida-y-persona.html",  free: false },
       ];
 
       const loadingEl = document.getElementById("loading");
@@ -398,19 +413,25 @@
         }
       }
 
-      function renderRedwoodSubjects() {
+      function renderRedwoodSubjects(hasAccess) {
         subjectsEl.innerHTML = "";
         subjectsEl.classList.add("rw-grid");
         for (const subj of REDWOOD_SUBJECTS) {
-          const card = document.createElement("a");
-          card.className = "card rw-subject";
-          card.href = subj.href;
+          const unlocked = subj.free === true || hasAccess === true;
+          const card = document.createElement(unlocked ? "a" : "div");
+          card.className = "card rw-subject" + (unlocked ? "" : " locked");
+          if (unlocked) {
+            card.href = subj.href;
+          }
           card.innerHTML = `
             <span class="ic">${subj.icon}</span>
             <h3>${subj.name}</h3>
             <span class="desc">${subj.desc}</span>
-            <span class="tag">Explorar</span>
+            <span class="tag">${subj.free ? "Gratis" : unlocked ? "Disponible" : "Bloqueado"}</span>
           `;
+          if (!unlocked) {
+            card.addEventListener("click", openModal);
+          }
           subjectsEl.appendChild(card);
         }
       }
@@ -528,7 +549,7 @@
           const tagline = document.getElementById("hero-tagline");
           tagline.textContent = "Elige una materia — ¡ohana de aprendizaje!";
           tagline.classList.add("rw-tagline");
-          renderRedwoodSubjects();
+          renderRedwoodSubjects(hasAccess);
         } else {
           renderSubjects(hasAccess);
         }

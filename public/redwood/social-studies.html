@@ -129,7 +129,26 @@
     </div>
 
     <script src="./social_studies_content.js"></script>
-    <script>
+    <script type="module">
+      import { supabase } from "../js/supabase.js";
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        window.location.replace("../redwood-login.html");
+      } else {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("has_access")
+          .eq("id", user.id)
+          .single();
+
+        if (profile?.has_access !== true) {
+          window.location.replace("../dashboard.html");
+        } else {
       function escapeHtml(s) {
         return String(s ?? "").replace(/[&<>"']/g, function (c) {
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -189,6 +208,8 @@
           rem.hidden = false;
         }
       })();
+        }
+      }
     </script>
   </body>
 </html>
