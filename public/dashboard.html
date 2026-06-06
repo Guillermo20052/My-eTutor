@@ -128,6 +128,51 @@
         font-size:.95rem;cursor:pointer;
       }
       .disc-check input{width:18px;height:18px;cursor:pointer;accent-color:var(--blue)}
+
+      /* ---------- Redwood island / ohana dashboard (school === 'redwood') ---------- */
+      .redwood-dash{
+        --rw-accent:#a63d3d;--rw-accent-d:#8b2e2e;--rw-sky:#fde8e4;--rw-sand:#fff6e8;
+        --rw-leaf:#2d8a5e;--rw-sun:#f4b942;
+      }
+      .redwood-dash .hero h1 .pop{color:var(--rw-accent)}
+      .redwood-dash .hero .rw-mascot{
+        font-size:2.6rem;line-height:1;margin-bottom:8px;
+        filter:drop-shadow(0 4px 10px rgba(166,61,61,.2));
+      }
+      .redwood-dash .hero .rw-tagline{color:var(--rw-accent-d)}
+      .redwood-dash .grid.rw-grid{gap:20px}
+      .redwood-dash .rw-subject{
+        text-align:center;cursor:pointer;border-radius:28px;position:relative;
+        min-height:220px;padding:26px 18px 22px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+        background:linear-gradient(165deg,#fff 0%,var(--rw-sand) 55%,var(--rw-sky) 100%);
+        border:2px solid #f0cfc7;box-shadow:0 10px 24px -14px rgba(139,46,46,.35);
+        transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+      }
+      .redwood-dash .rw-subject .ic{
+        font-size:3.2rem;line-height:1;display:block;margin:0 0 6px;
+        filter:drop-shadow(0 5px 10px rgba(45,138,94,.15));
+        transition:transform .16s ease;
+      }
+      .redwood-dash .rw-subject h3{
+        font-size:1.28rem;color:var(--rw-accent-d);font-weight:700;line-height:1.15;
+      }
+      .redwood-dash .rw-subject .desc{
+        color:var(--soft);font-weight:700;font-size:.88rem;margin-top:2px;
+      }
+      .redwood-dash .rw-subject .tag{
+        display:inline-block;margin-top:12px;font-size:.74rem;font-weight:800;
+        color:var(--rw-accent);background:var(--rw-sky);padding:5px 12px;border-radius:999px;
+        border:1px solid #f0cfc7;
+      }
+      .redwood-dash .rw-subject:hover{
+        transform:translateY(-6px) scale(1.02);
+        border-color:var(--rw-accent);box-shadow:0 14px 28px -12px rgba(166,61,61,.45);
+      }
+      .redwood-dash .rw-subject:hover .ic{transform:scale(1.06) rotate(-2deg)}
+      @media (max-width:680px){
+        .redwood-dash .rw-subject{min-height:190px}
+      }
     </style>
   </head>
   <body>
@@ -166,8 +211,9 @@
       </nav>
 
       <section class="hero">
+        <div class="rw-mascot" id="rw-mascot" hidden aria-hidden="true">🌺🏝️</div>
         <h1 id="greeting">¡Hola!</h1>
-        <p>Elige una materia para estudiar jugando.</p>
+        <p id="hero-tagline">Elige una materia para estudiar jugando.</p>
       </section>
 
       <section class="grid" id="subjects"></section>
@@ -236,6 +282,17 @@
         { id: "espanol",     name: "Español",     icon: "📖", accent: "#E8633F", free: false, desc: "Historieta, adverbios y más" },
         { id: "musica",      name: "Música",      icon: "🎵", accent: "#7C3AED", free: false, desc: "Lee y nombra las notas" },
         { id: "ciencias",    name: "Science",     icon: "🔬", accent: "#16A98C", free: false, desc: "Ecosystems, space and more" },
+      ];
+
+      const REDWOOD_SUBJECTS = [
+        { id: "espanol",         name: "Español",         icon: "📖", desc: "Lectura y escritura",     href: "./redwood/espanol.html" },
+        { id: "language-arts",   name: "Language Arts",   icon: "✍️", desc: "Reading & writing",       href: "./redwood/language-arts.html" },
+        { id: "french",          name: "French",          icon: "🇫🇷", desc: "Parlez et apprenez",      href: "./redwood/french.html" },
+        { id: "math",            name: "Math",            icon: "🔢", desc: "Numbers & problem solving", href: "./redwood/math.html" },
+        { id: "social-studies",  name: "Social Studies",  icon: "🌺", desc: "History & community",     href: "./redwood/social-studies.html" },
+        { id: "science",         name: "Science",         icon: "🔬", desc: "Explore & discover",      href: "./redwood/science.html" },
+        { id: "religion",        name: "Religión",        icon: "✝️", desc: "Fe y valores",            href: "./redwood/religion.html" },
+        { id: "vida-y-persona",  name: "Vida y Persona",  icon: "🌴", desc: "Crecer con propósito",    href: "./redwood/vida-y-persona.html" },
       ];
 
       const loadingEl = document.getElementById("loading");
@@ -344,6 +401,23 @@
         }
       }
 
+      function renderRedwoodSubjects() {
+        subjectsEl.innerHTML = "";
+        subjectsEl.classList.add("rw-grid");
+        for (const subj of REDWOOD_SUBJECTS) {
+          const card = document.createElement("a");
+          card.className = "card rw-subject";
+          card.href = subj.href;
+          card.innerHTML = `
+            <span class="ic">${subj.icon}</span>
+            <h3>${subj.name}</h3>
+            <span class="desc">${subj.desc}</span>
+            <span class="tag">Explorar</span>
+          `;
+          subjectsEl.appendChild(card);
+        }
+      }
+
       // Shared rank -> medal + name color mapping (gold/silver/bronze/blue).
       // Used for the header pill here and mirrored on leaderboard.html.
       function rankMeta(rank) {
@@ -413,10 +487,10 @@
 
         const userId = user.id;
 
-        // Fetch this user's profile (kid_name + has_access + is_admin).
+        // Fetch this user's profile (kid_name + has_access + is_admin + school).
         const { data: profile } = await supabase
           .from("profiles")
-          .select("kid_name, has_access, is_admin")
+          .select("kid_name, has_access, is_admin, school")
           .eq("id", userId)
           .single();
 
@@ -428,6 +502,7 @@
 
         const kidName = (profile?.kid_name || "").trim();
         const hasAccess = profile?.has_access === true;
+        const isRedwood = profile?.school === "redwood";
 
         // Greeting: never render "¡Hola, !"
         document.getElementById("greeting").innerHTML = kidName
@@ -441,7 +516,16 @@
           : "?";
         applyHeaderRank(null);
 
-        renderSubjects(hasAccess);
+        if (isRedwood) {
+          appEl.classList.add("redwood-dash");
+          document.getElementById("rw-mascot").hidden = false;
+          const tagline = document.getElementById("hero-tagline");
+          tagline.textContent = "Elige una materia — ¡ohana de aprendizaje!";
+          tagline.classList.add("rw-tagline");
+          renderRedwoodSubjects();
+        } else {
+          renderSubjects(hasAccess);
+        }
 
         loadingEl.hidden = true;
         appEl.hidden = false;
