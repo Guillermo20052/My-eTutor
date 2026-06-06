@@ -687,7 +687,7 @@
       function setupAuthListener(uid) {
         supabase.auth.onAuthStateChange((event, session) => {
           if (event === "SIGNED_OUT" || !session) {
-            window.location.replace("../redwood-login.html");
+            window.location.replace("../index.html");
             return;
           }
           if (session.user.id !== uid) {

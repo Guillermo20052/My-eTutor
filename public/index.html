@@ -59,6 +59,22 @@
       .school-btn.redwood:hover{border-color:#a63d3d}
       .school-btn.redwood .ic{background:#fde8e4;color:#8b2e2e}
       .school-btn.redwood .name span{color:#a63d3d}
+
+      .continue-wrap{margin-bottom:20px;width:100%}
+      .continue-btn{
+        display:block;width:100%;padding:16px 20px;border-radius:18px;
+        border:2px solid var(--blue);background:var(--sky);
+        font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.12rem;
+        color:var(--navy);text-align:center;text-decoration:none;
+        box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;
+      }
+      .continue-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+      .continue-btn:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+      .continue-btn.redwood{border-color:#a63d3d;background:#fde8e4;color:#8b2e2e}
+      .picker-or{
+        text-align:center;color:var(--soft);font-weight:700;font-size:.9rem;
+        margin-bottom:16px;line-height:1.4;
+      }
     </style>
   </head>
   <body>
@@ -76,6 +92,10 @@
         <p class="picker-welcome">
           <em>Elige tu escuela</em> · Choose your school
         </p>
+        <div id="continue-wrap" class="continue-wrap" hidden>
+          <a id="continue-btn" class="continue-btn" href="./dashboard.html"></a>
+        </div>
+        <p id="picker-or" class="picker-or" hidden>o elige otra escuela · or pick another school</p>
         <div class="picker-grid">
           <a class="school-btn blueridge" href="./login.html">
             <span class="ic" aria-hidden="true">🏔️</span>
@@ -100,10 +120,24 @@
 
       const loader = document.getElementById("loader");
       const picker = document.getElementById("picker");
+      const continueWrap = document.getElementById("continue-wrap");
+      const continueBtn = document.getElementById("continue-btn");
+      const pickerOr = document.getElementById("picker-or");
 
-      function showPicker() {
+      function showPicker(opts = {}) {
         loader.hidden = true;
         picker.hidden = false;
+        if (opts.school === "redwood") {
+          continueBtn.textContent = "Continuar como Redwood";
+          continueBtn.classList.add("redwood");
+          continueWrap.hidden = false;
+          pickerOr.hidden = false;
+        } else if (opts.school === "blueridge") {
+          continueBtn.textContent = "Continuar como Blueridge";
+          continueBtn.classList.remove("redwood");
+          continueWrap.hidden = false;
+          pickerOr.hidden = false;
+        }
       }
 
       (async () => {
@@ -114,7 +148,14 @@
             error,
           } = await supabase.auth.getUser();
           if (!error && user) {
-            window.location.replace("./dashboard.html");
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("school")
+              .eq("id", user.id)
+              .single();
+            const school =
+              profile?.school === "redwood" ? "redwood" : "blueridge";
+            showPicker({ school });
             return;
           }
           showPicker();
