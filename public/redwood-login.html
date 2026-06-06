@@ -15,11 +15,37 @@
       .auth-brand .s{font-size:.72rem;letter-spacing:.14em;color:var(--rw-accent);font-weight:800;text-transform:uppercase}
       .auth-card h1{font-size:1.35rem;color:var(--navy);text-align:center;margin-bottom:4px}
       .auth-card .subtitle{color:var(--soft);text-align:center;font-weight:700;margin-bottom:18px}
-      .alt-link{margin-top:18px;text-align:center;color:var(--soft);font-weight:700;font-size:.92rem}
-      .alt-link a{color:var(--rw-accent);font-weight:800;text-decoration:none}
-      .alt-link a:hover{text-decoration:underline}
       .btn.primary{width:100%;background:var(--rw-accent)}
       .btn.primary:hover{background:var(--rw-accent-d)}
+
+      .signup-cta{
+        margin-top:20px;padding:22px 20px 20px;
+        background:linear-gradient(165deg,#fff 0%,var(--rw-sky) 100%);
+        border:2px solid #f0cfc7;border-radius:20px;
+        box-shadow:0 10px 28px -12px rgba(139,46,46,.35);
+        text-align:center;
+      }
+      .signup-cta .cta-lead{
+        font-family:'Fredoka',sans-serif;font-weight:700;color:var(--navy);
+        font-size:1.05rem;margin:0 0 14px;line-height:1.35;
+      }
+      .signup-cta .btn-signup{
+        display:block;width:100%;padding:16px 20px;border-radius:16px;
+        border:2px solid var(--rw-accent-d);
+        background:linear-gradient(145deg,var(--rw-accent),var(--rw-accent-d));
+        color:#fff;text-decoration:none;text-align:center;
+        font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.15rem;
+        line-height:1.3;box-shadow:0 8px 22px -8px rgba(139,46,46,.55);
+        transition:transform .15s,box-shadow .15s,background .15s;
+      }
+      .signup-cta .btn-signup:hover{
+        transform:translateY(-2px);
+        box-shadow:0 12px 26px -8px rgba(139,46,46,.65);
+        background:linear-gradient(145deg,#b54848,var(--rw-accent-d));
+      }
+      .signup-cta .btn-signup:focus-visible{
+        outline:2px solid var(--rw-accent);outline-offset:3px;
+      }
       #message{margin-top:0;margin-bottom:16px}
 
       .pw-wrap{position:relative;display:flex;align-items:center}
@@ -134,11 +160,12 @@
             Iniciar sesión
           </button>
         </form>
-
-        <p class="alt-link">
-          ¿No tienes cuenta? <a href="./redwood-signup.html">Regístrate en Redwood</a>
-        </p>
       </div>
+
+      <section class="signup-cta" aria-label="Crear cuenta">
+        <p class="cta-lead">¿Primera vez en Redwood? 🌺</p>
+        <a class="btn-signup" href="./redwood-signup.html">Haz click aquí para empezar</a>
+      </section>
     </div>
 
     <script type="module">
