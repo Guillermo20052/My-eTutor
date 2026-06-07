@@ -390,6 +390,7 @@
       let streak = 0;
       let selectedModule = null;
       let activeDeckModuleId = null;
+      let deckEpoch = 0;
       let moduleDeck = [];
       let deckIndex = 0;
       let lastDealtKey = null;
@@ -477,7 +478,7 @@
       }
 
       function deckEntryKey(entry) {
-        return `${entry.mech}:${entry.idx}`;
+        return `${entry.moduleId}:${entry.mech}:${entry.idx}:${entry.topic}`;
       }
 
       function resolveModule(module) {
@@ -487,23 +488,33 @@
         );
       }
 
+      function moduleTopicSet(mod) {
+        return new Set((mod?.topics || []));
+      }
+
       function buildModulePool(module) {
         const bank = window.ESPANOL_BANK;
         const mod = resolveModule(module);
-        if (!bank || !mod) return [];
-        const topics = new Set(mod.topics || []);
+        if (!bank || !mod?.id) return [];
+        const topics = moduleTopicSet(mod);
         if (!topics.size) return [];
         const pool = [];
         for (const mech of MECHANICS) {
           const items = bank[mech];
           if (!Array.isArray(items)) continue;
           items.forEach((item, idx) => {
-            if (item?.topic && topics.has(item.topic)) {
-              pool.push({ mech, item, idx });
+            const topic = item?.topic;
+            if (topic && topics.has(topic)) {
+              pool.push({ mech, item, idx, moduleId: mod.id, topic });
             }
           });
         }
         return pool;
+      }
+
+      function isDeckEntryForModule(entry, mod) {
+        if (!entry || !mod?.id) return false;
+        return entry.moduleId === mod.id && moduleTopicSet(mod).has(entry.topic);
       }
 
       function resetModuleDeckState() {
@@ -527,21 +538,34 @@
         deckIndex = 0;
       }
 
+      function ensureModuleDeck(mod) {
+        if (activeDeckModuleId === mod.id && moduleDeck.length) return true;
+        const pool = buildModulePool(mod);
+        if (!pool.length) return false;
+        lastDealtKey = null;
+        reshuffleModuleDeck(mod);
+        return true;
+      }
+
       function dealNextRound() {
         const mod = resolveModule(selectedModule);
         if (!mod) return null;
 
-        if (activeDeckModuleId !== mod.id || !moduleDeck.length) {
-          const pool = buildModulePool(mod);
-          if (!pool.length) return null;
-          lastDealtKey = null;
-          reshuffleModuleDeck(mod);
-        } else if (deckIndex >= moduleDeck.length) {
+        if (!ensureModuleDeck(mod)) return null;
+
+        if (deckIndex >= moduleDeck.length) {
           lastDealtKey = deckEntryKey(moduleDeck[moduleDeck.length - 1]);
           reshuffleModuleDeck(mod);
         }
 
-        const entry = moduleDeck[deckIndex++];
+        let entry = moduleDeck[deckIndex++];
+        if (!isDeckEntryForModule(entry, mod)) {
+          resetModuleDeckState();
+          if (!ensureModuleDeck(mod)) return null;
+          entry = moduleDeck[deckIndex++];
+          if (!isDeckEntryForModule(entry, mod)) return null;
+        }
+
         lastDealtKey = deckEntryKey(entry);
         return { mech: entry.mech, item: entry.item };
       }
@@ -554,7 +578,10 @@
       }
 
       function showView(name) {
-        if (name !== "game") cancelScheduledRound();
+        if (name !== "game") {
+          cancelScheduledRound();
+          answering = false;
+        }
         const views = {
           modules: $("view-modules"),
           study: $("view-module-study"),
@@ -611,10 +638,10 @@
 
       function openModuleStudy(module) {
         const mod = resolveModule(module);
-        if (selectedModule?.id !== mod?.id) {
-          resetModuleDeckState();
-          currentRound = null;
-        }
+        cancelScheduledRound();
+        resetModuleDeckState();
+        answering = false;
+        currentRound = null;
         selectedModule = mod;
         const lesson = findLesson(mod.lesson);
         const root = $("module-lesson");
@@ -628,12 +655,15 @@
       }
 
       function startModuleGame() {
-        if (!selectedModule) return;
+        const mod = resolveModule(selectedModule);
+        if (!mod) return;
         cancelScheduledRound();
-        lastDealtKey = null;
-        reshuffleModuleDeck(selectedModule);
+        resetModuleDeckState();
         answering = false;
         currentRound = null;
+        deckEpoch += 1;
+        lastDealtKey = null;
+        reshuffleModuleDeck(mod);
         showView("game");
         startRound();
       }
@@ -677,8 +707,14 @@
 
       function scheduleNext() {
         cancelScheduledRound();
+        const scheduledModuleId = selectedModule?.id ?? null;
+        const scheduledEpoch = deckEpoch;
         nextRoundTimer = setTimeout(() => {
           nextRoundTimer = null;
+          if ($("view-game").hidden) return;
+          if ((selectedModule?.id ?? null) !== scheduledModuleId) return;
+          if (deckEpoch !== scheduledEpoch) return;
+          if (activeDeckModuleId !== scheduledModuleId) return;
           answering = false;
           startRound();
         }, ADVANCE_MS);
@@ -753,11 +789,8 @@
         letters.forEach((ch, i) => {
           html += `<button type="button" class="letter-btn" data-idx="${i}">${escapeHtml(ch)}</button>`;
         });
-        html += "</div>";
-        if (item.answerIndex === -1) {
-          html +=
-            '<div style="text-align:center"><button type="button" class="btn ghost" id="tilde-none">Ninguna (sin tilde)</button></div>';
-        }
+        html +=
+          '</div><div style="text-align:center"><button type="button" class="btn ghost" id="tilde-none">Ninguna (sin tilde)</button></div>';
         wrap.innerHTML = html;
 
         const finish = (picked, ok) => {
@@ -789,12 +822,9 @@
             finish(btn, idx === item.answerIndex);
           });
         });
-        const noneBtn = $("tilde-none");
-        if (noneBtn) {
-          noneBtn.addEventListener("click", () => {
-            finish(noneBtn, item.answerIndex === -1);
-          });
-        }
+        $("tilde-none").addEventListener("click", () => {
+          finish($("tilde-none"), item.answerIndex === -1);
+        });
       }
 
       function wireSignosHelperButtons(wrap, getTargetInput) {
@@ -1030,6 +1060,16 @@
       }
 
       function startRound() {
+        if ($("view-game").hidden || !selectedModule) return;
+        const mod = resolveModule(selectedModule);
+        if (!mod || activeDeckModuleId !== mod.id) {
+          if (!ensureModuleDeck(mod)) {
+            $("mech-tag").textContent = "Sin preguntas";
+            $("prompt").textContent = "No hay preguntas para este módulo.";
+            $("interaction").innerHTML = "";
+            return;
+          }
+        }
         currentRound = dealNextRound();
         $("feedback").className = "feedback";
         $("feedback").innerHTML = "";
