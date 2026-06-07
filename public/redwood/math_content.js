@@ -1,368 +1,717 @@
-/* =====================================================================
-   Redwood · Math — CONTENT FILE  (English)
-   Covers all 17 themes from the Math Journal Vol. 2 guide for ~8-yr-olds.
+/* Redwood · Math — modules + study + banks (English) */
 
-   MATH_LESSONS: study lessons (grouped by skill family).
-   MATH_BANK: 8 mechanics:
-     type       -> type the number answer (word problems, subtraction,
-                   multiples, two equal groups)
-     compare    -> tap <, >, or = between two numbers/amounts
-     shape      -> identify or count a shape (pentagons, hexagons, mystery)
-     array      -> rows x columns total (equal groups, covering rectangles)
-     fraction   -> what fraction is shaded / equal parts
-     money      -> coins shown -> how much / ways to pay
-     pictograph -> read a simple pictograph (each symbol = a value)
-     measure    -> measuring lengths (units of cubes/inches)
-   MATH_UI: kid-friendly instructions.
-   ===================================================================== */
-
-   const MATH_LESSONS = [
-    {
-      id: "number-stories",
-      num: 1,
-      title: "Number Stories & Subtraction",
-      subtitle: "Adding and subtracting in word problems (7-1, 7-7)",
-      intro:
-        "A number story is a little story that hides a math problem inside it. You read it, find the numbers, and decide whether to add or subtract. Words like 'in all' or 'altogether' mean add; words like 'left,' 'fewer,' or 'how many more' mean subtract.",
-      sections: [
-        { h:"Adding stories", body:"'Ana has 6 bamboo shoots. She finds 5 more. How many in all?' → 6 + 5 = 11. 'In all' tells you to add." },
-        { h:"Subtracting stories", body:"'There were 12 pandas. 4 went home. How many are left?' → 12 - 4 = 8. 'Left' tells you to subtract." },
-        { h:"Find the key words", body:"Look for clue words: in all, total, altogether (add); left, fewer, how many more, difference (subtract)." },
-      ],
-      recuerda: "Tip: 'In all' = add. 'How many left' = subtract.",
-    },
-    {
-      id: "shapes",
-      num: 2,
-      title: "Shapes: Pentagons, Hexagons & More",
-      subtitle: "Comparing shapes and mystery shapes (8-3, 8-11)",
-      intro:
-        "Shapes are named by how many sides and corners they have. Knowing the number of sides helps you tell shapes apart and solve 'mystery shape' clues.",
-      sections: [
-        { h:"Count the sides", body:"Triangle = 3 sides. Square/rectangle = 4 sides. Pentagon = 5 sides. Hexagon = 6 sides." },
-        { h:"Pentagons vs. hexagons", body:"A pentagon has 5 sides and 5 corners. A hexagon has 6 sides and 6 corners. Count carefully — they look similar!" },
-        { h:"Mystery shapes", body:"Use clues to name a shape: 'I have 6 sides. What am I?' → a hexagon. Match the number of sides to the name." },
-      ],
-      recuerda: "Tip: Penta = 5 sides, Hexa = 6 sides. Count the sides to name any shape.",
-    },
-    {
-      id: "arrays",
-      num: 3,
-      title: "Arrays & Equal Groups",
-      subtitle: "Rows, columns, and covering rectangles (8-6 to 8-9)",
-      intro:
-        "An array is objects lined up in equal rows and columns. To find the total, you can count them all, or multiply rows × columns. Equal groups work the same way.",
-      sections: [
-        { h:"Rows and columns", body:"An array with 3 rows and 4 in each row has 3 × 4 = 12 in all. Rows go across; columns go down." },
-        { h:"Equal groups", body:"4 groups of 2 = 4 × 2 = 8. Equal groups always have the SAME number in each group." },
-        { h:"Covering rectangles", body:"To find how many squares cover a rectangle, count the rows of squares times the number in each row." },
-      ],
-      recuerda: "Tip: rows × how many in each row = the total.",
-    },
-    {
-      id: "fractions",
-      num: 4,
-      title: "Fractions & Equal Parts",
-      subtitle: "Halves, thirds, fourths (9-1, 9-4, 9-10)",
-      intro:
-        "A fraction shows equal parts of a whole. The bottom number tells how many equal parts there are; the top number tells how many we're talking about. Parts must be EQUAL to be fair fractions.",
-      sections: [
-        { h:"Halves, thirds, fourths", body:"2 equal parts = halves (½ each). 3 equal parts = thirds (⅓ each). 4 equal parts = fourths (¼ each)." },
-        { h:"What fraction is shaded?", body:"If a circle is cut in 4 equal parts and 1 is shaded, that's ¼ (one fourth)." },
-        { h:"Equal parts must match", body:"Parts have to be the same size. A shape cut into uneven pieces is NOT showing real fractions." },
-      ],
-      recuerda: "Tip: The bottom number = total equal parts. ½ = 2 parts, ⅓ = 3 parts, ¼ = 4 parts.",
-    },
-    {
-      id: "numbers-money-data",
-      num: 5,
-      title: "Comparing, Money, Data & Measuring",
-      subtitle: "Compare numbers, ways to pay, pictographs, lengths (7-3, 9-5, 9-8, 9-4)",
-      intro:
-        "This theme brings together comparing numbers (which is bigger?), money (counting coins and ways to pay), reading pictographs (graphs made of pictures), and measuring lengths.",
-      sections: [
-        { h:"Comparing numbers", body:"Use > (greater than), < (less than), or = (equal). The open mouth always 'eats' the bigger number: 8 > 5, 3 < 9, 6 = 6." },
-        { h:"Money & ways to pay", body:"Coins: penny = 1¢, nickel = 5¢, dime = 10¢, quarter = 25¢. There are many ways to make the same amount." },
-        { h:"Pictographs", body:"In a pictograph, each picture stands for a number. If 🍎 = 2 apples, then 3 apples 🍎🍎🍎 means 3 × 2 = 6." },
-        { h:"Measuring lengths", body:"We measure length with units like cubes or inches. Line the object up at 0 and count the units to the end." },
-      ],
-      recuerda: "Tip: The > or < mouth always opens toward the BIGGER number.",
-    },
-  ];
-  
-  const MATH_BANK = {
-    type: [
-      { topic:"number-stories", q:"Ana has 6 bamboo shoots. She finds 5 more. How many in all?", answer:"11", why:"6 + 5 = 11.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"There were 12 pandas. 4 went home. How many are left?", answer:"8", why:"12 - 4 = 8.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"A panda ate 9 leaves, then 3 more. How many leaves in all?", answer:"12", why:"9 + 3 = 12.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"15 birds were in a tree. 6 flew away. How many are left?", answer:"9", why:"15 - 6 = 9.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"Sam had 7 marbles and won 8 more. How many in all?", answer:"15", why:"7 + 8 = 15.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"There are 20 apples. 11 are eaten. How many are left?", answer:"9", why:"20 - 11 = 9.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"A box has 14 crayons. 5 are broken. How many are NOT broken?", answer:"9", why:"14 - 5 = 9.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"Mia read 8 pages, then 6 more. How many pages in all?", answer:"14", why:"8 + 6 = 14.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"18 kids were at the park. 9 went home. How many are left?", answer:"9", why:"18 - 9 = 9.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"A farmer had 10 cows and bought 7 more. How many in all?", answer:"17", why:"10 + 7 = 17.", ask:"Read the story. Type the number answer." },
-      { topic:"subtraction", q:"13 - 7 = ?", answer:"6", why:"13 - 7 = 6.", ask:"Solve it. Type the answer." },
-      { topic:"subtraction", q:"16 - 8 = ?", answer:"8", why:"16 - 8 = 8.", ask:"Solve it. Type the answer." },
-      { topic:"subtraction", q:"11 - 5 = ?", answer:"6", why:"11 - 5 = 6.", ask:"Solve it. Type the answer." },
-      { topic:"subtraction", q:"20 - 6 = ?", answer:"14", why:"20 - 6 = 14.", ask:"Solve it. Type the answer." },
-      { topic:"subtraction", q:"15 - 9 = ?", answer:"6", why:"15 - 9 = 6.", ask:"Solve it. Type the answer." },
-      { topic:"multiples", q:"What comes next? 10, 20, 30, ___", answer:"40", why:"Multiples of 10: next is 40.", ask:"What number comes next? Type it." },
-      { topic:"multiples", q:"What comes next? 5, 10, 15, ___", answer:"20", why:"Multiples of 5: next is 20.", ask:"What number comes next? Type it." },
-      { topic:"multiples", q:"What comes next? 2, 4, 6, ___", answer:"8", why:"Multiples of 2: next is 8.", ask:"What number comes next? Type it." },
-      { topic:"multiples", q:"Count by 10s: 40, 50, 60, ___", answer:"70", why:"Add 10: 70.", ask:"What number comes next? Type it." },
-      { topic:"multiples", q:"Count by 5s: 25, 30, 35, ___", answer:"40", why:"Add 5: 40.", ask:"What number comes next? Type it." },
-      { topic:"multiples", q:"Count by 2s: 12, 14, 16, ___", answer:"18", why:"Add 2: 18.", ask:"What number comes next? Type it." },
-      { topic:"two-equal-groups", q:"2 equal groups of 5 = ?", answer:"10", why:"5 + 5 = 10.", ask:"Solve it. Type the answer." },
-      { topic:"two-equal-groups", q:"2 equal groups of 8 = ?", answer:"16", why:"8 + 8 = 16.", ask:"Solve it. Type the answer." },
-      { topic:"two-equal-groups", q:"2 equal groups of 6 = ?", answer:"12", why:"6 + 6 = 12.", ask:"Solve it. Type the answer." },
-      { topic:"two-equal-groups", q:"Share 10 toys into 2 equal groups. How many in each?", answer:"5", why:"10 ÷ 2 = 5.", ask:"Read the story. Type the number answer." },
-      { topic:"two-equal-groups", q:"Share 14 stickers into 2 equal groups. How many each?", answer:"7", why:"14 ÷ 2 = 7.", ask:"Read the story. Type the number answer." },
-      { topic:"number-stories", q:"Leo had 5 toy cars. His mom gave him 9 more. How many now?", answer:"14", why:"5 + 9 = 14.", ask:"Read the story. Type the number answer." },
-      { topic:"subtraction", q:"17 - 8 = ?", answer:"9", why:"17 - 8 = 9.", ask:"Solve it. Type the answer." },
-      { topic:"multiples", q:"Count by 10s: 70, 80, 90, ___", answer:"100", why:"Add 10: 100.", ask:"What number comes next? Type it." },
-      { topic:"two-equal-groups", q:"2 equal groups of 9 = ?", answer:"18", why:"9 + 9 = 18.", ask:"Solve it. Type the answer." },
+const MATH_MODULES = [
+  {
+    "id": "number-stories",
+    "title": "Number Stories",
+    "emoji": "📖",
+    "topics": [
+      "number-stories"
     ],
-    compare: [
-      { topic:"comparing", left:"8", right:"5", answer:">", why:"8 is greater than 5.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"3", right:"9", answer:"<", why:"3 is less than 9.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"6", right:"6", answer:"=", why:"6 equals 6.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"12", right:"21", answer:"<", why:"12 is less than 21.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"45", right:"45", answer:"=", why:"They are equal.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"30", right:"13", answer:">", why:"30 is greater than 13.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"19", right:"9", answer:">", why:"19 is greater than 9.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"7", right:"17", answer:"<", why:"7 is less than 17.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"50", right:"50", answer:"=", why:"They are equal.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"24", right:"42", answer:"<", why:"24 is less than 42.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"99", right:"89", answer:">", why:"99 is greater than 89.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"15", right:"15", answer:"=", why:"They are equal.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"60", right:"16", answer:">", why:"60 is greater than 16.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"33", right:"38", answer:"<", why:"33 is less than 38.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"71", right:"71", answer:"=", why:"They are equal.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"4 + 3", right:"6", answer:">", why:"4+3=7, which is greater than 6.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"5", right:"2 + 4", answer:"<", why:"2+4=6, so 5 is less than 6.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"10 - 2", right:"8", answer:"=", why:"10-2=8, equal to 8.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"7 + 1", right:"9", answer:"<", why:"7+1=8, less than 9.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"6 + 6", right:"10", answer:">", why:"6+6=12, greater than 10.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"40", right:"40", answer:"=", why:"They are equal.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"28", right:"82", answer:"<", why:"28 is less than 82.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"55", right:"5", answer:">", why:"55 is greater than 5.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"63", right:"36", answer:">", why:"63 is greater than 36.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"14", right:"41", answer:"<", why:"14 is less than 41.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"9 - 3", right:"6", answer:"=", why:"9-3=6, equal to 6.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"20", right:"2", answer:">", why:"20 is greater than 2.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"11", right:"11", answer:"=", why:"They are equal.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"8 + 2", right:"12", answer:"<", why:"8+2=10, less than 12.", ask:"Which number is bigger? Tap >, <, or =." },
-      { topic:"comparing", left:"100", right:"99", answer:">", why:"100 is greater than 99.", ask:"Which number is bigger? Tap >, <, or =." },
+    "lesson": "number-stories"
+  },
+  {
+    "id": "subtraction",
+    "title": "Subtraction",
+    "emoji": "➖",
+    "topics": [
+      "subtraction"
     ],
-    shape: [
-      { topic:"shapes", q:"How many sides does a pentagon have?", options:["4","5","6"], answer:1, why:"A pentagon has 5 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"How many sides does a hexagon have?", options:["5","6","7"], answer:1, why:"A hexagon has 6 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"How many sides does a triangle have?", options:["3","4","5"], answer:0, why:"A triangle has 3 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"How many sides does a square have?", options:["3","4","5"], answer:1, why:"A square has 4 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"I have 6 sides. What am I?", options:["Pentagon","Hexagon","Square"], answer:1, why:"6 sides = hexagon.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"I have 5 sides. What am I?", options:["Pentagon","Hexagon","Triangle"], answer:0, why:"5 sides = pentagon.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"I have 3 corners. What am I?", options:["Square","Triangle","Hexagon"], answer:1, why:"3 corners = triangle.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"Which shape has MORE sides: pentagon or hexagon?", options:["Pentagon","Hexagon","Same"], answer:1, why:"Hexagon (6) has more than pentagon (5).", ask:"Which one? Tap the answer." },
-      { topic:"shapes", q:"A shape has 4 equal sides and 4 corners. What is it?", options:["Square","Pentagon","Triangle"], answer:0, why:"4 equal sides = square.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"How many corners does a hexagon have?", options:["5","6","7"], answer:1, why:"A hexagon has 6 corners.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"How many corners does a pentagon have?", options:["4","5","6"], answer:1, why:"A pentagon has 5 corners.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"I have 4 sides but they are not all equal. I could be a...", options:["Rectangle","Triangle","Pentagon"], answer:0, why:"4 sides, not all equal = rectangle.", ask:"Read the question. Tap the answer." },
-      { topic:"shapes", q:"Which has fewer sides: triangle or square?", options:["Triangle","Square","Same"], answer:0, why:"Triangle (3) has fewer than square (4).", ask:"Which one? Tap the answer." },
-      { topic:"shapes", q:"A stop sign has 8 sides. It is an...", options:["Octagon","Hexagon","Pentagon"], answer:0, why:"8 sides = octagon.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"How many sides does a rectangle have?", options:["3","4","5"], answer:1, why:"A rectangle has 4 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"I have 5 corners and 5 sides. What am I?", options:["Hexagon","Pentagon","Square"], answer:1, why:"5 sides & corners = pentagon.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"Which shape has the most sides?", options:["Triangle","Pentagon","Hexagon"], answer:2, why:"Hexagon (6) has the most here.", ask:"Which one? Tap the answer." },
-      { topic:"shapes", q:"A shape with 6 equal sides is a regular...", options:["Pentagon","Hexagon","Square"], answer:1, why:"6 sides = hexagon.", ask:"Read the question. Tap the answer." },
-      { topic:"shapes", q:"How many MORE sides does a hexagon have than a triangle?", options:["2","3","4"], answer:1, why:"6 - 3 = 3 more sides.", ask:"Which one? Tap the answer." },
-      { topic:"shapes", q:"I have 3 sides and 3 corners. What am I?", options:["Triangle","Square","Pentagon"], answer:0, why:"3 sides = triangle.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"Which is a 5-sided shape?", options:["Hexagon","Pentagon","Octagon"], answer:1, why:"Pentagon = 5 sides.", ask:"Read the question. Tap the answer." },
-      { topic:"shapes", q:"How many sides do a pentagon and a triangle have together?", options:["7","8","9"], answer:1, why:"5 + 3 = 8 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"A shape has more than 5 but fewer than 7 sides. It is a...", options:["Pentagon","Hexagon","Octagon"], answer:1, why:"6 sides = hexagon.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"Two triangles together have how many sides?", options:["5","6","7"], answer:1, why:"3 + 3 = 6 sides.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"How many corners does a square have?", options:["3","4","5"], answer:1, why:"A square has 4 corners.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"I have no straight sides. I am round. What am I?", options:["Circle","Pentagon","Hexagon"], answer:0, why:"No straight sides = circle.", ask:"Read the clue. Tap the shape." },
-      { topic:"shapes", q:"Which shape has equal sides AND 6 of them?", options:["Hexagon","Pentagon","Rectangle"], answer:0, why:"Hexagon = 6 equal sides.", ask:"Read the question. Tap the answer." },
-      { topic:"shapes", q:"A pentagon has ___ more side than a square.", options:["1","2","3"], answer:0, why:"5 - 4 = 1 more side.", ask:"Which one? Tap the answer." },
-      { topic:"shapes", q:"How many sides does a hexagon have more than a pentagon?", options:["1","2","3"], answer:0, why:"6 - 5 = 1.", ask:"Count the sides. Tap the answer." },
-      { topic:"shapes", q:"I have 4 corners and 4 sides of the same length. What am I?", options:["Square","Triangle","Hexagon"], answer:0, why:"Equal 4 sides = square.", ask:"Read the clue. Tap the shape." },
+    "lesson": "subtraction"
+  },
+  {
+    "id": "multiples",
+    "title": "Multiples of 10, 5, 2",
+    "emoji": "🔢",
+    "topics": [
+      "multiples"
     ],
-    array: [
-      { topic:"arrays", q:"3 rows of 4. How many in all?", answer:"12", why:"3 × 4 = 12.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"2 rows of 5. How many in all?", answer:"10", why:"2 × 5 = 10.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"4 rows of 3. How many in all?", answer:"12", why:"4 × 3 = 12.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"5 rows of 2. How many in all?", answer:"10", why:"5 × 2 = 10.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"3 rows of 3. How many in all?", answer:"9", why:"3 × 3 = 9.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"4 groups of 2. How many in all?", answer:"8", why:"4 × 2 = 8.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"6 rows of 2. How many in all?", answer:"12", why:"6 × 2 = 12.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"2 rows of 8. How many in all?", answer:"16", why:"2 × 8 = 16.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"5 groups of 5. How many in all?", answer:"25", why:"5 × 5 = 25.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"3 rows of 5. How many in all?", answer:"15", why:"3 × 5 = 15.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"A rectangle is covered by 2 rows of 6 squares. How many squares?", answer:"12", why:"2 × 6 = 12 squares.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"A rectangle is covered by 3 rows of 4 squares. How many squares?", answer:"12", why:"3 × 4 = 12 squares.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"4 groups of 4. How many in all?", answer:"16", why:"4 × 4 = 16.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"2 rows of 7. How many in all?", answer:"14", why:"2 × 7 = 14.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"3 groups of 6. How many in all?", answer:"18", why:"3 × 6 = 18.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"5 rows of 3. How many in all?", answer:"15", why:"5 × 3 = 15.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"A rectangle has 4 rows of 5 squares. How many squares?", answer:"20", why:"4 × 5 = 20.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"6 groups of 3. How many in all?", answer:"18", why:"6 × 3 = 18.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"2 rows of 9. How many in all?", answer:"18", why:"2 × 9 = 18.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"4 rows of 6. How many in all?", answer:"24", why:"4 × 6 = 24.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"3 rows of 7. How many in all?", answer:"21", why:"3 × 7 = 21.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"5 groups of 4. How many in all?", answer:"20", why:"5 × 4 = 20.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"A rectangle has 5 rows of 5 squares. How many squares?", answer:"25", why:"5 × 5 = 25.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"2 groups of 10. How many in all?", answer:"20", why:"2 × 10 = 20.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"3 rows of 8. How many in all?", answer:"24", why:"3 × 8 = 24.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"4 rows of 7. How many in all?", answer:"28", why:"4 × 7 = 28.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"6 rows of 4. How many in all?", answer:"24", why:"6 × 4 = 24.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"A rectangle has 3 rows of 6 squares. How many squares?", answer:"18", why:"3 × 6 = 18.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"2 rows of 6. How many in all?", answer:"12", why:"2 × 6 = 12.", ask:"How many in all? Type the number." },
-      { topic:"arrays", q:"5 rows of 6. How many in all?", answer:"30", why:"5 × 6 = 30.", ask:"How many in all? Type the number." },
+    "lesson": "multiples"
+  },
+  {
+    "id": "two-equal-groups",
+    "title": "Two Equal Groups",
+    "emoji": "👥",
+    "topics": [
+      "two-equal-groups"
     ],
-    fraction: [
-      { topic:"fractions", q:"A circle is cut into 2 equal parts. 1 is shaded. What fraction is shaded?", options:["1/2","1/3","1/4"], answer:0, why:"1 of 2 equal parts = 1/2.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A circle is cut into 4 equal parts. 1 is shaded. What fraction?", options:["1/2","1/3","1/4"], answer:2, why:"1 of 4 = 1/4.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A circle is cut into 3 equal parts. 1 is shaded. What fraction?", options:["1/2","1/3","1/4"], answer:1, why:"1 of 3 = 1/3.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A rectangle is cut into 4 equal parts. 2 are shaded. What fraction?", options:["1/4","2/4","3/4"], answer:1, why:"2 of 4 = 2/4 (one half).", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A circle is cut into 4 equal parts. 3 are shaded. What fraction?", options:["1/4","2/4","3/4"], answer:2, why:"3 of 4 = 3/4.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"What do we call 2 equal parts of a whole?", options:["Halves","Thirds","Fourths"], answer:0, why:"2 equal parts = halves.", ask:"What are the equal parts called? Tap it." },
-      { topic:"fractions", q:"What do we call 3 equal parts?", options:["Halves","Thirds","Fourths"], answer:1, why:"3 equal parts = thirds.", ask:"What are the equal parts called? Tap it." },
-      { topic:"fractions", q:"What do we call 4 equal parts?", options:["Halves","Thirds","Fourths"], answer:2, why:"4 equal parts = fourths.", ask:"What are the equal parts called? Tap it." },
-      { topic:"fractions", q:"A pizza is cut into 2 equal slices. You eat 1. What fraction did you eat?", options:["1/2","1/3","1/4"], answer:0, why:"1 of 2 = 1/2.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A rectangle has 3 equal parts. 2 are shaded. What fraction?", options:["1/3","2/3","3/3"], answer:1, why:"2 of 3 = 2/3.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"Are these fractions? A shape cut into UNEQUAL parts.", options:["Yes","No"], answer:1, why:"Parts must be EQUAL to be fractions.", ask:"Are the parts equal? Tap yes or no." },
-      { topic:"fractions", q:"A circle in 4 equal parts, all 4 shaded. What fraction?", options:["2/4","3/4","4/4"], answer:2, why:"4 of 4 = 4/4 (the whole).", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"Which is bigger: 1/2 or 1/4 of the same pizza?", options:["1/2","1/4","Same"], answer:0, why:"1/2 is bigger than 1/4.", ask:"Which piece? Tap the answer." },
-      { topic:"fractions", q:"A square is cut into 2 equal parts. What is each part called?", options:["A half","A third","A fourth"], answer:0, why:"Each is a half.", ask:"What are the equal parts called? Tap it." },
-      { topic:"fractions", q:"A bar is split into 4 equal parts. 1 shaded. Fraction?", options:["1/2","1/3","1/4"], answer:2, why:"1 of 4 = 1/4.", ask:"Are the parts equal? Tap yes or no." },
-      { topic:"fractions", q:"How many fourths make a whole?", options:["2","3","4"], answer:2, why:"4 fourths = 1 whole.", ask:"How many make one whole? Tap it." },
-      { topic:"fractions", q:"How many halves make a whole?", options:["2","3","4"], answer:0, why:"2 halves = 1 whole.", ask:"How many make one whole? Tap it." },
-      { topic:"fractions", q:"How many thirds make a whole?", options:["2","3","4"], answer:1, why:"3 thirds = 1 whole.", ask:"How many make one whole? Tap it." },
-      { topic:"fractions", q:"A circle in 3 equal parts, 3 shaded. What fraction?", options:["1/3","2/3","3/3"], answer:2, why:"3 of 3 = whole.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"Which shows equal parts: a circle cut into 2 even halves, or 2 uneven pieces?", options:["Even halves","Uneven pieces"], answer:0, why:"Equal parts must be even.", ask:"Are the parts equal? Tap yes or no." },
-      { topic:"fractions", q:"A pie has 4 equal slices. 2 eaten. What fraction is left?", options:["1/4","2/4","3/4"], answer:1, why:"2 of 4 left = 2/4.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A rectangle split in 2 equal parts, 1 shaded. Fraction shaded?", options:["1/2","1/3","1/4"], answer:0, why:"1 of 2 = 1/2.", ask:"Are the parts equal? Tap yes or no." },
-      { topic:"fractions", q:"Cut a sandwich into 4 equal parts. Each part is a...", options:["half","third","fourth"], answer:2, why:"4 parts → each is a fourth.", ask:"What are the equal parts called? Tap it." },
-      { topic:"fractions", q:"A circle in 4 parts, 2 shaded. Same as which?", options:["1/2","1/3","1/4"], answer:0, why:"2/4 = 1/2.", ask:"Read the question. Tap the answer." },
-      { topic:"fractions", q:"Which is the SMALLEST piece: 1/2, 1/3, or 1/4?", options:["1/2","1/3","1/4"], answer:2, why:"1/4 is the smallest.", ask:"Which piece? Tap the answer." },
-      { topic:"fractions", q:"A ribbon in 3 equal parts, 1 shaded. Fraction?", options:["1/2","1/3","1/4"], answer:1, why:"1 of 3 = 1/3.", ask:"Are the parts equal? Tap yes or no." },
-      { topic:"fractions", q:"Two equal groups of cookies: you take 1 group. What fraction?", options:["1/2","1/3","1/4"], answer:0, why:"1 of 2 groups = 1/2.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"A circle in 2 equal parts, 2 shaded. Fraction?", options:["1/2","2/2","1/4"], answer:1, why:"2 of 2 = whole (2/2).", ask:"Are the parts equal? Tap yes or no." },
-      { topic:"fractions", q:"4 friends share 1 pizza equally. Each gets what fraction?", options:["1/2","1/3","1/4"], answer:2, why:"1 of 4 = 1/4.", ask:"How much is colored? Tap the fraction." },
-      { topic:"fractions", q:"3 friends share 1 cake equally. Each gets what fraction?", options:["1/2","1/3","1/4"], answer:1, why:"1 of 3 = 1/3.", ask:"How much is colored? Tap the fraction." },
+    "lesson": "two-equal-groups"
+  },
+  {
+    "id": "comparing",
+    "title": "Comparing Numbers",
+    "emoji": "⚖️",
+    "topics": [
+      "comparing"
     ],
-    money: [
-      { topic:"money", q:"How much is 1 dime + 1 nickel?", options:["10¢","15¢","20¢"], answer:1, why:"10 + 5 = 15¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 1 quarter?", options:["10¢","25¢","50¢"], answer:1, why:"A quarter = 25¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 2 dimes?", options:["10¢","20¢","25¢"], answer:1, why:"10 + 10 = 20¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 1 nickel + 2 pennies?", options:["5¢","7¢","10¢"], answer:1, why:"5 + 1 + 1 = 7¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 3 nickels?", options:["10¢","15¢","20¢"], answer:1, why:"5 × 3 = 15¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 1 quarter + 1 dime?", options:["30¢","35¢","40¢"], answer:1, why:"25 + 10 = 35¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How many pennies make a nickel?", options:["5","10","25"], answer:0, why:"5 pennies = 1 nickel.", ask:"How many coins? Tap the answer." },
-      { topic:"money", q:"How many pennies make a dime?", options:["5","10","25"], answer:1, why:"10 pennies = 1 dime.", ask:"How many coins? Tap the answer." },
-      { topic:"money", q:"How much is 4 pennies?", options:["4¢","5¢","10¢"], answer:0, why:"4 pennies = 4¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 2 quarters?", options:["25¢","50¢","75¢"], answer:1, why:"25 + 25 = 50¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"Which makes 10¢: 1 dime OR 2 nickels?", options:["Only 1 dime","Only 2 nickels","Both"], answer:2, why:"Both equal 10¢ — many ways to pay.", ask:"Which is right? Tap the answer." },
-      { topic:"money", q:"How much is 1 dime + 1 dime + 1 nickel?", options:["20¢","25¢","30¢"], answer:1, why:"10 + 10 + 5 = 25¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 5 nickels?", options:["20¢","25¢","30¢"], answer:1, why:"5 × 5 = 25¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 1 quarter + 2 dimes?", options:["35¢","40¢","45¢"], answer:2, why:"25 + 20 = 45¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How many nickels make a quarter?", options:["3","5","10"], answer:1, why:"5 nickels = 25¢.", ask:"How many coins? Tap the answer." },
-      { topic:"money", q:"How much is 3 dimes?", options:["20¢","30¢","40¢"], answer:1, why:"10 × 3 = 30¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 1 nickel + 1 dime + 1 quarter?", options:["35¢","40¢","45¢"], answer:1, why:"5 + 10 + 25 = 40¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"Which is worth more: a dime or a nickel?", options:["Dime","Nickel","Same"], answer:0, why:"Dime (10¢) > nickel (5¢).", ask:"Which is right? Tap the answer." },
-      { topic:"money", q:"How much is 6 pennies + 1 nickel?", options:["10¢","11¢","12¢"], answer:1, why:"6 + 5 = 11¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 2 dimes + 1 nickel?", options:["20¢","25¢","30¢"], answer:1, why:"10 + 10 + 5 = 25¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How many dimes make 50¢?", options:["3","5","10"], answer:1, why:"5 dimes = 50¢.", ask:"How many coins? Tap the answer." },
-      { topic:"money", q:"How much is 1 quarter + 1 nickel?", options:["25¢","30¢","35¢"], answer:1, why:"25 + 5 = 30¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"Which is worth more: a quarter or 2 dimes?", options:["Quarter","2 dimes","Same"], answer:0, why:"25¢ > 20¢.", ask:"Which is right? Tap the answer." },
-      { topic:"money", q:"How much is 4 nickels?", options:["15¢","20¢","25¢"], answer:1, why:"5 × 4 = 20¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How much is 1 dime + 3 pennies?", options:["11¢","12¢","13¢"], answer:2, why:"10 + 3 = 13¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"Which coins make 15¢?", options:["1 dime + 1 nickel","2 dimes","1 quarter"], answer:0, why:"10 + 5 = 15¢.", ask:"Which coins make it? Tap the answer." },
-      { topic:"money", q:"How much is 2 quarters + 1 dime?", options:["50¢","60¢","70¢"], answer:1, why:"25 + 25 + 10 = 60¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"How many pennies make a quarter?", options:["10","20","25"], answer:2, why:"25 pennies = 25¢.", ask:"How many coins? Tap the answer." },
-      { topic:"money", q:"How much is 7 pennies?", options:["5¢","7¢","10¢"], answer:1, why:"7 pennies = 7¢.", ask:"Add up the coins. Tap the amount." },
-      { topic:"money", q:"Which makes 25¢: 1 quarter OR 5 nickels?", options:["Only quarter","Only nickels","Both"], answer:2, why:"Both = 25¢ — ways to pay.", ask:"Which is right? Tap the answer." },
+    "lesson": "comparing"
+  },
+  {
+    "id": "shapes",
+    "title": "Shapes",
+    "emoji": "⬡",
+    "topics": [
+      "shapes"
     ],
-    pictograph: [
-      { topic:"pictograph", q:"🍎 = 2 apples. How many apples is 🍎🍎🍎?", options:["3","6","9"], answer:1, why:"3 × 2 = 6.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"⭐ = 5 stars. How many is ⭐⭐?", options:["7","10","15"], answer:1, why:"2 × 5 = 10.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🐟 = 2 fish. How many is 🐟🐟🐟🐟?", options:["6","8","10"], answer:1, why:"4 × 2 = 8.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🌸 = 10 flowers. How many is 🌸🌸?", options:["12","20","30"], answer:1, why:"2 × 10 = 20.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🚗 = 5 cars. How many is 🚗🚗🚗?", options:["10","15","20"], answer:1, why:"3 × 5 = 15.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🍎 = 2 apples. How many symbols show 8 apples?", options:["2","4","8"], answer:1, why:"8 ÷ 2 = 4 symbols.", ask:"How many pictures do you need? Tap the answer." },
-      { topic:"pictograph", q:"⭐ = 5. How many symbols show 25?", options:["3","5","25"], answer:1, why:"25 ÷ 5 = 5 symbols.", ask:"How many pictures do you need? Tap the answer." },
-      { topic:"pictograph", q:"🐶 = 2 dogs. How many is 🐶🐶🐶🐶🐶?", options:["8","10","12"], answer:1, why:"5 × 2 = 10.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🍪 = 3 cookies. How many is 🍪🍪?", options:["5","6","9"], answer:1, why:"2 × 3 = 6.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🌟 = 4. How many is 🌟🌟🌟?", options:["8","12","16"], answer:1, why:"3 × 4 = 12.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🍎 = 2. How many is 🍎🍎🍎🍎🍎?", options:["8","10","12"], answer:1, why:"5 × 2 = 10.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"📚 = 5 books. How many is 📚📚📚📚?", options:["15","20","25"], answer:1, why:"4 × 5 = 20.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🐱 = 2 cats. How many symbols show 6 cats?", options:["2","3","6"], answer:1, why:"6 ÷ 2 = 3 symbols.", ask:"How many pictures do you need? Tap the answer." },
-      { topic:"pictograph", q:"⚽ = 10. How many is ⚽⚽⚽?", options:["20","30","40"], answer:1, why:"3 × 10 = 30.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🍩 = 3. How many is 🍩🍩🍩?", options:["6","9","12"], answer:1, why:"3 × 3 = 9.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🌸 = 5. How many is 🌸🌸🌸🌸?", options:["15","20","25"], answer:1, why:"4 × 5 = 20.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🐟 = 2. How many symbols show 12 fish?", options:["4","6","12"], answer:1, why:"12 ÷ 2 = 6 symbols.", ask:"How many pictures do you need? Tap the answer." },
-      { topic:"pictograph", q:"⭐ = 4. How many is ⭐⭐⭐⭐?", options:["12","16","20"], answer:1, why:"4 × 4 = 16.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🚌 = 5. How many is 🚌🚌?", options:["5","10","15"], answer:1, why:"2 × 5 = 10.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🍎 = 3. How many is 🍎🍎🍎🍎?", options:["9","12","15"], answer:1, why:"4 × 3 = 12.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🎈 = 2. How many is 🎈🎈🎈🎈🎈🎈?", options:["10","12","14"], answer:1, why:"6 × 2 = 12.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🐶 = 5 dogs. How many symbols show 15 dogs?", options:["2","3","5"], answer:1, why:"15 ÷ 5 = 3 symbols.", ask:"How many pictures do you need? Tap the answer." },
-      { topic:"pictograph", q:"🍪 = 2. How many is 🍪🍪🍪🍪🍪🍪🍪?", options:["12","14","16"], answer:1, why:"7 × 2 = 14.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🌟 = 10. How many is 🌟🌟🌟🌟?", options:["30","40","50"], answer:1, why:"4 × 10 = 40.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"📕 = 2 books. How many is 📕📕📕?", options:["4","6","8"], answer:1, why:"3 × 2 = 6.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"⚽ = 3. How many is ⚽⚽⚽⚽⚽?", options:["12","15","18"], answer:1, why:"5 × 3 = 15.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🍩 = 5. How many is 🍩🍩🍩🍩🍩🍩?", options:["25","30","35"], answer:1, why:"6 × 5 = 30.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🐱 = 2 cats. How many is 🐱🐱🐱🐱?", options:["6","8","10"], answer:1, why:"4 × 2 = 8.", ask:"Each picture is worth a number. Tap the total." },
-      { topic:"pictograph", q:"🌸 = 2. How many symbols show 10 flowers?", options:["3","5","10"], answer:1, why:"10 ÷ 2 = 5 symbols.", ask:"How many pictures do you need? Tap the answer." },
-      { topic:"pictograph", q:"🎈 = 5. How many is 🎈🎈🎈?", options:["10","15","20"], answer:1, why:"3 × 5 = 15.", ask:"Each picture is worth a number. Tap the total." },
+    "lesson": "shapes"
+  },
+  {
+    "id": "arrays",
+    "title": "Arrays & Equal Groups",
+    "emoji": "🟦",
+    "topics": [
+      "arrays"
     ],
-    measure: [
-      { topic:"measure", q:"A pencil lines up from 0 to 7. How many units long?", options:["6","7","8"], answer:1, why:"From 0 to 7 = 7 units.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"A crayon is 5 cubes long. A marker is 8 cubes. How much longer is the marker?", options:["2","3","4"], answer:1, why:"8 - 5 = 3 cubes longer.", ask:"How much longer? Tap the answer." },
-      { topic:"measure", q:"A ribbon starts at 0 and ends at 10. How long is it?", options:["9","10","11"], answer:1, why:"0 to 10 = 10 units.", ask:"How long is it? Tap the answer." },
-      { topic:"measure", q:"A stick is 6 inches. Another is 4 inches. Together?", options:["8","10","12"], answer:1, why:"6 + 4 = 10 inches.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"Which is longer: 12 cubes or 9 cubes?", options:["12 cubes","9 cubes","Same"], answer:0, why:"12 > 9.", ask:"How much longer? Tap the answer." },
-      { topic:"measure", q:"A worm is 3 cm. A bigger worm is 7 cm. Difference?", options:["3","4","5"], answer:1, why:"7 - 3 = 4 cm.", ask:"How much longer? Tap the answer." },
-      { topic:"measure", q:"A book is 9 inches tall. A box is 9 inches. They are...", options:["Equal","Different",""], answer:0, why:"Both 9 inches = equal.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"If a shoe is 8 units and lines up at 0, it ends at...", options:["7","8","9"], answer:1, why:"Starts at 0, 8 long → ends at 8.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"A rope is 15 ft. You cut off 6 ft. How much is left?", options:["8","9","10"], answer:1, why:"15 - 6 = 9 ft.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"A table is 20 cubes. A chair is 11 cubes. How much longer is the table?", options:["8","9","10"], answer:1, why:"20 - 11 = 9 cubes.", ask:"How much longer? Tap the answer." },
-      { topic:"measure", q:"Two pencils, each 6 inches, end to end =", options:["10","12","14"], answer:1, why:"6 + 6 = 12 inches.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"A line goes from 2 to 9 on a ruler. How long?", options:["6","7","8"], answer:1, why:"9 - 2 = 7 units.", ask:"How long is it? Tap the answer." },
-      { topic:"measure", q:"Which is shorter: 5 inches or 8 inches?", options:["5 inches","8 inches","Same"], answer:0, why:"5 < 8.", ask:"Which is longer? Tap the answer." },
-      { topic:"measure", q:"A snake is 14 cubes. A worm is 6 cubes. Together?", options:["18","20","22"], answer:1, why:"14 + 6 = 20 cubes.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"A line from 0 to 6, then 3 more units. Total length?", options:["8","9","10"], answer:1, why:"6 + 3 = 9 units.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"A bookshelf is 30 inches. A book takes 10. How much space left?", options:["18","20","22"], answer:1, why:"30 - 10 = 20 inches.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"A pencil is 7 cm. A shorter one is 4 cm. Difference?", options:["2","3","4"], answer:1, why:"7 - 4 = 3 cm.", ask:"How much longer? Tap the answer." },
-      { topic:"measure", q:"A ruler shows 0 to 12. An object covers 0 to 5. Length?", options:["4","5","6"], answer:1, why:"0 to 5 = 5 units.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"Which is longest: 7, 11, or 9 cubes?", options:["7","11","9"], answer:1, why:"11 is the longest.", ask:"Which is longer? Tap the answer." },
-      { topic:"measure", q:"A path is 8 m. You walk 8 m. You have walked...", options:["all of it","half","none"], answer:0, why:"8 of 8 = all of it.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"A pole is 16 ft. Another is 9 ft. How much taller is the first?", options:["6","7","8"], answer:1, why:"16 - 9 = 7 ft.", ask:"How much longer? Tap the answer." },
-      { topic:"measure", q:"Three blocks, each 2 inches, in a row =", options:["5","6","7"], answer:1, why:"2 + 2 + 2 = 6 inches.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"A line from 3 to 10. How long?", options:["6","7","8"], answer:1, why:"10 - 3 = 7 units.", ask:"How long is it? Tap the answer." },
-      { topic:"measure", q:"A caterpillar is 4 cm, grows 5 cm. New length?", options:["8","9","10"], answer:1, why:"4 + 5 = 9 cm.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"Which is shorter: 13 cubes or 10 cubes?", options:["13","10","Same"], answer:1, why:"10 < 13.", ask:"Which is longer? Tap the answer." },
-      { topic:"measure", q:"A scarf is 25 inches. Cut off 5. How long now?", options:["18","20","22"], answer:1, why:"25 - 5 = 20 inches.", ask:"How long is it? Tap the answer." },
-      { topic:"measure", q:"An object covers 1 to 8 on a ruler. Length?", options:["6","7","8"], answer:1, why:"8 - 1 = 7 units.", ask:"Read the lengths. Tap the answer." },
-      { topic:"measure", q:"Two ropes: 12 ft and 8 ft. Together?", options:["18","20","22"], answer:1, why:"12 + 8 = 20 ft.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"A pencil 9 cm, eraser 2 cm, end to end?", options:["10","11","12"], answer:1, why:"9 + 2 = 11 cm.", ask:"Add the lengths. Tap the answer." },
-      { topic:"measure", q:"A line from 0 to 4, plus 4 more. Total?", options:["7","8","9"], answer:1, why:"4 + 4 = 8 units.", ask:"Add the lengths. Tap the answer." },
+    "lesson": "arrays"
+  },
+  {
+    "id": "fractions",
+    "title": "Fractions",
+    "emoji": "🍕",
+    "topics": [
+      "fractions"
     ],
-  };
-  
-  /* Kid-friendly instructions (English). 8-year-olds. */
-  const MATH_UI = {
-    type:       "Solve it. Type the number answer.",
-    compare:    "Which is bigger? Tap >, <, or =.",
-    shape:      "Read the shape question. Tap the answer.",
-    array:      "Count the rows and columns. Type the total.",
-    fraction:   "Look at the equal parts. Tap the right fraction.",
-    money:      "Add up the coins. Tap the right amount.",
-    pictograph: "Each picture stands for a number. Tap the total.",
-    measure:    "Read the lengths. Tap the answer."
-  };
-  
-  if (typeof window !== "undefined") {
-    window.MATH_LESSONS = MATH_LESSONS;
-    window.MATH_BANK = MATH_BANK;
-    window.MATH_UI = MATH_UI;
+    "lesson": "fractions"
+  },
+  {
+    "id": "money",
+    "title": "Money",
+    "emoji": "🪙",
+    "topics": [
+      "money"
+    ],
+    "lesson": "money"
+  },
+  {
+    "id": "pictograph",
+    "title": "Pictographs",
+    "emoji": "📊",
+    "topics": [
+      "pictograph"
+    ],
+    "lesson": "pictograph"
+  },
+  {
+    "id": "measure",
+    "title": "Measuring Lengths",
+    "emoji": "📏",
+    "topics": [
+      "measure"
+    ],
+    "lesson": "measure"
   }
+];
+
+const MATH_LESSONS = [
+  {
+    "id": "number-stories",
+    "num": 1,
+    "title": "Number Stories & Subtraction",
+    "subtitle": "Adding and subtracting in word problems (7-1, 7-7)",
+    "intro": "A number story is a little story that hides a math problem inside it. You read it, find the numbers, and decide whether to add or subtract. Words like 'in all' or 'altogether' mean add; words like 'left,' 'fewer,' or 'how many more' mean subtract.",
+    "sections": [
+      {
+        "h": "Adding stories",
+        "body": "'Ana has 6 bamboo shoots. She finds 5 more. How many in all?' → 6 + 5 = 11. 'In all' tells you to add."
+      },
+      {
+        "h": "Subtracting stories",
+        "body": "'There were 12 pandas. 4 went home. How many are left?' → 12 - 4 = 8. 'Left' tells you to subtract."
+      },
+      {
+        "h": "Find the key words",
+        "body": "Look for clue words: in all, total, altogether (add); left, fewer, how many more, difference (subtract)."
+      }
+    ],
+    "recuerda": "Tip: 'In all' = add. 'How many left' = subtract."
+  },
+  {
+    "id": "shapes",
+    "num": 2,
+    "title": "Shapes: Pentagons, Hexagons & More",
+    "subtitle": "Comparing shapes and mystery shapes (8-3, 8-11)",
+    "intro": "Shapes are named by how many sides and corners they have. Knowing the number of sides helps you tell shapes apart and solve 'mystery shape' clues.",
+    "sections": [
+      {
+        "h": "Count the sides",
+        "body": "Triangle = 3 sides. Square/rectangle = 4 sides. Pentagon = 5 sides. Hexagon = 6 sides."
+      },
+      {
+        "h": "Pentagons vs. hexagons",
+        "body": "A pentagon has 5 sides and 5 corners. A hexagon has 6 sides and 6 corners. Count carefully — they look similar!"
+      },
+      {
+        "h": "Mystery shapes",
+        "body": "Use clues to name a shape: 'I have 6 sides. What am I?' → a hexagon. Match the number of sides to the name."
+      }
+    ],
+    "recuerda": "Tip: Penta = 5 sides, Hexa = 6 sides. Count the sides to name any shape."
+  },
+  {
+    "id": "arrays",
+    "num": 3,
+    "title": "Arrays & Equal Groups",
+    "subtitle": "Rows, columns, and covering rectangles (8-6 to 8-9)",
+    "intro": "An array is objects lined up in equal rows and columns. To find the total, you can count them all, or multiply rows × columns. Equal groups work the same way.",
+    "sections": [
+      {
+        "h": "Rows and columns",
+        "body": "An array with 3 rows and 4 in each row has 3 × 4 = 12 in all. Rows go across; columns go down."
+      },
+      {
+        "h": "Equal groups",
+        "body": "4 groups of 2 = 4 × 2 = 8. Equal groups always have the SAME number in each group."
+      },
+      {
+        "h": "Covering rectangles",
+        "body": "To find how many squares cover a rectangle, count the rows of squares times the number in each row."
+      }
+    ],
+    "recuerda": "Tip: rows × how many in each row = the total."
+  },
+  {
+    "id": "fractions",
+    "num": 4,
+    "title": "Fractions & Equal Parts",
+    "subtitle": "Halves, thirds, fourths (9-1, 9-4, 9-10)",
+    "intro": "A fraction shows equal parts of a whole. The bottom number tells how many equal parts there are; the top number tells how many we're talking about. Parts must be EQUAL to be fair fractions.",
+    "sections": [
+      {
+        "h": "Halves, thirds, fourths",
+        "body": "2 equal parts = halves (½ each). 3 equal parts = thirds (⅓ each). 4 equal parts = fourths (¼ each)."
+      },
+      {
+        "h": "What fraction is shaded?",
+        "body": "If a circle is cut in 4 equal parts and 1 is shaded, that's ¼ (one fourth)."
+      },
+      {
+        "h": "Equal parts must match",
+        "body": "Parts have to be the same size. A shape cut into uneven pieces is NOT showing real fractions."
+      }
+    ],
+    "recuerda": "Tip: The bottom number = total equal parts. ½ = 2 parts, ⅓ = 3 parts, ¼ = 4 parts."
+  },
+  {
+    "id": "numbers-money-data",
+    "num": 5,
+    "title": "Comparing, Money, Data & Measuring",
+    "subtitle": "Compare numbers, ways to pay, pictographs, lengths (7-3, 9-5, 9-8, 9-4)",
+    "intro": "This theme brings together comparing numbers (which is bigger?), money (counting coins and ways to pay), reading pictographs (graphs made of pictures), and measuring lengths.",
+    "sections": [
+      {
+        "h": "Comparing numbers",
+        "body": "Use > (greater than), < (less than), or = (equal). The open mouth always 'eats' the bigger number: 8 > 5, 3 < 9, 6 = 6."
+      },
+      {
+        "h": "Money & ways to pay",
+        "body": "Coins: penny = 1¢, nickel = 5¢, dime = 10¢, quarter = 25¢. There are many ways to make the same amount."
+      },
+      {
+        "h": "Pictographs",
+        "body": "In a pictograph, each picture stands for a number. If 🍎 = 2 apples, then 3 apples 🍎🍎🍎 means 3 × 2 = 6."
+      },
+      {
+        "h": "Measuring lengths",
+        "body": "We measure length with units like cubes or inches. Line the object up at 0 and count the units to the end."
+      }
+    ],
+    "recuerda": "Tip: The > or < mouth always opens toward the BIGGER number."
+  },
+  {
+    "id": "subtraction",
+    "num": 0,
+    "title": "Subtraction",
+    "subtitle": "Taking away (7-7)",
+    "intro": "Subtraction means taking some away to find how many are left. The big number comes first, then you take away the smaller number.",
+    "sections": [
+      {
+        "h": "How it works",
+        "body": "13 - 5 means start at 13 and take away 5, which leaves 8. Count back if it helps."
+      },
+      {
+        "h": "Clue words",
+        "body": "\"left\", \"fewer\", \"how many more\", and \"take away\" all mean subtract."
+      }
+    ],
+    "recuerda": "Tip: subtraction tells you what is LEFT."
+  },
+  {
+    "id": "multiples",
+    "num": 0,
+    "title": "Multiples of 10, 5, and 2",
+    "subtitle": "Skip counting (9-11)",
+    "intro": "Skip counting means jumping by the same number each time. It helps you count fast.",
+    "sections": [
+      {
+        "h": "By 10s",
+        "body": "10, 20, 30, 40... add ten each jump."
+      },
+      {
+        "h": "By 5s",
+        "body": "5, 10, 15, 20... add five each jump."
+      },
+      {
+        "h": "By 2s",
+        "body": "2, 4, 6, 8... add two each jump (these are even numbers)."
+      }
+    ],
+    "recuerda": "Tip: keep adding the same number to find what comes next."
+  },
+  {
+    "id": "two-equal-groups",
+    "num": 0,
+    "title": "Two Equal Groups",
+    "subtitle": "Sharing fairly (9-10)",
+    "intro": "Two equal groups means splitting things into two piles that are exactly the same size.",
+    "sections": [
+      {
+        "h": "Making groups",
+        "body": "2 groups of 5 = 5 + 5 = 10."
+      },
+      {
+        "h": "Sharing",
+        "body": "To share 10 fairly between 2, each gets 5 (10 ÷ 2 = 5)."
+      }
+    ],
+    "recuerda": "Tip: equal groups must have the SAME amount in each."
+  },
+  {
+    "id": "comparing",
+    "num": 0,
+    "title": "Comparing Numbers",
+    "subtitle": "Bigger, smaller, equal (9-5)",
+    "intro": "Comparing numbers means deciding which is bigger, smaller, or if they are the same. We use the signs >, <, and =.",
+    "sections": [
+      {
+        "h": "The signs",
+        "body": "> means greater than, < means less than, = means equal."
+      },
+      {
+        "h": "The hungry mouth",
+        "body": "The open mouth of > or < always opens toward the BIGGER number: 8 > 5, 3 < 9."
+      }
+    ],
+    "recuerda": "Tip: the mouth always eats the bigger number."
+  },
+  {
+    "id": "money",
+    "num": 0,
+    "title": "Money & Ways to Pay",
+    "subtitle": "Counting coins (9-8)",
+    "intro": "Coins have different values. Adding them up tells you how much money you have, and there are many ways to make the same amount.",
+    "sections": [
+      {
+        "h": "Coin values",
+        "body": "penny = 1¢, nickel = 5¢, dime = 10¢, quarter = 25¢."
+      },
+      {
+        "h": "Ways to pay",
+        "body": "10¢ can be 1 dime OR 2 nickels OR 10 pennies — many ways to pay the same amount."
+      }
+    ],
+    "recuerda": "Tip: a dime (10¢) is worth more than a nickel (5¢)."
+  },
+  {
+    "id": "pictograph",
+    "num": 0,
+    "title": "Pictographs",
+    "subtitle": "Picture graphs (7-3, 7-9)",
+    "intro": "A pictograph uses pictures to show numbers. Each picture stands for an amount, so you multiply to find the total.",
+    "sections": [
+      {
+        "h": "Reading it",
+        "body": "If 🍎 = 2 apples, then 🍎🍎🍎 means 3 × 2 = 6 apples."
+      },
+      {
+        "h": "Working backward",
+        "body": "If 🍎 = 2 and you need 8 apples, you need 4 pictures (8 ÷ 2 = 4)."
+      }
+    ],
+    "recuerda": "Tip: each picture is worth more than one — multiply!"
+  },
+  {
+    "id": "measure",
+    "num": 0,
+    "title": "Measuring Lengths",
+    "subtitle": "How long is it? (9-4)",
+    "intro": "We measure length with units like cubes or inches. Line the object up at 0 and count the units to the end.",
+    "sections": [
+      {
+        "h": "Start at 0",
+        "body": "Always line the start of the object at 0, then read where it ends."
+      },
+      {
+        "h": "Comparing & adding",
+        "body": "A 6-inch and a 4-inch stick together are 10 inches. The longer one minus the shorter tells how much longer."
+      }
+    ],
+    "recuerda": "Tip: start at 0 and count the units to the end."
+  }
+];
+
+const MATH_BANK = {
+  type: [
+    {"topic":"number-stories","q":"Ana has 6 bamboo shoots. She finds 5 more. How many in all?","answer":"11","why":"6 + 5 = 11.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"There were 12 pandas. 4 went home. How many are left?","answer":"8","why":"12 - 4 = 8.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"A panda ate 9 leaves, then 3 more. How many leaves in all?","answer":"12","why":"9 + 3 = 12.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"15 birds were in a tree. 6 flew away. How many are left?","answer":"9","why":"15 - 6 = 9.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"Sam had 7 marbles and won 8 more. How many in all?","answer":"15","why":"7 + 8 = 15.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"There are 20 apples. 11 are eaten. How many are left?","answer":"9","why":"20 - 11 = 9.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"A box has 14 crayons. 5 are broken. How many are NOT broken?","answer":"9","why":"14 - 5 = 9.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"Mia read 8 pages, then 6 more. How many pages in all?","answer":"14","why":"8 + 6 = 14.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"18 kids were at the park. 9 went home. How many are left?","answer":"9","why":"18 - 9 = 9.","ask":"Read the story. Type the number answer."},
+    {"topic":"number-stories","q":"A farmer had 10 cows and bought 7 more. How many in all?","answer":"17","why":"10 + 7 = 17.","ask":"Read the story. Type the number answer."},
+    {"topic":"subtraction","q":"13 - 7 = ?","answer":"6","why":"13 - 7 = 6.","ask":"Solve it. Type the answer."},
+    {"topic":"subtraction","q":"16 - 8 = ?","answer":"8","why":"16 - 8 = 8.","ask":"Solve it. Type the answer."},
+    {"topic":"subtraction","q":"11 - 5 = ?","answer":"6","why":"11 - 5 = 6.","ask":"Solve it. Type the answer."},
+    {"topic":"subtraction","q":"20 - 6 = ?","answer":"14","why":"20 - 6 = 14.","ask":"Solve it. Type the answer."},
+    {"topic":"subtraction","q":"15 - 9 = ?","answer":"6","why":"15 - 9 = 6.","ask":"Solve it. Type the answer."},
+    {"topic":"multiples","q":"What comes next? 10, 20, 30, ___","answer":"40","why":"Multiples of 10: next is 40.","ask":"What number comes next? Type it."},
+    {"topic":"multiples","q":"What comes next? 5, 10, 15, ___","answer":"20","why":"Multiples of 5: next is 20.","ask":"What number comes next? Type it."},
+    {"topic":"multiples","q":"What comes next? 2, 4, 6, ___","answer":"8","why":"Multiples of 2: next is 8.","ask":"What number comes next? Type it."},
+    {"topic":"multiples","q":"Count by 10s: 40, 50, 60, ___","answer":"70","why":"Add 10: 70.","ask":"What number comes next? Type it."},
+    {"topic":"multiples","q":"Count by 5s: 25, 30, 35, ___","answer":"40","why":"Add 5: 40.","ask":"What number comes next? Type it."},
+    {"topic":"multiples","q":"Count by 2s: 12, 14, 16, ___","answer":"18","why":"Add 2: 18.","ask":"What number comes next? Type it."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 5 = ?","answer":"10","why":"5 + 5 = 10.","ask":"Solve it. Type the answer."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 8 = ?","answer":"16","why":"8 + 8 = 16.","ask":"Solve it. Type the answer."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 6 = ?","answer":"12","why":"6 + 6 = 12.","ask":"Solve it. Type the answer."},
+    {"topic":"two-equal-groups","q":"Share 10 toys into 2 equal groups. How many in each?","answer":"5","why":"10 ÷ 2 = 5.","ask":"Split into equal groups. Type how many in each."},
+    {"topic":"two-equal-groups","q":"Share 14 stickers into 2 equal groups. How many each?","answer":"7","why":"14 ÷ 2 = 7.","ask":"Split into equal groups. Type how many in each."},
+    {"topic":"number-stories","q":"Leo had 5 toy cars. His mom gave him 9 more. How many now?","answer":"14","why":"5 + 9 = 14.","ask":"Read the story. Type the number answer."},
+    {"topic":"subtraction","q":"17 - 8 = ?","answer":"9","why":"17 - 8 = 9.","ask":"Solve it. Type the answer."},
+    {"topic":"multiples","q":"Count by 10s: 70, 80, 90, ___","answer":"100","why":"Add 10: 100.","ask":"What number comes next? Type it."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 9 = ?","answer":"18","why":"9 + 9 = 18.","ask":"Solve it. Type the answer."},
+    {"topic":"number-stories","q":"A garden had 14 flowers. 6 more bloomed. How many in all?","answer":"20","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"There were 18 ducks. 9 swam away. How many are left?","answer":"9","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"Maria read 12 pages, then 13 more. How many pages in all?","answer":"25","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"A shelf had 20 books. 7 were borrowed. How many are left?","answer":"13","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"Tom caught 8 fish, then 7 more. How many in all?","answer":"15","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"16 kids were playing. 8 went home. How many are left?","answer":"8","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"A box had 15 crayons. 6 broke. How many are NOT broken?","answer":"9","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"Ana had 9 stickers and earned 14 more. How many in all?","answer":"23","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"There were 22 apples. 13 were eaten. How many are left?","answer":"9","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"A farmer had 17 hens and bought 6 more. How many in all?","answer":"23","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"25 balloons were up. 8 popped. How many are left?","answer":"17","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"Lucy baked 13 cookies, then 11 more. How many in all?","answer":"24","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"A pond had 19 frogs. 12 hopped away. How many are left?","answer":"7","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"Sam had 7 cars and got 16 more. How many in all?","answer":"23","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"There were 24 students. 9 were absent. How many were present?","answer":"15","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"A jar had 18 candies. 11 were taken. How many are left?","answer":"7","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"Mia picked 14 berries, then 9 more. How many in all?","answer":"23","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"28 birds were in a tree. 19 flew off. How many are left?","answer":"9","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"number-stories","q":"A team scored 12 points, then 13 more. How many in all?","answer":"25","ask":"Read the story. Type the number answer.","why":"Add or subtract to solve."},
+    {"topic":"subtraction","q":"21 - 8 = ?","answer":"13","ask":"Solve it. Type the answer.","why":"21 - 8 = 13."},
+    {"topic":"subtraction","q":"24 - 7 = ?","answer":"17","ask":"Solve it. Type the answer.","why":"24 - 7 = 17."},
+    {"topic":"subtraction","q":"19 - 6 = ?","answer":"13","ask":"Solve it. Type the answer.","why":"19 - 6 = 13."},
+    {"topic":"subtraction","q":"23 - 9 = ?","answer":"14","ask":"Solve it. Type the answer.","why":"23 - 9 = 14."},
+    {"topic":"subtraction","q":"30 - 14 = ?","answer":"16","ask":"Solve it. Type the answer.","why":"30 - 14 = 16."},
+    {"topic":"subtraction","q":"17 - 9 = ?","answer":"8","ask":"Solve it. Type the answer.","why":"17 - 9 = 8."},
+    {"topic":"subtraction","q":"25 - 8 = ?","answer":"17","ask":"Solve it. Type the answer.","why":"25 - 8 = 17."},
+    {"topic":"subtraction","q":"22 - 6 = ?","answer":"16","ask":"Solve it. Type the answer.","why":"22 - 6 = 16."},
+    {"topic":"subtraction","q":"18 - 9 = ?","answer":"9","ask":"Solve it. Type the answer.","why":"18 - 9 = 9."},
+    {"topic":"subtraction","q":"27 - 8 = ?","answer":"19","ask":"Solve it. Type the answer.","why":"27 - 8 = 19."},
+    {"topic":"subtraction","q":"20 - 13 = ?","answer":"7","ask":"Solve it. Type the answer.","why":"20 - 13 = 7."},
+    {"topic":"subtraction","q":"26 - 7 = ?","answer":"19","ask":"Solve it. Type the answer.","why":"26 - 7 = 19."},
+    {"topic":"subtraction","q":"15 - 8 = ?","answer":"7","ask":"Solve it. Type the answer.","why":"15 - 8 = 7."},
+    {"topic":"subtraction","q":"28 - 9 = ?","answer":"19","ask":"Solve it. Type the answer.","why":"28 - 9 = 19."},
+    {"topic":"subtraction","q":"31 - 6 = ?","answer":"25","ask":"Solve it. Type the answer.","why":"31 - 6 = 25."},
+    {"topic":"subtraction","q":"16 - 9 = ?","answer":"7","ask":"Solve it. Type the answer.","why":"16 - 9 = 7."},
+    {"topic":"subtraction","q":"29 - 14 = ?","answer":"15","ask":"Solve it. Type the answer.","why":"29 - 14 = 15."},
+    {"topic":"subtraction","q":"14 - 8 = ?","answer":"6","ask":"Solve it. Type the answer.","why":"14 - 8 = 6."},
+    {"topic":"subtraction","q":"33 - 7 = ?","answer":"26","ask":"Solve it. Type the answer.","why":"33 - 7 = 26."},
+    {"topic":"subtraction","q":"19 - 12 = ?","answer":"7","ask":"Solve it. Type the answer.","why":"19 - 12 = 7."},
+    {"topic":"subtraction","q":"24 - 6 = ?","answer":"18","ask":"Solve it. Type the answer.","why":"24 - 6 = 18."},
+    {"topic":"subtraction","q":"35 - 8 = ?","answer":"27","ask":"Solve it. Type the answer.","why":"35 - 8 = 27."},
+    {"topic":"subtraction","q":"18 - 11 = ?","answer":"7","ask":"Solve it. Type the answer.","why":"18 - 11 = 7."},
+    {"topic":"subtraction","q":"32 - 9 = ?","answer":"23","ask":"Solve it. Type the answer.","why":"32 - 9 = 23."},
+    {"topic":"multiples","q":"Count by 2s: 18, 20, 22, ___","answer":"24","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 40, 45, 50, ___","answer":"55","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 10s: 30, 40, 50, ___","answer":"60","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 2s: 24, 26, 28, ___","answer":"30","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 55, 60, 65, ___","answer":"70","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 10s: 60, 70, 80, ___","answer":"90","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 2s: 30, 32, 34, ___","answer":"36","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 70, 75, 80, ___","answer":"85","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 10s: 80, 90, 100, ___","answer":"110","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"What comes next? 2, 4, 6, 8, ___","answer":"10","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"What comes next? 5, 10, 15, 20, ___","answer":"25","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"What comes next? 10, 20, 30, 40, ___","answer":"50","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 2s: 40, 42, 44, ___","answer":"46","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 85, 90, 95, ___","answer":"100","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 10s: 100, 110, 120, ___","answer":"130","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 2s: 8, 10, 12, ___","answer":"14","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 15, 20, 25, ___","answer":"30","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 10s: 20, 30, 40, ___","answer":"50","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 2s: 46, 48, 50, ___","answer":"52","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 30, 35, 40, ___","answer":"45","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 10s: 110, 120, 130, ___","answer":"140","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 2s: 14, 16, 18, ___","answer":"20","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"multiples","q":"Count by 5s: 5, 10, 15, ___","answer":"20","ask":"What number comes next? Type it.","why":"Keep the pattern going."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 7 = ?","answer":"14","ask":"Solve it. Type the answer.","why":"7 + 7 = 14."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 10 = ?","answer":"20","ask":"Solve it. Type the answer.","why":"10 + 10 = 20."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 4 = ?","answer":"8","ask":"Solve it. Type the answer.","why":"4 + 4 = 8."},
+    {"topic":"two-equal-groups","q":"Share 16 toys into 2 equal groups. How many each?","answer":"8","ask":"Split into equal groups. Type how many in each.","why":"16 ÷ 2 = 8."},
+    {"topic":"two-equal-groups","q":"Share 18 stickers into 2 equal groups. How many each?","answer":"9","ask":"Split into equal groups. Type how many in each.","why":"18 ÷ 2 = 9."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 11 = ?","answer":"22","ask":"Solve it. Type the answer.","why":"11 + 11 = 22."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 3 = ?","answer":"6","ask":"Solve it. Type the answer.","why":"3 + 3 = 6."},
+    {"topic":"two-equal-groups","q":"Share 20 candies into 2 equal groups. How many each?","answer":"10","ask":"Split into equal groups. Type how many in each.","why":"20 ÷ 2 = 10."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 12 = ?","answer":"24","ask":"Solve it. Type the answer.","why":"12 + 12 = 24."},
+    {"topic":"two-equal-groups","q":"Share 12 apples into 2 equal groups. How many each?","answer":"6","ask":"Split into equal groups. Type how many in each.","why":"12 ÷ 2 = 6."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 9 = ?","answer":"18","ask":"Solve it. Type the answer.","why":"9 + 9 = 18."},
+    {"topic":"two-equal-groups","q":"Share 22 marbles into 2 equal groups. How many each?","answer":"11","ask":"Split into equal groups. Type how many in each.","why":"22 ÷ 2 = 11."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 8 = ?","answer":"16","ask":"Solve it. Type the answer.","why":"8 + 8 = 16."},
+    {"topic":"two-equal-groups","q":"Share 14 cards into 2 equal groups. How many each?","answer":"7","ask":"Split into equal groups. Type how many in each.","why":"14 ÷ 2 = 7."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 6 = ?","answer":"12","ask":"Solve it. Type the answer.","why":"6 + 6 = 12."},
+    {"topic":"two-equal-groups","q":"Share 24 beads into 2 equal groups. How many each?","answer":"12","ask":"Split into equal groups. Type how many in each.","why":"24 ÷ 2 = 12."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 5 = ?","answer":"10","ask":"Solve it. Type the answer.","why":"5 + 5 = 10."},
+    {"topic":"two-equal-groups","q":"Share 10 pens into 2 equal groups. How many each?","answer":"5","ask":"Split into equal groups. Type how many in each.","why":"10 ÷ 2 = 5."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 13 = ?","answer":"26","ask":"Solve it. Type the answer.","why":"13 + 13 = 26."},
+    {"topic":"two-equal-groups","q":"Share 26 grapes into 2 equal groups. How many each?","answer":"13","ask":"Split into equal groups. Type how many in each.","why":"26 ÷ 2 = 13."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 14 = ?","answer":"28","ask":"Solve it. Type the answer.","why":"14 + 14 = 28."},
+    {"topic":"two-equal-groups","q":"Share 8 blocks into 2 equal groups. How many each?","answer":"4","ask":"Split into equal groups. Type how many in each.","why":"8 ÷ 2 = 4."},
+    {"topic":"two-equal-groups","q":"2 equal groups of 15 = ?","answer":"30","ask":"Solve it. Type the answer.","why":"15 + 15 = 30."},
+    {"topic":"two-equal-groups","q":"Share 30 coins into 2 equal groups. How many each?","answer":"15","ask":"Split into equal groups. Type how many in each.","why":"30 ÷ 2 = 15."},
+  ],
+  compare: [
+    {"topic":"comparing","left":"8","right":"5","answer":">","why":"8 is greater than 5.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"3","right":"9","answer":"<","why":"3 is less than 9.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"6","right":"6","answer":"=","why":"6 equals 6.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"12","right":"21","answer":"<","why":"12 is less than 21.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"45","right":"45","answer":"=","why":"They are equal.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"30","right":"13","answer":">","why":"30 is greater than 13.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"19","right":"9","answer":">","why":"19 is greater than 9.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"7","right":"17","answer":"<","why":"7 is less than 17.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"50","right":"50","answer":"=","why":"They are equal.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"24","right":"42","answer":"<","why":"24 is less than 42.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"99","right":"89","answer":">","why":"99 is greater than 89.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"15","right":"15","answer":"=","why":"They are equal.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"60","right":"16","answer":">","why":"60 is greater than 16.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"33","right":"38","answer":"<","why":"33 is less than 38.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"71","right":"71","answer":"=","why":"They are equal.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"4 + 3","right":"6","answer":">","why":"4+3=7, which is greater than 6.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"5","right":"2 + 4","answer":"<","why":"2+4=6, so 5 is less than 6.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"10 - 2","right":"8","answer":"=","why":"10-2=8, equal to 8.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"7 + 1","right":"9","answer":"<","why":"7+1=8, less than 9.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"6 + 6","right":"10","answer":">","why":"6+6=12, greater than 10.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"40","right":"40","answer":"=","why":"They are equal.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"28","right":"82","answer":"<","why":"28 is less than 82.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"55","right":"5","answer":">","why":"55 is greater than 5.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"63","right":"36","answer":">","why":"63 is greater than 36.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"14","right":"41","answer":"<","why":"14 is less than 41.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"9 - 3","right":"6","answer":"=","why":"9-3=6, equal to 6.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"20","right":"2","answer":">","why":"20 is greater than 2.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"11","right":"11","answer":"=","why":"They are equal.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"8 + 2","right":"12","answer":"<","why":"8+2=10, less than 12.","ask":"Which is bigger? Tap >, <, or =."},
+    {"topic":"comparing","left":"100","right":"99","answer":">","why":"100 is greater than 99.","ask":"Which is bigger? Tap >, <, or =."},
+  ],
+  shape: [
+    {"topic":"shapes","q":"How many sides does a pentagon have?","options":["4","5","6"],"answer":1,"why":"A pentagon has 5 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"How many sides does a hexagon have?","options":["5","6","7"],"answer":1,"why":"A hexagon has 6 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"How many sides does a triangle have?","options":["3","4","5"],"answer":0,"why":"A triangle has 3 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"How many sides does a square have?","options":["3","4","5"],"answer":1,"why":"A square has 4 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"I have 6 sides. What am I?","options":["Pentagon","Hexagon","Square"],"answer":1,"why":"6 sides = hexagon.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"I have 5 sides. What am I?","options":["Pentagon","Hexagon","Triangle"],"answer":0,"why":"5 sides = pentagon.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"I have 3 corners. What am I?","options":["Square","Triangle","Hexagon"],"answer":1,"why":"3 corners = triangle.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"Which shape has MORE sides: pentagon or hexagon?","options":["Pentagon","Hexagon","Same"],"answer":1,"why":"Hexagon (6) has more than pentagon (5).","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"A shape has 4 equal sides and 4 corners. What is it?","options":["Square","Pentagon","Triangle"],"answer":0,"why":"4 equal sides = square.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"How many corners does a hexagon have?","options":["5","6","7"],"answer":1,"why":"A hexagon has 6 corners.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"How many corners does a pentagon have?","options":["4","5","6"],"answer":1,"why":"A pentagon has 5 corners.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"I have 4 sides but they are not all equal. I could be a...","options":["Rectangle","Triangle","Pentagon"],"answer":0,"why":"4 sides, not all equal = rectangle.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"Which has fewer sides: triangle or square?","options":["Triangle","Square","Same"],"answer":0,"why":"Triangle (3) has fewer than square (4).","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"A stop sign has 8 sides. It is an...","options":["Octagon","Hexagon","Pentagon"],"answer":0,"why":"8 sides = octagon.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"How many sides does a rectangle have?","options":["3","4","5"],"answer":1,"why":"A rectangle has 4 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"I have 5 corners and 5 sides. What am I?","options":["Hexagon","Pentagon","Square"],"answer":1,"why":"5 sides & corners = pentagon.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"Which shape has the most sides?","options":["Triangle","Pentagon","Hexagon"],"answer":2,"why":"Hexagon (6) has the most here.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"A shape with 6 equal sides is a regular...","options":["Pentagon","Hexagon","Square"],"answer":1,"why":"6 sides = hexagon.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"How many MORE sides does a hexagon have than a triangle?","options":["2","3","4"],"answer":1,"why":"6 - 3 = 3 more sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"I have 3 sides and 3 corners. What am I?","options":["Triangle","Square","Pentagon"],"answer":0,"why":"3 sides = triangle.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"Which is a 5-sided shape?","options":["Hexagon","Pentagon","Octagon"],"answer":1,"why":"Pentagon = 5 sides.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"How many sides do a pentagon and a triangle have together?","options":["7","8","9"],"answer":1,"why":"5 + 3 = 8 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"A shape has more than 5 but fewer than 7 sides. It is a...","options":["Pentagon","Hexagon","Octagon"],"answer":1,"why":"6 sides = hexagon.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"Two triangles together have how many sides?","options":["5","6","7"],"answer":1,"why":"3 + 3 = 6 sides.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"How many corners does a square have?","options":["3","4","5"],"answer":1,"why":"A square has 4 corners.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"I have no straight sides. I am round. What am I?","options":["Circle","Pentagon","Hexagon"],"answer":0,"why":"No straight sides = circle.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"Which shape has equal sides AND 6 of them?","options":["Hexagon","Pentagon","Rectangle"],"answer":0,"why":"Hexagon = 6 equal sides.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"A pentagon has ___ more side than a square.","options":["1","2","3"],"answer":0,"why":"5 - 4 = 1 more side.","ask":"Read the clue. Tap the answer."},
+    {"topic":"shapes","q":"How many sides does a hexagon have more than a pentagon?","options":["1","2","3"],"answer":0,"why":"6 - 5 = 1.","ask":"Count carefully. Tap the answer."},
+    {"topic":"shapes","q":"I have 4 corners and 4 sides of the same length. What am I?","options":["Square","Triangle","Hexagon"],"answer":0,"why":"Equal 4 sides = square.","ask":"Read the clue. Tap the answer."},
+  ],
+  array: [
+    {"topic":"arrays","q":"3 rows of 4. How many in all?","answer":"12","why":"3 × 4 = 12.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"2 rows of 5. How many in all?","answer":"10","why":"2 × 5 = 10.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"4 rows of 3. How many in all?","answer":"12","why":"4 × 3 = 12.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"5 rows of 2. How many in all?","answer":"10","why":"5 × 2 = 10.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"3 rows of 3. How many in all?","answer":"9","why":"3 × 3 = 9.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"4 groups of 2. How many in all?","answer":"8","why":"4 × 2 = 8.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"6 rows of 2. How many in all?","answer":"12","why":"6 × 2 = 12.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"2 rows of 8. How many in all?","answer":"16","why":"2 × 8 = 16.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"5 groups of 5. How many in all?","answer":"25","why":"5 × 5 = 25.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"3 rows of 5. How many in all?","answer":"15","why":"3 × 5 = 15.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"A rectangle is covered by 2 rows of 6 squares. How many squares?","answer":"12","why":"2 × 6 = 12 squares.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"A rectangle is covered by 3 rows of 4 squares. How many squares?","answer":"12","why":"3 × 4 = 12 squares.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"4 groups of 4. How many in all?","answer":"16","why":"4 × 4 = 16.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"2 rows of 7. How many in all?","answer":"14","why":"2 × 7 = 14.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"3 groups of 6. How many in all?","answer":"18","why":"3 × 6 = 18.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"5 rows of 3. How many in all?","answer":"15","why":"5 × 3 = 15.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"A rectangle has 4 rows of 5 squares. How many squares?","answer":"20","why":"4 × 5 = 20.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"6 groups of 3. How many in all?","answer":"18","why":"6 × 3 = 18.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"2 rows of 9. How many in all?","answer":"18","why":"2 × 9 = 18.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"4 rows of 6. How many in all?","answer":"24","why":"4 × 6 = 24.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"3 rows of 7. How many in all?","answer":"21","why":"3 × 7 = 21.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"5 groups of 4. How many in all?","answer":"20","why":"5 × 4 = 20.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"A rectangle has 5 rows of 5 squares. How many squares?","answer":"25","why":"5 × 5 = 25.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"2 groups of 10. How many in all?","answer":"20","why":"2 × 10 = 20.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"3 rows of 8. How many in all?","answer":"24","why":"3 × 8 = 24.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"4 rows of 7. How many in all?","answer":"28","why":"4 × 7 = 28.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"6 rows of 4. How many in all?","answer":"24","why":"6 × 4 = 24.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"A rectangle has 3 rows of 6 squares. How many squares?","answer":"18","why":"3 × 6 = 18.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"2 rows of 6. How many in all?","answer":"12","why":"2 × 6 = 12.","ask":"How many in all? Type the number."},
+    {"topic":"arrays","q":"5 rows of 6. How many in all?","answer":"30","why":"5 × 6 = 30.","ask":"How many in all? Type the number."},
+  ],
+  fraction: [
+    {"topic":"fractions","q":"A circle is cut into 2 equal parts. 1 is shaded. What fraction is shaded?","options":["1/2","1/3","1/4"],"answer":0,"why":"1 of 2 equal parts = 1/2.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A circle is cut into 4 equal parts. 1 is shaded. What fraction?","options":["1/2","1/3","1/4"],"answer":2,"why":"1 of 4 = 1/4.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A circle is cut into 3 equal parts. 1 is shaded. What fraction?","options":["1/2","1/3","1/4"],"answer":1,"why":"1 of 3 = 1/3.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A rectangle is cut into 4 equal parts. 2 are shaded. What fraction?","options":["1/4","2/4","3/4"],"answer":1,"why":"2 of 4 = 2/4 (one half).","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A circle is cut into 4 equal parts. 3 are shaded. What fraction?","options":["1/4","2/4","3/4"],"answer":2,"why":"3 of 4 = 3/4.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"What do we call 2 equal parts of a whole?","options":["Halves","Thirds","Fourths"],"answer":0,"why":"2 equal parts = halves.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"What do we call 3 equal parts?","options":["Halves","Thirds","Fourths"],"answer":1,"why":"3 equal parts = thirds.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"What do we call 4 equal parts?","options":["Halves","Thirds","Fourths"],"answer":2,"why":"4 equal parts = fourths.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A pizza is cut into 2 equal slices. You eat 1. What fraction did you eat?","options":["1/2","1/3","1/4"],"answer":0,"why":"1 of 2 = 1/2.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A rectangle has 3 equal parts. 2 are shaded. What fraction?","options":["1/3","2/3","3/3"],"answer":1,"why":"2 of 3 = 2/3.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"Are these fractions? A shape cut into UNEQUAL parts.","options":["Yes","No"],"answer":1,"why":"Parts must be EQUAL to be fractions.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A circle in 4 equal parts, all 4 shaded. What fraction?","options":["2/4","3/4","4/4"],"answer":2,"why":"4 of 4 = 4/4 (the whole).","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"Which is bigger: 1/2 or 1/4 of the same pizza?","options":["1/2","1/4","Same"],"answer":0,"why":"1/2 is bigger than 1/4.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A square is cut into 2 equal parts. What is each part called?","options":["A half","A third","A fourth"],"answer":0,"why":"Each is a half.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A bar is split into 4 equal parts. 1 shaded. Fraction?","options":["1/2","1/3","1/4"],"answer":2,"why":"1 of 4 = 1/4.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"How many fourths make a whole?","options":["2","3","4"],"answer":2,"why":"4 fourths = 1 whole.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"How many halves make a whole?","options":["2","3","4"],"answer":0,"why":"2 halves = 1 whole.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"How many thirds make a whole?","options":["2","3","4"],"answer":1,"why":"3 thirds = 1 whole.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A circle in 3 equal parts, 3 shaded. What fraction?","options":["1/3","2/3","3/3"],"answer":2,"why":"3 of 3 = whole.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"Which shows equal parts: a circle cut into 2 even halves, or 2 uneven pieces?","options":["Even halves","Uneven pieces"],"answer":0,"why":"Equal parts must be even.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A pie has 4 equal slices. 2 eaten. What fraction is left?","options":["1/4","2/4","3/4"],"answer":1,"why":"2 of 4 left = 2/4.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A rectangle split in 2 equal parts, 1 shaded. Fraction shaded?","options":["1/2","1/3","1/4"],"answer":0,"why":"1 of 2 = 1/2.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"Cut a sandwich into 4 equal parts. Each part is a...","options":["half","third","fourth"],"answer":2,"why":"4 parts → each is a fourth.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A circle in 4 parts, 2 shaded. Same as which?","options":["1/2","1/3","1/4"],"answer":0,"why":"2/4 = 1/2.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"Which is the SMALLEST piece: 1/2, 1/3, or 1/4?","options":["1/2","1/3","1/4"],"answer":2,"why":"1/4 is the smallest.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"A ribbon in 3 equal parts, 1 shaded. Fraction?","options":["1/2","1/3","1/4"],"answer":1,"why":"1 of 3 = 1/3.","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"Two equal groups of cookies: you take 1 group. What fraction?","options":["1/2","1/3","1/4"],"answer":0,"why":"1 of 2 groups = 1/2.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"A circle in 2 equal parts, 2 shaded. Fraction?","options":["1/2","2/2","1/4"],"answer":1,"why":"2 of 2 = whole (2/2).","ask":"Read it. Tap the answer."},
+    {"topic":"fractions","q":"4 friends share 1 pizza equally. Each gets what fraction?","options":["1/2","1/3","1/4"],"answer":2,"why":"1 of 4 = 1/4.","ask":"How much is colored? Tap the fraction."},
+    {"topic":"fractions","q":"3 friends share 1 cake equally. Each gets what fraction?","options":["1/2","1/3","1/4"],"answer":1,"why":"1 of 3 = 1/3.","ask":"How much is colored? Tap the fraction."},
+  ],
+  money: [
+    {"topic":"money","q":"How much is 1 dime + 1 nickel?","options":["10¢","15¢","20¢"],"answer":1,"why":"10 + 5 = 15¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 1 quarter?","options":["10¢","25¢","50¢"],"answer":1,"why":"A quarter = 25¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 2 dimes?","options":["10¢","20¢","25¢"],"answer":1,"why":"10 + 10 = 20¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 1 nickel + 2 pennies?","options":["5¢","7¢","10¢"],"answer":1,"why":"5 + 1 + 1 = 7¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 3 nickels?","options":["10¢","15¢","20¢"],"answer":1,"why":"5 × 3 = 15¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 1 quarter + 1 dime?","options":["30¢","35¢","40¢"],"answer":1,"why":"25 + 10 = 35¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How many pennies make a nickel?","options":["5","10","25"],"answer":0,"why":"5 pennies = 1 nickel.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How many pennies make a dime?","options":["5","10","25"],"answer":1,"why":"10 pennies = 1 dime.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 4 pennies?","options":["4¢","5¢","10¢"],"answer":0,"why":"4 pennies = 4¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 2 quarters?","options":["25¢","50¢","75¢"],"answer":1,"why":"25 + 25 = 50¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"Which makes 10¢: 1 dime OR 2 nickels?","options":["Only 1 dime","Only 2 nickels","Both"],"answer":2,"why":"Both equal 10¢ — many ways to pay.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 1 dime + 1 dime + 1 nickel?","options":["20¢","25¢","30¢"],"answer":1,"why":"10 + 10 + 5 = 25¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 5 nickels?","options":["20¢","25¢","30¢"],"answer":1,"why":"5 × 5 = 25¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 1 quarter + 2 dimes?","options":["35¢","40¢","45¢"],"answer":2,"why":"25 + 20 = 45¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How many nickels make a quarter?","options":["3","5","10"],"answer":1,"why":"5 nickels = 25¢.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 3 dimes?","options":["20¢","30¢","40¢"],"answer":1,"why":"10 × 3 = 30¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 1 nickel + 1 dime + 1 quarter?","options":["35¢","40¢","45¢"],"answer":1,"why":"5 + 10 + 25 = 40¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"Which is worth more: a dime or a nickel?","options":["Dime","Nickel","Same"],"answer":0,"why":"Dime (10¢) > nickel (5¢).","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 6 pennies + 1 nickel?","options":["10¢","11¢","12¢"],"answer":1,"why":"6 + 5 = 11¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 2 dimes + 1 nickel?","options":["20¢","25¢","30¢"],"answer":1,"why":"10 + 10 + 5 = 25¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How many dimes make 50¢?","options":["3","5","10"],"answer":1,"why":"5 dimes = 50¢.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 1 quarter + 1 nickel?","options":["25¢","30¢","35¢"],"answer":1,"why":"25 + 5 = 30¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"Which is worth more: a quarter or 2 dimes?","options":["Quarter","2 dimes","Same"],"answer":0,"why":"25¢ > 20¢.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 4 nickels?","options":["15¢","20¢","25¢"],"answer":1,"why":"5 × 4 = 20¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How much is 1 dime + 3 pennies?","options":["11¢","12¢","13¢"],"answer":2,"why":"10 + 3 = 13¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"Which coins make 15¢?","options":["1 dime + 1 nickel","2 dimes","1 quarter"],"answer":0,"why":"10 + 5 = 15¢.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 2 quarters + 1 dime?","options":["50¢","60¢","70¢"],"answer":1,"why":"25 + 25 + 10 = 60¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"How many pennies make a quarter?","options":["10","20","25"],"answer":2,"why":"25 pennies = 25¢.","ask":"Read it. Tap the answer."},
+    {"topic":"money","q":"How much is 7 pennies?","options":["5¢","7¢","10¢"],"answer":1,"why":"7 pennies = 7¢.","ask":"Add up the coins. Tap the amount."},
+    {"topic":"money","q":"Which makes 25¢: 1 quarter OR 5 nickels?","options":["Only quarter","Only nickels","Both"],"answer":2,"why":"Both = 25¢ — ways to pay.","ask":"Read it. Tap the answer."},
+  ],
+  pictograph: [
+    {"topic":"pictograph","q":"🍎 = 2 apples. How many apples is 🍎🍎🍎?","options":["3","6","9"],"answer":1,"why":"3 × 2 = 6.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"⭐ = 5 stars. How many is ⭐⭐?","options":["7","10","15"],"answer":1,"why":"2 × 5 = 10.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🐟 = 2 fish. How many is 🐟🐟🐟🐟?","options":["6","8","10"],"answer":1,"why":"4 × 2 = 8.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🌸 = 10 flowers. How many is 🌸🌸?","options":["12","20","30"],"answer":1,"why":"2 × 10 = 20.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🚗 = 5 cars. How many is 🚗🚗🚗?","options":["10","15","20"],"answer":1,"why":"3 × 5 = 15.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🍎 = 2 apples. How many symbols show 8 apples?","options":["2","4","8"],"answer":1,"why":"8 ÷ 2 = 4 symbols.","ask":"How many pictures? Tap the answer."},
+    {"topic":"pictograph","q":"⭐ = 5. How many symbols show 25?","options":["3","5","25"],"answer":1,"why":"25 ÷ 5 = 5 symbols.","ask":"How many pictures? Tap the answer."},
+    {"topic":"pictograph","q":"🐶 = 2 dogs. How many is 🐶🐶🐶🐶🐶?","options":["8","10","12"],"answer":1,"why":"5 × 2 = 10.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🍪 = 3 cookies. How many is 🍪🍪?","options":["5","6","9"],"answer":1,"why":"2 × 3 = 6.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🌟 = 4. How many is 🌟🌟🌟?","options":["8","12","16"],"answer":1,"why":"3 × 4 = 12.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🍎 = 2. How many is 🍎🍎🍎🍎🍎?","options":["8","10","12"],"answer":1,"why":"5 × 2 = 10.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"📚 = 5 books. How many is 📚📚📚📚?","options":["15","20","25"],"answer":1,"why":"4 × 5 = 20.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🐱 = 2 cats. How many symbols show 6 cats?","options":["2","3","6"],"answer":1,"why":"6 ÷ 2 = 3 symbols.","ask":"How many pictures? Tap the answer."},
+    {"topic":"pictograph","q":"⚽ = 10. How many is ⚽⚽⚽?","options":["20","30","40"],"answer":1,"why":"3 × 10 = 30.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🍩 = 3. How many is 🍩🍩🍩?","options":["6","9","12"],"answer":1,"why":"3 × 3 = 9.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🌸 = 5. How many is 🌸🌸🌸🌸?","options":["15","20","25"],"answer":1,"why":"4 × 5 = 20.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🐟 = 2. How many symbols show 12 fish?","options":["4","6","12"],"answer":1,"why":"12 ÷ 2 = 6 symbols.","ask":"How many pictures? Tap the answer."},
+    {"topic":"pictograph","q":"⭐ = 4. How many is ⭐⭐⭐⭐?","options":["12","16","20"],"answer":1,"why":"4 × 4 = 16.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🚌 = 5. How many is 🚌🚌?","options":["5","10","15"],"answer":1,"why":"2 × 5 = 10.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🍎 = 3. How many is 🍎🍎🍎🍎?","options":["9","12","15"],"answer":1,"why":"4 × 3 = 12.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🎈 = 2. How many is 🎈🎈🎈🎈🎈🎈?","options":["10","12","14"],"answer":1,"why":"6 × 2 = 12.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🐶 = 5 dogs. How many symbols show 15 dogs?","options":["2","3","5"],"answer":1,"why":"15 ÷ 5 = 3 symbols.","ask":"How many pictures? Tap the answer."},
+    {"topic":"pictograph","q":"🍪 = 2. How many is 🍪🍪🍪🍪🍪🍪🍪?","options":["12","14","16"],"answer":1,"why":"7 × 2 = 14.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🌟 = 10. How many is 🌟🌟🌟🌟?","options":["30","40","50"],"answer":1,"why":"4 × 10 = 40.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"📕 = 2 books. How many is 📕📕📕?","options":["4","6","8"],"answer":1,"why":"3 × 2 = 6.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"⚽ = 3. How many is ⚽⚽⚽⚽⚽?","options":["12","15","18"],"answer":1,"why":"5 × 3 = 15.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🍩 = 5. How many is 🍩🍩🍩🍩🍩🍩?","options":["25","30","35"],"answer":1,"why":"6 × 5 = 30.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🐱 = 2 cats. How many is 🐱🐱🐱🐱?","options":["6","8","10"],"answer":1,"why":"4 × 2 = 8.","ask":"Each picture is worth a number. Tap the total."},
+    {"topic":"pictograph","q":"🌸 = 2. How many symbols show 10 flowers?","options":["3","5","10"],"answer":1,"why":"10 ÷ 2 = 5 symbols.","ask":"How many pictures? Tap the answer."},
+    {"topic":"pictograph","q":"🎈 = 5. How many is 🎈🎈🎈?","options":["10","15","20"],"answer":1,"why":"3 × 5 = 15.","ask":"Each picture is worth a number. Tap the total."},
+  ],
+  measure: [
+    {"topic":"measure","q":"A pencil lines up from 0 to 7. How many units long?","options":["6","7","8"],"answer":1,"why":"From 0 to 7 = 7 units.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A crayon is 5 cubes long. A marker is 8 cubes. How much longer is the marker?","options":["2","3","4"],"answer":1,"why":"8 - 5 = 3 cubes longer.","ask":"How much longer? Tap the answer."},
+    {"topic":"measure","q":"A ribbon starts at 0 and ends at 10. How long is it?","options":["9","10","11"],"answer":1,"why":"0 to 10 = 10 units.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A stick is 6 inches. Another is 4 inches. Together?","options":["8","10","12"],"answer":1,"why":"6 + 4 = 10 inches.","ask":"Add the lengths. Tap the answer."},
+    {"topic":"measure","q":"Which is longer: 12 cubes or 9 cubes?","options":["12 cubes","9 cubes","Same"],"answer":0,"why":"12 > 9.","ask":"How much longer? Tap the answer."},
+    {"topic":"measure","q":"A worm is 3 cm. A bigger worm is 7 cm. Difference?","options":["3","4","5"],"answer":1,"why":"7 - 3 = 4 cm.","ask":"How much longer? Tap the answer."},
+    {"topic":"measure","q":"A book is 9 inches tall. A box is 9 inches. They are...","options":["Equal","Different",""],"answer":0,"why":"Both 9 inches = equal.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"If a shoe is 8 units and lines up at 0, it ends at...","options":["7","8","9"],"answer":1,"why":"Starts at 0, 8 long → ends at 8.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A rope is 15 ft. You cut off 6 ft. How much is left?","options":["8","9","10"],"answer":1,"why":"15 - 6 = 9 ft.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A table is 20 cubes. A chair is 11 cubes. How much longer is the table?","options":["8","9","10"],"answer":1,"why":"20 - 11 = 9 cubes.","ask":"How much longer? Tap the answer."},
+    {"topic":"measure","q":"Two pencils, each 6 inches, end to end =","options":["10","12","14"],"answer":1,"why":"6 + 6 = 12 inches.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A line goes from 2 to 9 on a ruler. How long?","options":["6","7","8"],"answer":1,"why":"9 - 2 = 7 units.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"Which is shorter: 5 inches or 8 inches?","options":["5 inches","8 inches","Same"],"answer":0,"why":"5 < 8.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A snake is 14 cubes. A worm is 6 cubes. Together?","options":["18","20","22"],"answer":1,"why":"14 + 6 = 20 cubes.","ask":"Add the lengths. Tap the answer."},
+    {"topic":"measure","q":"A line from 0 to 6, then 3 more units. Total length?","options":["8","9","10"],"answer":1,"why":"6 + 3 = 9 units.","ask":"Add the lengths. Tap the answer."},
+    {"topic":"measure","q":"A bookshelf is 30 inches. A book takes 10. How much space left?","options":["18","20","22"],"answer":1,"why":"30 - 10 = 20 inches.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A pencil is 7 cm. A shorter one is 4 cm. Difference?","options":["2","3","4"],"answer":1,"why":"7 - 4 = 3 cm.","ask":"How much longer? Tap the answer."},
+    {"topic":"measure","q":"A ruler shows 0 to 12. An object covers 0 to 5. Length?","options":["4","5","6"],"answer":1,"why":"0 to 5 = 5 units.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"Which is longest: 7, 11, or 9 cubes?","options":["7","11","9"],"answer":1,"why":"11 is the longest.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A path is 8 m. You walk 8 m. You have walked...","options":["all of it","half","none"],"answer":0,"why":"8 of 8 = all of it.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A pole is 16 ft. Another is 9 ft. How much taller is the first?","options":["6","7","8"],"answer":1,"why":"16 - 9 = 7 ft.","ask":"How much longer? Tap the answer."},
+    {"topic":"measure","q":"Three blocks, each 2 inches, in a row =","options":["5","6","7"],"answer":1,"why":"2 + 2 + 2 = 6 inches.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A line from 3 to 10. How long?","options":["6","7","8"],"answer":1,"why":"10 - 3 = 7 units.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A caterpillar is 4 cm, grows 5 cm. New length?","options":["8","9","10"],"answer":1,"why":"4 + 5 = 9 cm.","ask":"Add the lengths. Tap the answer."},
+    {"topic":"measure","q":"Which is shorter: 13 cubes or 10 cubes?","options":["13","10","Same"],"answer":1,"why":"10 < 13.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A scarf is 25 inches. Cut off 5. How long now?","options":["18","20","22"],"answer":1,"why":"25 - 5 = 20 inches.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"An object covers 1 to 8 on a ruler. Length?","options":["6","7","8"],"answer":1,"why":"8 - 1 = 7 units.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"Two ropes: 12 ft and 8 ft. Together?","options":["18","20","22"],"answer":1,"why":"12 + 8 = 20 ft.","ask":"Add the lengths. Tap the answer."},
+    {"topic":"measure","q":"A pencil 9 cm, eraser 2 cm, end to end?","options":["10","11","12"],"answer":1,"why":"9 + 2 = 11 cm.","ask":"Read it. Tap the answer."},
+    {"topic":"measure","q":"A line from 0 to 4, plus 4 more. Total?","options":["7","8","9"],"answer":1,"why":"4 + 4 = 8 units.","ask":"Add the lengths. Tap the answer."},
+  ],
+};
+
+const MATH_UI = {
+  "type": "Solve it. Type the number answer.",
+  "compare": "Which is bigger? Tap >, <, or =.",
+  "shape": "Read the shape question. Tap the answer.",
+  "array": "Count the rows and columns. Type the total.",
+  "fraction": "Look at the equal parts. Tap the right fraction.",
+  "money": "Add up the coins. Tap the right amount.",
+  "pictograph": "Each picture stands for a number. Tap the total.",
+  "measure": "Read the lengths. Tap the answer."
+};
+
+if (typeof window !== "undefined") {
+  window.MATH_MODULES = MATH_MODULES;
+  window.MATH_LESSONS = MATH_LESSONS;
+  window.MATH_BANK = MATH_BANK;
+  window.MATH_UI = MATH_UI;
+}

@@ -75,6 +75,34 @@
       .panel { display: none; }
       .panel.on { display: block; }
 
+      .module-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+        gap: 14px; margin-bottom: 8px;
+      }
+      .module-tile {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 8px; min-height: 118px; padding: 16px 12px;
+        border: 2px solid #f0cfc7; border-radius: 20px; background: #fff;
+        box-shadow: var(--shadow-sm); cursor: pointer;
+        font-family: "Fredoka", sans-serif; transition: transform .15s, border-color .15s, box-shadow .15s;
+      }
+      .module-tile:hover {
+        transform: translateY(-3px); border-color: var(--rw-accent);
+        box-shadow: 0 10px 24px -12px rgba(166, 61, 61, .35);
+      }
+      .module-tile .mod-emoji { font-size: 2rem; line-height: 1; }
+      .module-tile .mod-title {
+        font-weight: 700; font-size: .92rem; color: var(--rw-accent-d);
+        text-align: center; line-height: 1.25;
+      }
+      .module-back, .game-nav a {
+        display: inline-block; margin-bottom: 14px;
+        text-decoration: none; font-weight: 800; color: var(--rw-accent); font-size: .92rem;
+      }
+      .module-back:hover, .game-nav a:hover { text-decoration: underline; }
+      .game-nav { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+      .module-play-btn { width: 100%; margin-top: 8px; }
+
       .lesson {
         background: #fff; border: 2px solid #f0cfc7; border-radius: 22px;
         padding: 22px 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
@@ -258,20 +286,21 @@
         </div>
       </header>
 
-      <nav class="tabs" role="tablist">
-        <button type="button" class="active" id="tab-study" role="tab" aria-selected="true">
-          📚 Study
-        </button>
-        <button type="button" id="tab-play" role="tab" aria-selected="false">
-          🎮 Play
-        </button>
-      </nav>
-
-      <section class="panel on" id="panel-study" role="tabpanel" aria-labelledby="tab-study">
-        <div id="lessons"></div>
+      <section class="panel on" id="view-modules">
+        <div class="module-grid" id="module-grid"></div>
       </section>
 
-      <section class="panel" id="panel-play" role="tabpanel" aria-labelledby="tab-play" hidden>
+      <section class="panel" id="view-module-study" hidden>
+        <a href="#" class="module-back" id="back-to-modules">← Back to modules</a>
+        <div id="module-lesson"></div>
+        <button type="button" class="btn module-play-btn" id="btn-start-module-game">🎮 Play</button>
+      </section>
+
+      <section class="panel" id="view-game" hidden>
+        <nav class="game-nav">
+          <a href="#" id="back-to-module-study">← Back to module</a>
+          <a href="#" id="back-to-modules-from-game">← Modules</a>
+        </nav>
         <div class="game-card" id="game-area">
           <div class="mech-tag" id="mech-tag"></div>
           <div class="round-instruction" id="round-instruction" hidden></div>
@@ -301,7 +330,10 @@
       let totalScore = 0;
       let sessionScore = 0;
       let streak = 0;
-      let lastItemKey = null;
+      let selectedModule = null;
+      let moduleDeck = [];
+      let deckIndex = 0;
+      let lastDealtKey = null;
       let answering = false;
       let currentRound = null;
 
@@ -384,58 +416,145 @@
         updateScoreboard();
       }
 
-      function renderLessons() {
-        const root = $("lessons");
-        root.innerHTML = "";
-        const lessons = window.LA_LESSONS;
-        if (!Array.isArray(lessons) || !lessons.length) {
-          root.innerHTML =
-            '<p style="text-align:center;color:var(--soft);font-weight:700">No lessons loaded.</p>';
-          return;
+      function deckEntryKey(entry) {
+        return `${entry.mech}:${entry.idx}`;
+      }
+
+      function buildModulePool(module) {
+        const bank = window.LA_BANK;
+        if (!bank || !module) return [];
+        const topics = new Set(module.topics || []);
+        const pool = [];
+        for (const mech of MECHANICS) {
+          const items = bank[mech];
+          if (!Array.isArray(items)) continue;
+          items.forEach((item, idx) => {
+            if (topics.has(item.topic)) pool.push({ mech, item, idx });
+          });
         }
-        for (const lesson of lessons) {
-          const el = document.createElement("article");
-          el.className = "lesson";
-          const sections = (lesson.sections || [])
-            .map(
-              (s) =>
-                `<div class="sec"><h3>${escapeHtml(s.h)}</h3><p>${escapeHtml(s.body)}</p></div>`
-            )
-            .join("");
-          el.innerHTML = `
+        return pool;
+      }
+
+      function reshuffleModuleDeck(module) {
+        moduleDeck = shuffle(buildModulePool(module));
+        if (
+          moduleDeck.length > 1 &&
+          lastDealtKey &&
+          deckEntryKey(moduleDeck[0]) === lastDealtKey
+        ) {
+          [moduleDeck[0], moduleDeck[1]] = [moduleDeck[1], moduleDeck[0]];
+        }
+        deckIndex = 0;
+      }
+
+      function dealNextRound() {
+        if (!selectedModule) return null;
+        if (!moduleDeck.length) {
+          const pool = buildModulePool(selectedModule);
+          if (!pool.length) return null;
+          reshuffleModuleDeck(selectedModule);
+        }
+        if (deckIndex >= moduleDeck.length) {
+          lastDealtKey = deckEntryKey(moduleDeck[moduleDeck.length - 1]);
+          reshuffleModuleDeck(selectedModule);
+        }
+        const entry = moduleDeck[deckIndex++];
+        lastDealtKey = deckEntryKey(entry);
+        return { mech: entry.mech, item: entry.item };
+      }
+
+      function showView(name) {
+        const views = {
+          modules: $("view-modules"),
+          study: $("view-module-study"),
+          game: $("view-game"),
+        };
+        for (const [key, el] of Object.entries(views)) {
+          el.hidden = key !== name;
+          el.classList.toggle("on", key === name);
+        }
+        $("scorebar").hidden = name !== "game";
+      }
+
+      function lessonHtml(lesson) {
+        const sections = (lesson.sections || [])
+          .map(
+            (s) =>
+              `<div class="sec"><h3>${escapeHtml(s.h)}</h3><p>${escapeHtml(s.body)}</p></div>`
+          )
+          .join("");
+        return `
+          <article class="lesson">
             <span class="num">Lesson ${escapeHtml(lesson.num ?? lesson.id)}</span>
             <h2>${escapeHtml(lesson.title)}</h2>
             <p class="sub">${escapeHtml(lesson.subtitle || "")}</p>
             <p class="intro">${escapeHtml(lesson.intro || "")}</p>
             ${sections}
             ${lesson.recuerda ? `<div class="recuerda">${escapeHtml(lesson.recuerda)}</div>` : ""}
-          `;
-          root.appendChild(el);
+          </article>
+        `;
+      }
+
+      function findLesson(lessonId) {
+        return (window.LA_LESSONS || []).find((l) => l.id === lessonId);
+      }
+
+      function renderModuleList() {
+        const root = $("module-grid");
+        root.innerHTML = "";
+        const modules = window.LA_MODULES || [];
+        if (!modules.length) {
+          root.innerHTML =
+            '<p style="text-align:center;color:var(--soft);font-weight:700">No modules loaded.</p>';
+          return;
+        }
+        for (const mod of modules) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "module-tile";
+          btn.innerHTML = `<span class="mod-emoji">${mod.emoji || "📘"}</span><span class="mod-title">${escapeHtml(mod.title)}</span>`;
+          btn.addEventListener("click", () => openModuleStudy(mod));
+          root.appendChild(btn);
         }
       }
 
-      function itemKey(mech, idx) {
-        return `${mech}:${idx}`;
+      function openModuleStudy(module) {
+        selectedModule = module;
+        const lesson = findLesson(module.lesson);
+        const root = $("module-lesson");
+        if (!lesson) {
+          root.innerHTML =
+            '<p style="text-align:center;color:var(--soft);font-weight:700">No lesson for this module.</p>';
+        } else {
+          root.innerHTML = lessonHtml(lesson);
+        }
+        showView("study");
       }
 
-      function pickRound() {
-        const bank = window.LA_BANK;
-        if (!bank) return null;
+      function startModuleGame() {
+        if (!selectedModule) return;
+        lastDealtKey = null;
+        reshuffleModuleDeck(selectedModule);
+        answering = false;
+        currentRound = null;
+        showView("game");
+        startRound();
+      }
 
-        for (let attempt = 0; attempt < 30; attempt++) {
-          const mech =
-            MECHANICS[Math.floor(Math.random() * MECHANICS.length)];
-          const pool = bank[mech];
-          if (!Array.isArray(pool) || !pool.length) continue;
-
-          const idx = Math.floor(Math.random() * pool.length);
-          const key = itemKey(mech, idx);
-          if (key === lastItemKey && pool.length > 1) continue;
-
-          lastItemKey = key;
-          return { mech, item: pool[idx], idx };
-        }
-        return null;
+      function setupNavigation() {
+        $("back-to-modules").addEventListener("click", (e) => {
+          e.preventDefault();
+          showView("modules");
+        });
+        $("back-to-modules-from-game").addEventListener("click", (e) => {
+          e.preventDefault();
+          showView("modules");
+        });
+        $("back-to-module-study").addEventListener("click", (e) => {
+          e.preventDefault();
+          if (selectedModule) openModuleStudy(selectedModule);
+        });
+        $("btn-start-module-game").addEventListener("click", startModuleGame);
       }
 
       function showRoundInstruction(mech, item) {
@@ -632,7 +751,7 @@
       }
 
       function startRound() {
-        currentRound = pickRound();
+        currentRound = dealNextRound();
         $("feedback").className = "feedback";
         $("feedback").innerHTML = "";
         $("round-instruction").hidden = true;
@@ -642,7 +761,7 @@
 
         if (!currentRound) {
           $("mech-tag").textContent = "No questions";
-          $("prompt").textContent = "Question bank not loaded yet.";
+          $("prompt").textContent = "No questions for this module.";
           return;
         }
 
@@ -654,36 +773,6 @@
         else if (mech === "sort") renderSort(item);
         else if (mech === "order") renderOrder(item);
         else renderSentence(item);
-      }
-
-      function setupTabs() {
-        const tabStudy = $("tab-study");
-        const tabPlay = $("tab-play");
-        const panelStudy = $("panel-study");
-        const panelPlay = $("panel-play");
-
-        tabStudy.addEventListener("click", () => {
-          tabStudy.classList.add("active");
-          tabPlay.classList.remove("active");
-          tabStudy.setAttribute("aria-selected", "true");
-          tabPlay.setAttribute("aria-selected", "false");
-          panelStudy.classList.add("on");
-          panelStudy.hidden = false;
-          panelPlay.classList.remove("on");
-          panelPlay.hidden = true;
-        });
-
-        tabPlay.addEventListener("click", () => {
-          tabPlay.classList.add("active");
-          tabStudy.classList.remove("active");
-          tabPlay.setAttribute("aria-selected", "true");
-          tabStudy.setAttribute("aria-selected", "false");
-          panelPlay.classList.add("on");
-          panelPlay.hidden = false;
-          panelStudy.classList.remove("on");
-          panelStudy.hidden = true;
-          if (!answering && !currentRound) startRound();
-        });
       }
 
       function setupAuthListener(uid) {
@@ -721,9 +810,9 @@
         }
 
         await loadProgress();
-        renderLessons();
-        setupTabs();
-        $("scorebar").hidden = false;
+        renderModuleList();
+        setupNavigation();
+        $("scorebar").hidden = true;
 
         $("loading").hidden = true;
         $("app").hidden = false;
