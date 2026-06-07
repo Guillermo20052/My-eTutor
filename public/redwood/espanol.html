@@ -221,6 +221,44 @@
       .letter-btn.correct { background: #e8f8ef; border-color: var(--rw-ok); color: var(--rw-ok); }
       .letter-btn.wrong { background: #fdecea; border-color: var(--rw-bad); color: var(--rw-bad); }
 
+      .signos-line {
+        display: flex; align-items: center; justify-content: center;
+        flex-wrap: wrap; gap: 8px;
+        font-family: "Fredoka", sans-serif; font-weight: 700;
+        font-size: clamp(1.2rem, 4vw, 1.55rem); color: var(--navy);
+        line-height: 1.35;
+      }
+      .signos-sentence { text-align: center; }
+      .signos-input {
+        box-sizing: border-box; width: 48px; height: 48px;
+        border: 3px solid var(--rw-accent); border-radius: 12px;
+        background: var(--rw-sky); color: var(--rw-accent-d);
+        font-family: "Fredoka", sans-serif; font-weight: 800;
+        font-size: 1.35rem; text-align: center; padding: 0;
+      }
+      .signos-input:focus {
+        outline: 3px solid rgba(166, 61, 61, .35); outline-offset: 2px;
+      }
+      .signos-input:disabled { opacity: .65; }
+      .signos-helpers {
+        display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+        margin-bottom: 14px;
+      }
+      .signos-helper-btn {
+        min-width: 44px; height: 44px; padding: 0 10px;
+        font-family: "Fredoka", sans-serif; font-weight: 700; font-size: 1.25rem;
+        border-radius: 12px; border: 2px solid #f0cfc7; background: #fff;
+        cursor: pointer; color: var(--navy);
+        transition: transform .12s, border-color .12s, background .12s;
+      }
+      .signos-helper-btn:hover:not(:disabled) {
+        transform: scale(1.06); border-color: var(--rw-accent); background: var(--rw-sky);
+      }
+      .signos-helper-btn:disabled { opacity: .55; cursor: not-allowed; }
+      .signos-submit-row {
+        display: flex; justify-content: center;
+      }
+
       .feedback {
         margin-top: 16px; padding: 14px 16px; border-radius: 14px;
         font-weight: 700; line-height: 1.5; text-align: center; display: none;
@@ -319,8 +357,9 @@
         fill: "Elige la letra",
         tilde: "Pon la tilde",
         error: "Caza el error",
+        signos: "Escribe los signos",
       };
-      const MECHANICS = ["fill", "tilde", "error"];
+      const MECHANICS = ["fill", "tilde", "error", "signos"];
       const ADVANCE_MS = 2200;
 
       let USER_ID = null;
@@ -695,6 +734,98 @@
         }
       }
 
+      function renderSignos(item) {
+        $("prompt").innerHTML = `
+          <div class="signos-line">
+            <input
+              type="text"
+              class="signos-input"
+              id="signos-open"
+              maxlength="2"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Signo de apertura"
+            />
+            <span class="signos-sentence">${escapeHtml(item.sentence)}</span>
+            <input
+              type="text"
+              class="signos-input"
+              id="signos-close"
+              maxlength="2"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Signo de cierre"
+            />
+          </div>
+        `;
+
+        const wrap = $("interaction");
+        wrap.innerHTML = `
+          <div class="signos-helpers" id="signos-helpers">
+            <button type="button" class="signos-helper-btn" data-ch="¿">¿</button>
+            <button type="button" class="signos-helper-btn" data-ch="¡">¡</button>
+            <button type="button" class="signos-helper-btn" data-ch="?">?</button>
+            <button type="button" class="signos-helper-btn" data-ch="!">!</button>
+          </div>
+          <div class="signos-submit-row">
+            <button type="button" class="btn" id="signos-submit">Comprobar</button>
+          </div>
+        `;
+
+        const openInput = $("signos-open");
+        const closeInput = $("signos-close");
+        const submit = $("signos-submit");
+        const fullCorrect = `${item.open}${item.sentence}${item.close}`;
+
+        wrap.querySelectorAll(".signos-helper-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const ch = btn.dataset.ch;
+            const active = document.activeElement;
+            const target =
+              active === openInput || active === closeInput ? active : openInput;
+            target.value = ch;
+            target.focus();
+          });
+        });
+
+        const check = () => {
+          if (answering) return;
+          const opening = openInput.value;
+          const closing = closeInput.value;
+          if (!opening && !closing) return;
+
+          answering = true;
+          submit.disabled = true;
+          openInput.disabled = true;
+          closeInput.disabled = true;
+          wrap.querySelectorAll(".signos-helper-btn").forEach((b) => (b.disabled = true));
+
+          const ok = opening === item.open && closing === item.close;
+
+          if (ok) {
+            awardCorrect();
+            let msg = "¡Correcto! +puntos";
+            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
+            showFeedback(true, msg);
+          } else {
+            breakStreak();
+            let msg = `No exactamente. La oración correcta es: <b>${escapeHtml(fullCorrect)}</b>.`;
+            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
+            showFeedback(false, msg);
+          }
+          scheduleNext();
+        };
+
+        submit.addEventListener("click", check);
+        openInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") check();
+        });
+        closeInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") check();
+        });
+        openInput.focus();
+      }
+
       function renderError(item) {
         const wrap = $("interaction");
         const tokens = Array.isArray(item.tokens) ? item.tokens : [];
@@ -755,6 +886,8 @@
         } else if (mech === "tilde") {
           $("prompt").textContent = item.word || item.prompt || "";
           renderTilde(item);
+        } else if (mech === "signos") {
+          renderSignos(item);
         } else {
           $("prompt").textContent = "";
           renderError(item);
