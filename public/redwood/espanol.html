@@ -259,6 +259,28 @@
         display: flex; justify-content: center;
       }
 
+      .comma-words-line {
+        display: flex; flex-wrap: wrap; align-items: center;
+        justify-content: center; gap: 8px;
+        font-family: "Fredoka", sans-serif; font-weight: 700;
+        font-size: clamp(1.05rem, 3.6vw, 1.4rem); color: var(--navy);
+        line-height: 1.4;
+      }
+      .comma-word-btn {
+        font-family: inherit; font-weight: 700; font-size: inherit;
+        padding: 10px 14px; border-radius: 14px; cursor: pointer;
+        border: 2px solid #f0cfc7; background: var(--rw-sand); color: var(--navy);
+        transition: transform .12s, border-color .12s, background .12s;
+      }
+      .comma-word-btn:hover:not(:disabled) {
+        transform: translateY(-2px); border-color: var(--rw-accent); background: var(--rw-sky);
+      }
+      .comma-word-btn.comma-marked {
+        background: var(--rw-sky); border-color: var(--rw-accent); color: var(--rw-accent-d);
+      }
+      .comma-word-btn:disabled { opacity: .7; cursor: default; }
+      .comma-word-final { font-weight: 700; }
+
       .feedback {
         margin-top: 16px; padding: 14px 16px; border-radius: 14px;
         font-weight: 700; line-height: 1.5; text-align: center; display: none;
@@ -367,9 +389,11 @@
       let sessionScore = 0;
       let streak = 0;
       let selectedModule = null;
+      let activeDeckModuleId = null;
       let moduleDeck = [];
       let deckIndex = 0;
       let lastDealtKey = null;
+      let nextRoundTimer = null;
       let answering = false;
       let currentRound = null;
 
@@ -456,23 +480,43 @@
         return `${entry.mech}:${entry.idx}`;
       }
 
+      function resolveModule(module) {
+        if (!module?.id) return module;
+        return (
+          (window.ESPANOL_MODULES || []).find((m) => m.id === module.id) || module
+        );
+      }
+
       function buildModulePool(module) {
         const bank = window.ESPANOL_BANK;
-        if (!bank || !module) return [];
-        const topics = new Set(module.topics || []);
+        const mod = resolveModule(module);
+        if (!bank || !mod) return [];
+        const topics = new Set(mod.topics || []);
+        if (!topics.size) return [];
         const pool = [];
         for (const mech of MECHANICS) {
           const items = bank[mech];
           if (!Array.isArray(items)) continue;
           items.forEach((item, idx) => {
-            if (topics.has(item.topic)) pool.push({ mech, item, idx });
+            if (item?.topic && topics.has(item.topic)) {
+              pool.push({ mech, item, idx });
+            }
           });
         }
         return pool;
       }
 
+      function resetModuleDeckState() {
+        moduleDeck = [];
+        deckIndex = 0;
+        lastDealtKey = null;
+        activeDeckModuleId = null;
+      }
+
       function reshuffleModuleDeck(module) {
-        moduleDeck = shuffle(buildModulePool(module));
+        const mod = resolveModule(module);
+        activeDeckModuleId = mod?.id ?? null;
+        moduleDeck = shuffle(buildModulePool(mod));
         if (
           moduleDeck.length > 1 &&
           lastDealtKey &&
@@ -484,22 +528,33 @@
       }
 
       function dealNextRound() {
-        if (!selectedModule) return null;
-        if (!moduleDeck.length) {
-          const pool = buildModulePool(selectedModule);
+        const mod = resolveModule(selectedModule);
+        if (!mod) return null;
+
+        if (activeDeckModuleId !== mod.id || !moduleDeck.length) {
+          const pool = buildModulePool(mod);
           if (!pool.length) return null;
-          reshuffleModuleDeck(selectedModule);
-        }
-        if (deckIndex >= moduleDeck.length) {
+          lastDealtKey = null;
+          reshuffleModuleDeck(mod);
+        } else if (deckIndex >= moduleDeck.length) {
           lastDealtKey = deckEntryKey(moduleDeck[moduleDeck.length - 1]);
-          reshuffleModuleDeck(selectedModule);
+          reshuffleModuleDeck(mod);
         }
+
         const entry = moduleDeck[deckIndex++];
         lastDealtKey = deckEntryKey(entry);
         return { mech: entry.mech, item: entry.item };
       }
 
+      function cancelScheduledRound() {
+        if (nextRoundTimer) {
+          clearTimeout(nextRoundTimer);
+          nextRoundTimer = null;
+        }
+      }
+
       function showView(name) {
+        if (name !== "game") cancelScheduledRound();
         const views = {
           modules: $("view-modules"),
           study: $("view-module-study"),
@@ -555,8 +610,13 @@
       }
 
       function openModuleStudy(module) {
-        selectedModule = module;
-        const lesson = findLesson(module.lesson);
+        const mod = resolveModule(module);
+        if (selectedModule?.id !== mod?.id) {
+          resetModuleDeckState();
+          currentRound = null;
+        }
+        selectedModule = mod;
+        const lesson = findLesson(mod.lesson);
         const root = $("module-lesson");
         if (!lesson) {
           root.innerHTML =
@@ -569,6 +629,7 @@
 
       function startModuleGame() {
         if (!selectedModule) return;
+        cancelScheduledRound();
         lastDealtKey = null;
         reshuffleModuleDeck(selectedModule);
         answering = false;
@@ -615,7 +676,9 @@
       }
 
       function scheduleNext() {
-        setTimeout(() => {
+        cancelScheduledRound();
+        nextRoundTimer = setTimeout(() => {
+          nextRoundTimer = null;
           answering = false;
           startRound();
         }, ADVANCE_MS);
@@ -799,34 +862,61 @@
           isCorrect = () => periodInput.value === item.close;
           wireSignosHelperButtons(wrap, () => periodInput);
         } else if (kind === "comma") {
-          $("prompt").innerHTML = `
-            <div class="signos-line">
-              <span class="signos-part">${escapeHtml(item.before)}</span>
-              <input
-                type="text"
-                class="signos-input"
-                id="signos-comma"
-                maxlength="2"
-                autocomplete="off"
-                spellcheck="false"
-                aria-label="Coma"
-              />
-              <span class="signos-part">${escapeHtml(item.after)}</span>
-            </div>
-          `;
+          const words = item.words || [];
+          const marked = new Set();
+
+          $("prompt").innerHTML = `<div class="comma-words-line" id="comma-words-line"></div>`;
+          const line = $("comma-words-line");
+
+          words.forEach((word, i) => {
+            if (i < words.length - 1) {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "comma-word-btn";
+              btn.textContent = word;
+              btn.addEventListener("click", () => {
+                if (answering) return;
+                if (marked.has(i)) {
+                  marked.delete(i);
+                  btn.classList.remove("comma-marked");
+                  btn.textContent = word;
+                } else {
+                  marked.add(i);
+                  btn.classList.add("comma-marked");
+                  btn.textContent = `${word},`;
+                }
+              });
+              line.appendChild(btn);
+            } else {
+              const span = document.createElement("span");
+              span.className = "comma-word-final";
+              span.textContent = word;
+              line.appendChild(span);
+            }
+          });
+
           wrap.innerHTML = `
-            <div class="signos-helpers" id="signos-helpers">
-              <button type="button" class="signos-helper-btn" data-ch=",">,</button>
-            </div>
             <div class="signos-submit-row">
               <button type="button" class="btn" id="signos-submit">Comprobar</button>
             </div>
           `;
-          const commaInput = $("signos-comma");
-          inputs = [commaInput];
-          fullCorrect = item.full;
-          isCorrect = () => commaInput.value === item.answer;
-          wireSignosHelperButtons(wrap, () => commaInput);
+
+          const submit = $("signos-submit");
+          submit.addEventListener("click", () => {
+            if (answering) return;
+            answering = true;
+            submit.disabled = true;
+            line.querySelectorAll(".comma-word-btn").forEach((b) => (b.disabled = true));
+
+            const picked = [...marked].sort((a, b) => a - b);
+            const expected = [...(item.commaAfter || [])].sort((a, b) => a - b);
+            const ok =
+              picked.length === expected.length &&
+              picked.every((v, idx) => v === expected[idx]);
+
+            signosFeedback(ok, item, item.full);
+          });
+          return;
         } else {
           $("prompt").innerHTML = `
             <div class="signos-line">
