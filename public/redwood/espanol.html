@@ -228,7 +228,7 @@
         font-size: clamp(1.2rem, 4vw, 1.55rem); color: var(--navy);
         line-height: 1.35;
       }
-      .signos-sentence { text-align: center; }
+      .signos-sentence, .signos-part { text-align: center; white-space: nowrap; }
       .signos-input {
         box-sizing: border-box; width: 48px; height: 48px;
         border: 3px solid var(--rw-accent); border-radius: 12px;
@@ -734,96 +734,172 @@
         }
       }
 
-      function renderSignos(item) {
-        $("prompt").innerHTML = `
-          <div class="signos-line">
-            <input
-              type="text"
-              class="signos-input"
-              id="signos-open"
-              maxlength="2"
-              autocomplete="off"
-              spellcheck="false"
-              aria-label="Signo de apertura"
-            />
-            <span class="signos-sentence">${escapeHtml(item.sentence)}</span>
-            <input
-              type="text"
-              class="signos-input"
-              id="signos-close"
-              maxlength="2"
-              autocomplete="off"
-              spellcheck="false"
-              aria-label="Signo de cierre"
-            />
-          </div>
-        `;
-
-        const wrap = $("interaction");
-        wrap.innerHTML = `
-          <div class="signos-helpers" id="signos-helpers">
-            <button type="button" class="signos-helper-btn" data-ch="¿">¿</button>
-            <button type="button" class="signos-helper-btn" data-ch="¡">¡</button>
-            <button type="button" class="signos-helper-btn" data-ch="?">?</button>
-            <button type="button" class="signos-helper-btn" data-ch="!">!</button>
-          </div>
-          <div class="signos-submit-row">
-            <button type="button" class="btn" id="signos-submit">Comprobar</button>
-          </div>
-        `;
-
-        const openInput = $("signos-open");
-        const closeInput = $("signos-close");
-        const submit = $("signos-submit");
-        const fullCorrect = `${item.open}${item.sentence}${item.close}`;
-
+      function wireSignosHelperButtons(wrap, getTargetInput) {
         wrap.querySelectorAll(".signos-helper-btn").forEach((btn) => {
+          const keepInputFocus = (e) => e.preventDefault();
+          btn.addEventListener("mousedown", keepInputFocus);
+          btn.addEventListener("touchstart", keepInputFocus, { passive: false });
           btn.addEventListener("click", () => {
-            const ch = btn.dataset.ch;
-            const active = document.activeElement;
-            const target =
-              active === openInput || active === closeInput ? active : openInput;
-            target.value = ch;
+            const target = getTargetInput();
+            if (!target) return;
+            target.value = btn.dataset.ch;
             target.focus();
           });
         });
+      }
 
+      function signosFeedback(ok, item, fullCorrect) {
+        if (ok) {
+          awardCorrect();
+          let msg = "¡Correcto! +puntos";
+          if (item.why) msg += `<br>${escapeHtml(item.why)}`;
+          showFeedback(true, msg);
+        } else {
+          breakStreak();
+          let msg = `No exactamente. La oración correcta es: <b>${escapeHtml(fullCorrect)}</b>.`;
+          if (item.why) msg += `<br>${escapeHtml(item.why)}`;
+          showFeedback(false, msg);
+        }
+        scheduleNext();
+      }
+
+      function renderSignos(item) {
+        const kind = item.kind || "signs";
+        const wrap = $("interaction");
+        let inputs = [];
+        let fullCorrect = "";
+        let isCorrect = () => false;
+
+        if (kind === "period") {
+          $("prompt").innerHTML = `
+            <div class="signos-line">
+              <span class="signos-sentence">${escapeHtml(item.sentence)}</span>
+              <input
+                type="text"
+                class="signos-input"
+                id="signos-period"
+                maxlength="2"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Punto final"
+              />
+            </div>
+          `;
+          wrap.innerHTML = `
+            <div class="signos-helpers" id="signos-helpers">
+              <button type="button" class="signos-helper-btn" data-ch=".">.</button>
+            </div>
+            <div class="signos-submit-row">
+              <button type="button" class="btn" id="signos-submit">Comprobar</button>
+            </div>
+          `;
+          const periodInput = $("signos-period");
+          inputs = [periodInput];
+          fullCorrect = `${item.sentence}${item.close}`;
+          isCorrect = () => periodInput.value === item.close;
+          wireSignosHelperButtons(wrap, () => periodInput);
+        } else if (kind === "comma") {
+          $("prompt").innerHTML = `
+            <div class="signos-line">
+              <span class="signos-part">${escapeHtml(item.before)}</span>
+              <input
+                type="text"
+                class="signos-input"
+                id="signos-comma"
+                maxlength="2"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Coma"
+              />
+              <span class="signos-part">${escapeHtml(item.after)}</span>
+            </div>
+          `;
+          wrap.innerHTML = `
+            <div class="signos-helpers" id="signos-helpers">
+              <button type="button" class="signos-helper-btn" data-ch=",">,</button>
+            </div>
+            <div class="signos-submit-row">
+              <button type="button" class="btn" id="signos-submit">Comprobar</button>
+            </div>
+          `;
+          const commaInput = $("signos-comma");
+          inputs = [commaInput];
+          fullCorrect = item.full;
+          isCorrect = () => commaInput.value === item.answer;
+          wireSignosHelperButtons(wrap, () => commaInput);
+        } else {
+          $("prompt").innerHTML = `
+            <div class="signos-line">
+              <input
+                type="text"
+                class="signos-input"
+                id="signos-open"
+                maxlength="2"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Signo de apertura"
+              />
+              <span class="signos-sentence">${escapeHtml(item.sentence)}</span>
+              <input
+                type="text"
+                class="signos-input"
+                id="signos-close"
+                maxlength="2"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Signo de cierre"
+              />
+            </div>
+          `;
+          wrap.innerHTML = `
+            <div class="signos-helpers" id="signos-helpers">
+              <button type="button" class="signos-helper-btn" data-ch="¿">¿</button>
+              <button type="button" class="signos-helper-btn" data-ch="¡">¡</button>
+              <button type="button" class="signos-helper-btn" data-ch="?">?</button>
+              <button type="button" class="signos-helper-btn" data-ch="!">!</button>
+            </div>
+            <div class="signos-submit-row">
+              <button type="button" class="btn" id="signos-submit">Comprobar</button>
+            </div>
+          `;
+          const openInput = $("signos-open");
+          const closeInput = $("signos-close");
+          inputs = [openInput, closeInput];
+          fullCorrect = `${item.open}${item.sentence}${item.close}`;
+          let lastSignosFocus = "open";
+          openInput.addEventListener("focus", () => {
+            lastSignosFocus = "open";
+          });
+          closeInput.addEventListener("focus", () => {
+            lastSignosFocus = "close";
+          });
+          isCorrect = () =>
+            openInput.value === item.open && closeInput.value === item.close;
+          wireSignosHelperButtons(wrap, () =>
+            lastSignosFocus === "close" ? closeInput : openInput
+          );
+        }
+
+        const submit = $("signos-submit");
         const check = () => {
           if (answering) return;
-          const opening = openInput.value;
-          const closing = closeInput.value;
-          if (!opening && !closing) return;
+          if (!inputs.some((el) => el.value)) return;
 
           answering = true;
           submit.disabled = true;
-          openInput.disabled = true;
-          closeInput.disabled = true;
+          inputs.forEach((el) => (el.disabled = true));
           wrap.querySelectorAll(".signos-helper-btn").forEach((b) => (b.disabled = true));
 
-          const ok = opening === item.open && closing === item.close;
-
-          if (ok) {
-            awardCorrect();
-            let msg = "¡Correcto! +puntos";
-            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
-            showFeedback(true, msg);
-          } else {
-            breakStreak();
-            let msg = `No exactamente. La oración correcta es: <b>${escapeHtml(fullCorrect)}</b>.`;
-            if (item.why) msg += `<br>${escapeHtml(item.why)}`;
-            showFeedback(false, msg);
-          }
-          scheduleNext();
+          signosFeedback(isCorrect(), item, fullCorrect);
         };
 
         submit.addEventListener("click", check);
-        openInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") check();
+        inputs.forEach((el) => {
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") check();
+          });
         });
-        closeInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") check();
-        });
-        openInput.focus();
+        inputs[0].focus();
       }
 
       function renderError(item) {
